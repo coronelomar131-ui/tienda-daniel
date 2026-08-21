@@ -3,7 +3,8 @@ import SneakerArt from './SneakerArt';
 
 const Hero = () => {
     return (
-        <section className="hero" id="top">
+      <div className="hero-band" id="top">
+        <section className="hero">
             <div className="hero-copy">
                 <div className="eyebrow">Originales · Envíos a todo México</div>
                 <h1>De la caja<br />a la <em>calle</em></h1>
@@ -20,6 +21,7 @@ const Hero = () => {
                 <SneakerArt />
             </div>
         </section>
+      </div>
     );
 };
 

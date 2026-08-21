@@ -31,7 +31,7 @@ function useScrollReveal(deps) {
 }
 
 function StoreFront() {
-    const { products } = useContext(ShopContext);
+    const { products, loading, loadError, demo } = useContext(ShopContext);
     const [brand, setBrand] = useState(null);
     const [cartOpen, setCartOpen] = useState(false);
 
@@ -44,7 +44,7 @@ function StoreFront() {
 
     const visible = brand ? products.filter(p => p.brand === brand) : products;
 
-    useScrollReveal([visible.length, brand]);
+    useScrollReveal([visible.length, brand, loading]);
 
     return (
         <>
@@ -54,7 +54,7 @@ function StoreFront() {
                 <Marquee />
                 {/* El filtro vive dentro del ancla para que al saltar al catálogo
                     se vea junto con los resultados y no quede tapado por el header. */}
-                <div id="coleccion">
+                <div id="coleccion" className="catalog">
                     <BrandFilter brands={brands} active={brand} onSelect={setBrand} />
 
                     <section className="section">
@@ -63,7 +63,13 @@ function StoreFront() {
                                 <h2>{brand || 'Lo que hay'}</h2>
                                 <span>{visible.length} {visible.length === 1 ? 'modelo' : 'modelos'}</span>
                             </div>
-                            <ProductGrid products={visible} />
+                            {demo && (
+                                <p className="demo-note">
+                                    Vista de ejemplo: no hay conexión con la tienda, así que
+                                    estos pares son de muestra y no están a la venta.
+                                </p>
+                            )}
+                            <ProductGrid products={visible} loading={loading} loadError={demo ? null : loadError} />
                         </div>
                     </section>
                 </div>
@@ -74,11 +80,13 @@ function StoreFront() {
             </main>
 
             <footer className="site-footer">
-                <div>© 2026 Prothe Shops</div>
-                <div className="flinks">
-                    <a href={config.instagramLink} target="_blank" rel="noreferrer">Instagram</a>
-                    <a href={config.tiktokLink} target="_blank" rel="noreferrer">TikTok</a>
-                    <a href={waPlain()} target="_blank" rel="noreferrer">WhatsApp</a>
+                <div className="wrap">
+                    <div>© 2026 Prothe Shops</div>
+                    <div className="flinks">
+                        <a href={config.instagramLink} target="_blank" rel="noreferrer">Instagram</a>
+                        <a href={config.tiktokLink} target="_blank" rel="noreferrer">TikTok</a>
+                        <a href={waPlain()} target="_blank" rel="noreferrer">WhatsApp</a>
+                    </div>
                 </div>
             </footer>
 

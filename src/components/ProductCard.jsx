@@ -2,7 +2,7 @@ import React, { useContext, useState } from 'react';
 import { ShopContext } from '../context/shop-context';
 import { config } from '../config';
 import { waLink } from '../lib/whatsapp';
-import SneakerArt from './SneakerArt';
+import ProductPhoto from './ProductPhoto';
 
 const WhatsAppIcon = () => (
     <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
@@ -38,9 +38,7 @@ const ProductCard = ({ product }) => {
                     {product.status === 'nuevo' && <span className="badge badge-new">Nuevo</span>}
                     {soldOut && <span className="badge badge-out">Agotado</span>}
                 </div>
-                {product.image
-                    ? <img src={product.image} alt={`${product.brand} ${product.name}`} loading="lazy" />
-                    : <SneakerArt />}
+                <ProductPhoto product={product} />
             </div>
 
             <div className="card-body">

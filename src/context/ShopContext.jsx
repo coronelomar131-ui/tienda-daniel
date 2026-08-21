@@ -1,19 +1,17 @@
-import React, { useState, useEffect } from 'react';
-import { products as defaultProducts } from '../data/products';
+import React, { useState, useEffect, useCallback } from 'react';
 import { ShopContext } from './shop-context';
+import { fetchProducts } from '../lib/shopApi';
+import { sampleProducts } from '../data/sampleProducts';
 
 // Cada línea del carrito es un par producto+talla, para que 2 tallas del mismo
 // modelo se cuenten por separado.
 const lineKey = (id, size) => `${id}__${size ?? 'unica'}`;
 
 export const ShopProvider = ({ children }) => {
-    const [products, setProducts] = useState(() => {
-        try {
-            const saved = localStorage.getItem('protheShopProducts');
-            if (saved) return JSON.parse(saved);
-        } catch { /* localStorage no disponible */ }
-        return defaultProducts;
-    });
+    const [products, setProducts] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [loadError, setLoadError] = useState(null);
+    const [demo, setDemo] = useState(false);
 
     const [cart, setCart] = useState(() => {
         try {
@@ -23,29 +21,34 @@ export const ShopProvider = ({ children }) => {
         return [];
     });
 
-    useEffect(() => {
+    // El catálogo vive en la base, así que lo que subes desde /admin lo ven
+    // todos tus clientes al instante.
+    const reload = useCallback(async () => {
+        setLoading(true);
         try {
-            localStorage.setItem('protheShopProducts', JSON.stringify(products));
-        } catch { /* localStorage no disponible */ }
-    }, [products]);
+            setProducts(await fetchProducts());
+            setLoadError(null);
+            setDemo(false);
+        } catch (err) {
+            // Sin conexión con la base mostramos el catálogo de muestra, pero
+            // avisando en pantalla que no son pares reales.
+            setProducts(sampleProducts);
+            setDemo(true);
+            setLoadError(err?.message || 'No se pudo cargar el catálogo');
+        } finally {
+            setLoading(false);
+        }
+    }, []);
 
+    useEffect(() => { reload(); }, [reload]);
+
+    // El carrito sí es de cada visitante, por eso se queda en su navegador.
     useEffect(() => {
         try {
             localStorage.setItem('protheShopCart', JSON.stringify(cart));
         } catch { /* localStorage no disponible */ }
     }, [cart]);
 
-    // --- Catálogo (admin) ---
-    const addProduct = (newProduct) => {
-        setProducts([...products, { ...newProduct, id: Date.now() }]);
-    };
-
-    const removeProduct = (id) => {
-        setProducts(products.filter(p => p.id !== id));
-        setCart(prev => prev.filter(item => item.id !== id));
-    };
-
-    // --- Carrito ---
     const addToCart = (product, size) => {
         const key = lineKey(product.id, size);
         setCart(prev => {
@@ -79,7 +82,7 @@ export const ShopProvider = ({ children }) => {
 
     return (
         <ShopContext.Provider value={{
-            products, addProduct, removeProduct,
+            products, loading, loadError, demo, reload,
             cart, addToCart, updateQty, clearCart, cartCount, cartTotal
         }}>
             {children}
