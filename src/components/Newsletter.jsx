@@ -9,17 +9,17 @@ const Newsletter = () => {
         e.preventDefault();
         if (!email.trim()) return;
         // El registro llega directo a tu WhatsApp para que tengas la lista de interesados.
-        const message = `Hola, quiero unirme a la lista de Prothe Shops. Mi correo es: ${email}`;
+        const message = `Hola, quiero enterarme de los nuevos drops de Prothe Shops. Mi correo es: ${email}`;
         window.open(`https://wa.me/${config.whatsappNumber}?text=${encodeURIComponent(message)}`, '_blank', 'noopener');
         setSent(true);
     };
 
     return (
         <section className="news reveal">
-            <h2>Únete a Prothe</h2>
-            <p>Nuevos lanzamientos, ediciones limitadas y acceso anticipado.</p>
+            <h2>No te quedes sin par</h2>
+            <p>Entérate primero de los drops, restocks y ediciones limitadas.</p>
             {sent ? (
-                <div className="thanks">Gracias — nos vemos en el próximo lanzamiento.</div>
+                <div className="thanks">Listo — nos vemos en el próximo drop</div>
             ) : (
                 <form onSubmit={handleSubmit}>
                     <input
@@ -29,7 +29,7 @@ const Newsletter = () => {
                         onChange={(e) => setEmail(e.target.value)}
                         required
                     />
-                    <button type="submit">Suscribirme</button>
+                    <button type="submit">Avísenme</button>
                 </form>
             )}
         </section>

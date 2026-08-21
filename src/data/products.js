@@ -1,75 +1,84 @@
 // =========================================================================
-// CATÁLOGO DE PRODUCTOS - PROTHE SHOPS
+// CATÁLOGO DE TENIS - PROTHE SHOPS
 // =========================================================================
-// Aquí puedes agregar, editar o borrar los productos que aparecen en tu página.
+// Aquí puedes agregar, editar o borrar los tenis que aparecen en tu página.
+// También puedes hacerlo sin tocar código desde el panel: /admin
 //
 // INSTRUCCIONES PARA IMÁGENES:
-// 1. Guarda la imagen en la carpeta `public/images` (ej. "playera.jpg")
-// 2. En "image:", escribe el nombre de la foto de esta forma: "/images/playera.jpg"
-// 3. Si dejas image vacío (""), se mostrará un dibujo de la prenda según su categoría.
+// 1. Guarda la foto en la carpeta `public/images` (ej. "jordan1.jpg")
+// 2. En "image:", escribe: "/images/jordan1.jpg"
+// 3. Si dejas image vacío (""), se muestra un dibujo de tenis.
 //
-// CATEGORÍAS DISPONIBLES: "Playeras", "Shorts", "Chamarras", "Sets"
-//
-// SI DEJAS mlLink VACÍO (""), se usará el link a tu eshop general de configuración.
+// CAMPOS:
+//   brand   → marca (Nike, Jordan, Adidas, New Balance...). Crea el filtro de arriba.
+//   sizes   → tallas MX disponibles. Si lo dejas vacío [], no pide talla.
+//   status  → "nuevo" (badge verde), "agotado" (badge rojo) o "" (sin badge)
+//   mlLink  → link específico de Mercado Libre. Vacío = usa tu eshop general.
 
 export const products = [
     {
         id: 1,
-        name: "Prothe Run Tee",
-        tag: "Playera Técnica",
-        category: "Playeras",
-        price: 450,
-        desc: "Tela ligera de secado rápido, corte relajado. Ideal para entrenar o para el día a día.",
+        brand: "Nike",
+        name: "Air Max Nocturna",
+        desc: "Silueta clásica en negro total, suela con cámara de aire visible.",
+        price: 3500,
+        sizes: [25, 25.5, 26, 27, 28],
+        status: "nuevo",
         image: "",
         mlLink: "",
     },
     {
         id: 2,
-        name: "Prothe Track Shorts",
-        tag: "Shorts Técnicos",
-        category: "Shorts",
-        price: 380,
-        desc: "Cintura elástica con cordón, bolsillos laterales, tejido transpirable.",
+        brand: "Nike",
+        name: "Urban Force One",
+        desc: "Piel blanca, corte bajo. El básico que combina con todo.",
+        price: 2800,
+        sizes: [25, 26, 26.5, 27, 28, 29],
+        status: "",
         image: "",
         mlLink: "",
     },
     {
         id: 3,
-        name: "Prothe Windbreaker",
-        tag: "Chamarra",
-        category: "Chamarras",
-        price: 780,
-        desc: "Rompevientos ligero, resistente al agua, forro de malla interior.",
+        brand: "Adidas",
+        name: "Neon Runner Pro",
+        desc: "Tejido primeknit con detalles neón, ultraligeros para correr.",
+        price: 4200,
+        sizes: [26, 27, 28],
+        status: "",
         image: "",
         mlLink: "",
     },
     {
         id: 4,
-        name: "Prothe Night Tee",
-        tag: "Playera Técnica",
-        category: "Playeras",
-        price: 460,
-        desc: "Versión negra de la Run Tee, detalles reflectantes en costuras.",
+        brand: "Jordan",
+        name: "Retro High OG",
+        desc: "Bota alta en piel, colorway original. Pieza de colección.",
+        price: 5600,
+        sizes: [26, 27, 28, 29],
+        status: "nuevo",
         image: "",
         mlLink: "",
     },
     {
         id: 5,
-        name: "Prothe Court Shorts",
-        tag: "Shorts Técnicos",
-        category: "Shorts",
-        price: 360,
-        desc: "Corte más corto, ideal para básquet o entrenamiento de alta intensidad.",
+        brand: "New Balance",
+        name: "Stealth 550",
+        desc: "Gamuza gris con panel blanco, suela de goma antiderrapante.",
+        price: 3900,
+        sizes: [25.5, 26, 27],
+        status: "",
         image: "",
         mlLink: "",
     },
     {
         id: 6,
-        name: "Prothe Duo Set",
-        tag: "Set Completo",
-        category: "Sets",
-        price: 780,
-        desc: "Playera + shorts a juego, empaque de regalo incluido.",
+        brand: "Adidas",
+        name: "Velocity Zero",
+        desc: "Edición limitada, ya no quedan pares. Pregunta por restock.",
+        price: 4500,
+        sizes: [],
+        status: "agotado",
         image: "",
         mlLink: "",
     }

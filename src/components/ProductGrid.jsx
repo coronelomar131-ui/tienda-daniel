@@ -3,7 +3,7 @@ import ProductCard from './ProductCard';
 
 const ProductGrid = ({ products }) => {
     if (products.length === 0) {
-        return <div className="empty-catalog">No hay piezas en esta categoría por ahora.</div>;
+        return <div className="empty-catalog">No hay pares de esta marca por ahora</div>;
     }
 
     return (

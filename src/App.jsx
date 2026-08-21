@@ -1,9 +1,9 @@
-import React, { useContext, useState, useEffect } from 'react';
+import React, { useContext, useState, useEffect, useMemo } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Navbar from './components/Navbar';
 import Hero from './components/Hero';
 import Marquee from './components/Marquee';
-import Categories from './components/Categories';
+import BrandFilter from './components/BrandFilter';
 import ProductGrid from './components/ProductGrid';
 import CartDrawer from './components/CartDrawer';
 import Newsletter from './components/Newsletter';
@@ -21,7 +21,7 @@ function useScrollReveal(deps) {
                     io.unobserve(e.target);
                 }
             });
-        }, { threshold: 0.15 });
+        }, { threshold: 0.12 });
         document.querySelectorAll('.reveal').forEach(el => io.observe(el));
         return () => io.disconnect();
         // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -30,14 +30,19 @@ function useScrollReveal(deps) {
 
 function StoreFront() {
     const { products } = useContext(ShopContext);
-    const [category, setCategory] = useState(null);
+    const [brand, setBrand] = useState(null);
     const [cartOpen, setCartOpen] = useState(false);
 
-    const visible = category
-        ? products.filter(p => p.category === category)
-        : products;
+    // Las marcas del filtro salen del propio catálogo, así que al agregar un
+    // producto de una marca nueva en /admin, su filtro aparece solo.
+    const brands = useMemo(
+        () => [...new Set(products.map(p => p.brand).filter(Boolean))].sort(),
+        [products]
+    );
 
-    useScrollReveal([visible.length, category]);
+    const visible = brand ? products.filter(p => p.brand === brand) : products;
+
+    useScrollReveal([visible.length, brand]);
 
     return (
         <>
@@ -45,21 +50,21 @@ function StoreFront() {
             <main>
                 <Hero />
                 <Marquee />
-                <Categories active={category} onSelect={setCategory} />
+                <BrandFilter brands={brands} active={brand} onSelect={setBrand} />
 
                 <section className="section" id="coleccion">
                     <div className="wrap">
                         <div className="section-head reveal">
-                            <h2>{category ? category : 'Colección actual'}</h2>
-                            <span>{visible.length} {visible.length === 1 ? 'pieza' : 'piezas'}</span>
+                            <h2>{brand || 'Todos los pares'}</h2>
+                            <span>{visible.length} {visible.length === 1 ? 'modelo' : 'modelos'}</span>
                         </div>
                         <ProductGrid products={visible} />
                     </div>
                 </section>
 
                 <div className="quote reveal" id="nosotros">
-                    <p>"La ropa deportiva no debería gritar. Debería moverse contigo y quedarse callada hasta que alguien pregunta de dónde es."</p>
-                    <div className="attrib">— Prothe Shops</div>
+                    <p>Escoge tu talla, dale a <em>apartar</em> y te contestamos por WhatsApp en minutos.</p>
+                    <div className="attrib">— Así de fácil</div>
                 </div>
 
                 <Newsletter />

@@ -2,6 +2,10 @@ import React, { useState, useEffect } from 'react';
 import { products as defaultProducts } from '../data/products';
 import { ShopContext } from './shop-context';
 
+// Cada línea del carrito es un par producto+talla, para que 2 tallas del mismo
+// modelo se cuenten por separado.
+const lineKey = (id, size) => `${id}__${size ?? 'unica'}`;
+
 export const ShopProvider = ({ children }) => {
     const [products, setProducts] = useState(() => {
         try {
@@ -38,24 +42,32 @@ export const ShopProvider = ({ children }) => {
 
     const removeProduct = (id) => {
         setProducts(products.filter(p => p.id !== id));
+        setCart(prev => prev.filter(item => item.id !== id));
     };
 
     // --- Carrito ---
-    const addToCart = (product) => {
+    const addToCart = (product, size) => {
+        const key = lineKey(product.id, size);
         setCart(prev => {
-            const existing = prev.find(item => item.id === product.id);
+            const existing = prev.find(item => item.key === key);
             if (existing) {
-                return prev.map(item =>
-                    item.id === product.id ? { ...item, qty: item.qty + 1 } : item
-                );
+                return prev.map(item => item.key === key ? { ...item, qty: item.qty + 1 } : item);
             }
-            return [...prev, { id: product.id, name: product.name, price: product.price, qty: 1 }];
+            return [...prev, {
+                key,
+                id: product.id,
+                brand: product.brand,
+                name: product.name,
+                price: product.price,
+                size: size ?? null,
+                qty: 1,
+            }];
         });
     };
 
-    const updateQty = (id, delta) => {
+    const updateQty = (key, delta) => {
         setCart(prev => prev
-            .map(item => item.id === id ? { ...item, qty: item.qty + delta } : item)
+            .map(item => item.key === key ? { ...item, qty: item.qty + delta } : item)
             .filter(item => item.qty > 0)
         );
     };

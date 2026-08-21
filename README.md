@@ -1,20 +1,22 @@
 # PROTHE SHOPS
 
-Tienda en línea de ropa deportiva construida con React + Vite. Diseño editorial en tonos hueso y latón, con pedidos por WhatsApp y catálogo administrable.
+Tienda en línea de tenis (sneakers) construida con React + Vite. Look oscuro streetwear, pedidos por WhatsApp y catálogo administrable sin tocar código.
 
 ## Características
 
-- **Catálogo con filtros por categoría**: Playeras, Shorts, Chamarras y Sets.
-- **Carrito de compras**: arma el pedido y se envía completo por WhatsApp con un clic.
-- **Pedidos directos por WhatsApp** desde cada producto (con el nombre y precio ya escritos).
+- **Catálogo con filtro por marca** — los filtros salen solos del catálogo: si agregas un par de una marca nueva, su botón aparece automáticamente.
+- **Tallas por producto** — el cliente escoge su talla MX antes de agregar al carrito, y la talla viaja en el pedido de WhatsApp.
+- **Etiquetas NUEVO y AGOTADO** — los pares agotados se ven atenuados y su botón cambia a "Restock".
+- **Carrito** — junta varios pares (cada talla cuenta por separado) y manda el pedido completo con total por WhatsApp.
+- **Apartar por WhatsApp** desde cada producto, con marca, modelo, talla y precio ya escritos.
 - **Enlaces a Mercado Libre** por producto o a tu eshop general.
-- **Panel de administración** en `/admin` para añadir y borrar productos sin tocar código (contraseña en `src/components/AdminLogin.jsx`).
-- **Fotos opcionales**: si un producto no tiene foto, se muestra un dibujo elegante de la prenda.
+- **Panel de administración** en `/admin` para añadir y borrar pares (contraseña en `src/components/AdminLogin.jsx`).
+- **Fotos opcionales** — sin foto se muestra un dibujo de tenis.
 
 ## Configuración rápida
 
-1. Edita `src/config.js` y pon tu número de WhatsApp, Instagram, TikTok y Mercado Libre.
-2. Edita `src/data/products.js` para tu catálogo inicial (o usa el panel `/admin`).
+1. Edita `src/config.js`: número de WhatsApp, Instagram, TikTok y Mercado Libre.
+2. Carga tu catálogo desde `/admin`, o edita `src/data/products.js`.
 3. Sube tus fotos a `public/images/` (ver `public/images/INSTRUCCIONES.txt`).
 
 ## Desarrollo
@@ -23,6 +25,7 @@ Tienda en línea de ropa deportiva construida con React + Vite. Diseño editoria
 npm install
 npm run dev      # servidor local
 npm run build    # build de producción
+npm run lint     # revisión de código
 ```
 
 Desplegado en Vercel (ver `vercel.json`).

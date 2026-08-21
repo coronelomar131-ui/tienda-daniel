@@ -3,22 +3,22 @@ import React from 'react';
 const Hero = () => {
     return (
         <section className="hero" id="top">
-            <div className="eyebrow">Ropa deportiva · Edición de temporada</div>
-            <h1>Rendimiento<br />con <em>actitud</em></h1>
+            <div className="eyebrow">100% Originales · Envíos a todo México</div>
+            <h1>Tenis que<br />nadie más <em>trae</em></h1>
             <p>
-                Ropa deportiva pensada para moverse contigo: tejidos técnicos,
-                cortes limpios y detalles que no gritan, pero se notan.
+                Sneakers auténticos, ediciones limitadas y restocks.
+                Escoge tu talla, apártalos por WhatsApp y te los mandamos a donde estés.
             </p>
             <div className="hero-cta">
-                <a href="#coleccion" className="btn-primary">Ver colección</a>
-                <a href="#nosotros" className="btn-ghost">Nuestra historia</a>
+                <a href="#coleccion" className="btn-primary">Ver catálogo</a>
+                <a href="#nosotros" className="btn-ghost">Cómo apartar</a>
             </div>
             <div className="pulse-line">
-                <svg viewBox="0 0 220 36" fill="none">
+                <svg viewBox="0 0 220 36" fill="none" aria-hidden="true">
                     <path
                         className="pulse-path"
                         d="M0 18 L60 18 L72 4 L84 32 L96 10 L108 26 L120 18 L220 18"
-                        stroke="#2B3CF0" strokeWidth="1.4" fill="none"
+                        stroke="#C8FF00" strokeWidth="1.6" fill="none"
                     />
                 </svg>
             </div>

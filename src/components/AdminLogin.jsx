@@ -19,7 +19,7 @@ const AdminLogin = () => {
     return (
         <div className="login-page">
             <form className="login-card" onSubmit={handleLogin}>
-                <h2>PROTHE SHOPS</h2>
+                <h2>Prothe <em>Shops</em></h2>
                 <p>Acceso empleados</p>
                 {error && <div className="login-error">{error}</div>}
                 <input

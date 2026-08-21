@@ -8,15 +8,15 @@ const Navbar = ({ onOpenCart }) => {
     return (
         <header className="site-header">
             <nav className="nav wrap">
-                <a href="#top" className="logo">PROTHE SHOPS</a>
+                <a href="#top" className="logo">Prothe <em>Shops</em></a>
                 <div className="navlinks">
-                    <a href="#coleccion">Colección</a>
-                    <a href="#categorias">Categorías</a>
+                    <a href="#coleccion">Catálogo</a>
+                    <a href="#marcas">Marcas</a>
                     <a href={config.instagramLink} target="_blank" rel="noreferrer">Instagram</a>
                     <a href={`https://wa.me/${config.whatsappNumber}`} target="_blank" rel="noreferrer">Contacto</a>
                 </div>
                 <button className="cart-toggle" onClick={onOpenCart}>
-                    Carrito <span className="count">({cartCount})</span>
+                    Carrito ({cartCount})
                 </button>
             </nav>
         </header>
