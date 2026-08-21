@@ -1,6 +1,7 @@
 import React, { useContext, useState } from 'react';
 import { ShopContext } from '../context/shop-context';
 import { config } from '../config';
+import { waLink } from '../lib/whatsapp';
 import SneakerArt from './SneakerArt';
 
 const WhatsAppIcon = () => (
@@ -21,7 +22,7 @@ const ProductCard = ({ product }) => {
     const waText = soldOut
         ? `Hola, ¿tendrán restock de los ${product.brand} ${product.name}?`
         : `Hola, me interesan los ${product.brand} ${product.name}${size ? ` en talla ${size}` : ''} ($${product.price} MXN). ¿Siguen disponibles?`;
-    const waLink = `https://wa.me/${config.whatsappNumber}?text=${encodeURIComponent(waText)}`;
+    const link = waLink(waText);
     const mlLink = product.mlLink || config.mercadoLibreGeneralLink;
 
     const handleAdd = () => {
@@ -80,7 +81,7 @@ const ProductCard = ({ product }) => {
                         >
                             {soldOut ? 'Agotado' : (needsSize && size === null ? 'Elige talla' : '+ Carrito')}
                         </button>
-                        <a href={waLink} target="_blank" rel="noreferrer" className="wa-btn">
+                        <a href={link} target="_blank" rel="noreferrer" className="wa-btn">
                             {soldOut ? 'Restock' : 'Apartar'} <WhatsAppIcon />
                         </a>
                     </div>

@@ -8,6 +8,10 @@ export const config = {
     // 1. TU NÚMERO DE WHATSAPP
     // Escríbelo con el código de país (52 para México) seguido de los 10 dígitos.
     // Ejemplo: "525512345678"
+    //
+    // ¿NO ABRE TU CHAT? Algunas líneas mexicanas viejitas todavía necesitan un
+    // 1 después del 52. Si al probar te manda a un número que no existe,
+    // cámbialo a "5215581286374" (con el 1) y vuelve a probar.
     whatsappNumber: "525581286374",
 
     // 2. TU ENLACE DE INSTAGRAM

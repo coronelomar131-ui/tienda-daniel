@@ -1,6 +1,6 @@
 import React, { useContext } from 'react';
 import { ShopContext } from '../context/shop-context';
-import { config } from '../config';
+import { waLink } from '../lib/whatsapp';
 
 const CartDrawer = ({ open, onClose }) => {
     const { cart, updateQty, clearCart, cartTotal } = useContext(ShopContext);
@@ -11,7 +11,14 @@ const CartDrawer = ({ open, onClose }) => {
         `• ${item.qty}x ${item.brand} ${item.name}${item.size ? ` — Talla ${item.size}` : ''} — $${(item.price * item.qty).toLocaleString('es-MX')} MXN`
     );
     const message = `Hola, quiero apartar estos pares:\n\n${orderLines.join('\n')}\n\nTotal: $${cartTotal.toLocaleString('es-MX')} MXN`;
-    const waLink = `https://wa.me/${config.whatsappNumber}?text=${encodeURIComponent(message)}`;
+    const link = waLink(message);
+
+    // Se vacía el carrito hasta después de que el navegador abrió WhatsApp.
+    // Si se cierra el panel en el mismo clic, el enlace se desmonta antes de
+    // navegar y WhatsApp nunca abre.
+    const handleOrder = () => {
+        setTimeout(() => { clearCart(); onClose(); }, 400);
+    };
 
     return (
         <>
@@ -52,11 +59,11 @@ const CartDrawer = ({ open, onClose }) => {
                             <strong>${cartTotal.toLocaleString('es-MX')} MXN</strong>
                         </div>
                         <a
-                            href={waLink}
+                            href={link}
                             target="_blank"
                             rel="noreferrer"
                             className="cart-wa"
-                            onClick={() => { clearCart(); onClose(); }}
+                            onClick={handleOrder}
                         >
                             Apartar por WhatsApp
                             <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">

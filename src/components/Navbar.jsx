@@ -1,6 +1,7 @@
 import React, { useContext } from 'react';
 import { ShopContext } from '../context/shop-context';
 import { config } from '../config';
+import { waPlain } from '../lib/whatsapp';
 
 const Navbar = ({ onOpenCart }) => {
     const { cartCount } = useContext(ShopContext);
@@ -13,7 +14,7 @@ const Navbar = ({ onOpenCart }) => {
                     <a href="#coleccion">Catálogo</a>
                     <a href="#comoapartar">Cómo apartar</a>
                     <a href={config.instagramLink} target="_blank" rel="noreferrer">Instagram</a>
-                    <a href={`https://wa.me/${config.whatsappNumber}`} target="_blank" rel="noreferrer">Contacto</a>
+                    <a href={waPlain()} target="_blank" rel="noreferrer">Contacto</a>
                 </div>
                 <button
                     className={`cart-toggle${cartCount > 0 ? ' has-items' : ''}`}

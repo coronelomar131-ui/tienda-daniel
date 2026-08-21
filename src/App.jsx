@@ -12,6 +12,7 @@ import AdminLogin from './components/AdminLogin';
 import AdminDashboard from './components/AdminDashboard';
 import { ShopContext } from './context/shop-context';
 import { config } from './config';
+import { waPlain } from './lib/whatsapp';
 
 function useScrollReveal(deps) {
     useEffect(() => {
@@ -77,7 +78,7 @@ function StoreFront() {
                 <div className="flinks">
                     <a href={config.instagramLink} target="_blank" rel="noreferrer">Instagram</a>
                     <a href={config.tiktokLink} target="_blank" rel="noreferrer">TikTok</a>
-                    <a href={`https://wa.me/${config.whatsappNumber}`} target="_blank" rel="noreferrer">WhatsApp</a>
+                    <a href={waPlain()} target="_blank" rel="noreferrer">WhatsApp</a>
                 </div>
             </footer>
 

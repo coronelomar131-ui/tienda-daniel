@@ -296,19 +296,19 @@ button { font-family: var(--body); }
 .news .news-body { max-width: 620px; }
 .news h2 { font-family: var(--display); text-transform: uppercase; font-weight: 900; font-size: clamp(30px, 5vw, 52px); line-height: 0.9; margin-bottom: 12px; }
 .news p { color: var(--muted); font-size: 15px; margin-bottom: 24px; line-height: 1.55; }
-.news form { display: flex; gap: 8px; flex-wrap: wrap; }
+.news .news-form { display: flex; gap: 8px; flex-wrap: wrap; align-items: stretch; }
 .news input {
   flex: 1; min-width: 210px; background: var(--surface); border: 1.5px solid var(--line);
   border-radius: 2px; padding: 13px 15px; font-size: 14px; font-family: var(--body); color: var(--text);
 }
 .news input::placeholder { color: var(--muted); }
 .news input:focus { outline: none; border-color: var(--accent); }
-.news button {
+.news .news-cta {
   background: var(--accent); color: var(--ground); border: 1.5px solid var(--accent); border-radius: 2px;
   font-family: var(--display); text-transform: uppercase; font-weight: 800; font-size: 19px; letter-spacing: 0.03em;
-  padding: 13px 26px; cursor: pointer; transition: background .2s, border-color .2s;
+  padding: 13px 26px; cursor: pointer; transition: background .2s, border-color .2s; display: inline-flex; align-items: center;
 }
-.news button:hover { background: var(--accent-soft); border-color: var(--accent-soft); }
+.news .news-cta:hover { background: var(--accent-soft); border-color: var(--accent-soft); }
 .news .thanks { font-family: var(--display); text-transform: uppercase; font-weight: 800; font-size: 24px; color: var(--accent); }
 
 /* ---------- FOOTER ---------- */

@@ -1,17 +1,22 @@
-import React, { useState } from 'react';
-import { config } from '../config';
+import React, { useRef, useState } from 'react';
+import { waLink } from '../lib/whatsapp';
 
 const Newsletter = () => {
     const [email, setEmail] = useState('');
     const [sent, setSent] = useState(false);
+    const inputRef = useRef(null);
 
-    const handleSubmit = (e) => {
-        e.preventDefault();
-        if (!email.trim()) return;
-        // El registro llega directo a tu WhatsApp para que tengas la lista de interesados.
-        const message = `Hola, quiero enterarme de lo que va llegando a Prothe Shops. Mi correo es: ${email}`;
-        window.open(`https://wa.me/${config.whatsappNumber}?text=${encodeURIComponent(message)}`, '_blank', 'noopener');
-        setSent(true);
+    // El registro llega a tu WhatsApp para que tengas la lista de interesados.
+    const link = waLink(`Hola, quiero enterarme de lo que va llegando a Prothe Shops. Mi correo es: ${email}`);
+
+    const handleClick = (e) => {
+        if (!email.trim()) {
+            e.preventDefault();
+            inputRef.current?.focus();
+            return;
+        }
+        // Se cambia el mensaje hasta después de que abrió WhatsApp.
+        setTimeout(() => setSent(true), 400);
     };
 
     return (
@@ -26,16 +31,25 @@ const Newsletter = () => {
                     {sent ? (
                         <div className="thanks">Listo, quedas en la lista</div>
                     ) : (
-                        <form onSubmit={handleSubmit}>
+                        <div className="news-form">
                             <input
+                                ref={inputRef}
                                 type="email"
                                 placeholder="Tu correo"
                                 value={email}
                                 onChange={(e) => setEmail(e.target.value)}
-                                required
+                                aria-label="Tu correo"
                             />
-                            <button type="submit">Anotarme</button>
-                        </form>
+                            <a
+                                href={link}
+                                target="_blank"
+                                rel="noreferrer"
+                                className="news-cta"
+                                onClick={handleClick}
+                            >
+                                Anotarme
+                            </a>
+                        </div>
                     )}
                 </div>
             </div>
