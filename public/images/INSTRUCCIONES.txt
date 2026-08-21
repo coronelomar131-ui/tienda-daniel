@@ -1,14 +1,16 @@
-Para poner tus propias imágenes en la página web, sigue estos pasos:
+Para poner tus propias fotos en la página web, sigue estos pasos:
 
-1. Guarda las fotos de tus tenis en esta misma carpeta (public/images).
-   (Asegúrate de que tengan nombres fáciles, por ejemplo: "jordan1.jpg", "dunkpanda.png", etc.)
-   
-2. Abre el archivo `src/data/sneakers.js` en tu editor.
+1. Guarda las fotos de tus productos en esta misma carpeta (public/images).
+   (Asegúrate de que tengan nombres fáciles, por ejemplo: "playera-run.jpg", "shorts-track.png", etc.)
 
-3. En el campo "image", en lugar de poner un enlace largo de internet, 
-   solo pon: "/images/nombre-de-tu-foto.jpg"
+2. Abre el archivo `src/data/products.js` en tu editor.
+
+3. En el campo "image" del producto, pon: "/images/nombre-de-tu-foto.jpg"
 
    Ejemplo:
-   image: "/images/jordan1.jpg"
+   image: "/images/playera-run.jpg"
+
+4. Si dejas "image" vacío (""), la página mostrará un dibujo elegante
+   de la prenda según su categoría (Playeras, Shorts, Chamarras o Sets).
 
 ¡Eso es todo! La página web cargará tus fotos locales automáticamente.

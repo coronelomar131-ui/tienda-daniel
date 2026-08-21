@@ -1,16 +1,28 @@
-# React + Vite
+# PROTHE SHOPS
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Tienda en línea de ropa deportiva construida con React + Vite. Diseño editorial en tonos hueso y latón, con pedidos por WhatsApp y catálogo administrable.
 
-Currently, two official plugins are available:
+## Características
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+- **Catálogo con filtros por categoría**: Playeras, Shorts, Chamarras y Sets.
+- **Carrito de compras**: arma el pedido y se envía completo por WhatsApp con un clic.
+- **Pedidos directos por WhatsApp** desde cada producto (con el nombre y precio ya escritos).
+- **Enlaces a Mercado Libre** por producto o a tu eshop general.
+- **Panel de administración** en `/admin` para añadir y borrar productos sin tocar código (contraseña en `src/components/AdminLogin.jsx`).
+- **Fotos opcionales**: si un producto no tiene foto, se muestra un dibujo elegante de la prenda.
 
-## React Compiler
+## Configuración rápida
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+1. Edita `src/config.js` y pon tu número de WhatsApp, Instagram, TikTok y Mercado Libre.
+2. Edita `src/data/products.js` para tu catálogo inicial (o usa el panel `/admin`).
+3. Sube tus fotos a `public/images/` (ver `public/images/INSTRUCCIONES.txt`).
 
-## Expanding the ESLint configuration
+## Desarrollo
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+```bash
+npm install
+npm run dev      # servidor local
+npm run build    # build de producción
+```
+
+Desplegado en Vercel (ver `vercel.json`).
