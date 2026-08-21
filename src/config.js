@@ -8,7 +8,7 @@ export const config = {
     // 1. TU NÚMERO DE WHATSAPP
     // Escríbelo con el código de país (52 para México) seguido de los 10 dígitos.
     // Ejemplo: "525512345678"
-    whatsappNumber: "525500000000",
+    whatsappNumber: "525581286374",
 
     // 2. TU ENLACE DE INSTAGRAM
     // Pon aquí el link directo a tu perfil.
