@@ -8,8 +8,8 @@ const ProductGrid = ({ products }) => {
 
     return (
         <div className="grid">
-            {products.map((product, index) => (
-                <ProductCard key={product.id} product={product} index={index} />
+            {products.map(product => (
+                <ProductCard key={product.id} product={product} />
             ))}
         </div>
     );

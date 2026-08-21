@@ -1,5 +1,5 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
-  <rect width="64" height="64" rx="10" fill="#0A0A0A"/>
-  <text x="32" y="40" font-family="Impact, Haettenschweiler, 'Arial Narrow Bold', sans-serif" font-size="34" text-anchor="middle" fill="#C8FF00">P</text>
-  <rect x="12" y="46" width="40" height="4" rx="2" fill="#C8FF00"/>
+  <rect width="64" height="64" rx="6" fill="#12100E"/>
+  <text x="32" y="41" font-family="'Arial Narrow', Impact, sans-serif" font-weight="bold" font-size="36" text-anchor="middle" fill="#E2622C">P</text>
+  <rect x="13" y="47" width="38" height="4" rx="1" fill="#E2622C"/>
 </svg>

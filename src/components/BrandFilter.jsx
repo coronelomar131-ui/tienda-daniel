@@ -7,14 +7,15 @@ const BrandFilter = ({ brands, active, onSelect }) => {
     };
 
     return (
-        <div className="brands" id="marcas">
+        <div className="brands">
             <div className="wrap">
                 <div className="row">
+                    <span className="row-label">Marca</span>
                     <button
                         className={`brand-chip${active === null ? ' active' : ''}`}
                         onClick={() => handleClick(null)}
                     >
-                        Todos
+                        Todas
                     </button>
                     {brands.map(brand => (
                         <button

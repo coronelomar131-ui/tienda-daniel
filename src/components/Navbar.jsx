@@ -11,11 +11,14 @@ const Navbar = ({ onOpenCart }) => {
                 <a href="#top" className="logo">Prothe <em>Shops</em></a>
                 <div className="navlinks">
                     <a href="#coleccion">Catálogo</a>
-                    <a href="#marcas">Marcas</a>
+                    <a href="#comoapartar">Cómo apartar</a>
                     <a href={config.instagramLink} target="_blank" rel="noreferrer">Instagram</a>
                     <a href={`https://wa.me/${config.whatsappNumber}`} target="_blank" rel="noreferrer">Contacto</a>
                 </div>
-                <button className="cart-toggle" onClick={onOpenCart}>
+                <button
+                    className={`cart-toggle${cartCount > 0 ? ' has-items' : ''}`}
+                    onClick={onOpenCart}
+                >
                     Carrito ({cartCount})
                 </button>
             </nav>

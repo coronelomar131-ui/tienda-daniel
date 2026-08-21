@@ -9,7 +9,7 @@ const WhatsAppIcon = () => (
     </svg>
 );
 
-const ProductCard = ({ product, index }) => {
+const ProductCard = ({ product }) => {
     const { addToCart } = useContext(ShopContext);
     const [size, setSize] = useState(null);
 
@@ -37,7 +37,6 @@ const ProductCard = ({ product, index }) => {
                     {product.status === 'nuevo' && <span className="badge badge-new">Nuevo</span>}
                     {soldOut && <span className="badge badge-out">Agotado</span>}
                 </div>
-                <span className="num">N°{String(index + 1).padStart(2, '0')}</span>
                 {product.image
                     ? <img src={product.image} alt={`${product.brand} ${product.name}`} loading="lazy" />
                     : <SneakerArt />}

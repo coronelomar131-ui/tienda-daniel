@@ -6,6 +6,7 @@ import Marquee from './components/Marquee';
 import BrandFilter from './components/BrandFilter';
 import ProductGrid from './components/ProductGrid';
 import CartDrawer from './components/CartDrawer';
+import HowTo from './components/HowTo';
 import Newsletter from './components/Newsletter';
 import AdminLogin from './components/AdminLogin';
 import AdminDashboard from './components/AdminDashboard';
@@ -50,22 +51,23 @@ function StoreFront() {
             <main>
                 <Hero />
                 <Marquee />
-                <BrandFilter brands={brands} active={brand} onSelect={setBrand} />
+                {/* El filtro vive dentro del ancla para que al saltar al catálogo
+                    se vea junto con los resultados y no quede tapado por el header. */}
+                <div id="coleccion">
+                    <BrandFilter brands={brands} active={brand} onSelect={setBrand} />
 
-                <section className="section" id="coleccion">
-                    <div className="wrap">
-                        <div className="section-head reveal">
-                            <h2>{brand || 'Todos los pares'}</h2>
-                            <span>{visible.length} {visible.length === 1 ? 'modelo' : 'modelos'}</span>
+                    <section className="section">
+                        <div className="wrap">
+                            <div className="section-head reveal">
+                                <h2>{brand || 'Lo que hay'}</h2>
+                                <span>{visible.length} {visible.length === 1 ? 'modelo' : 'modelos'}</span>
+                            </div>
+                            <ProductGrid products={visible} />
                         </div>
-                        <ProductGrid products={visible} />
-                    </div>
-                </section>
-
-                <div className="quote reveal" id="nosotros">
-                    <p>Escoge tu talla, dale a <em>apartar</em> y te contestamos por WhatsApp en minutos.</p>
-                    <div className="attrib">— Así de fácil</div>
+                    </section>
                 </div>
+
+                <HowTo />
 
                 <Newsletter />
             </main>
