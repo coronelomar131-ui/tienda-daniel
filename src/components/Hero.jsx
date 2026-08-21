@@ -18,7 +18,7 @@ const Hero = () => {
                     <path
                         className="pulse-path"
                         d="M0 18 L60 18 L72 4 L84 32 L96 10 L108 26 L120 18 L220 18"
-                        stroke="#7A5E38" strokeWidth="1.4" fill="none"
+                        stroke="#2B3CF0" strokeWidth="1.4" fill="none"
                     />
                 </svg>
             </div>

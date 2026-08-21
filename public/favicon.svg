@@ -1,5 +1,13 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
-  <rect width="64" height="64" fill="#EFEAE1"/>
-  <text x="32" y="44" font-family="Georgia, serif" font-size="36" text-anchor="middle" fill="#211E19">P</text>
-  <path d="M10 54 L24 54 L28 48 L32 58 L36 50 L40 54 L54 54" stroke="#7A5E38" stroke-width="2" fill="none"/>
+  <defs>
+    <linearGradient id="chrome" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#9EA2B0"/>
+      <stop offset="0.4" stop-color="#EDEEF3"/>
+      <stop offset="0.6" stop-color="#828693"/>
+      <stop offset="1" stop-color="#E3E4EA"/>
+    </linearGradient>
+  </defs>
+  <rect width="64" height="64" rx="14" fill="#0B0B0E"/>
+  <text x="32" y="42" font-family="Arial, sans-serif" font-weight="bold" font-size="32" text-anchor="middle" fill="url(#chrome)">P</text>
+  <path d="M12 52 L24 52 L28 46 L32 56 L36 48 L40 52 L52 52" stroke="#2B3CF0" stroke-width="2.5" fill="none" stroke-linecap="round"/>
 </svg>

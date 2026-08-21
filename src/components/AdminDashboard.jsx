@@ -93,7 +93,7 @@ const AdminDashboard = () => {
                     </div>
 
                     <div>
-                        <h3 style={{ fontFamily: "'Fraunces', serif", fontWeight: 400, fontSize: '19px', marginBottom: '20px' }}>
+                        <h3 style={{ fontWeight: 500, fontSize: '18px', marginBottom: '20px' }}>
                             Catálogo ({products.length})
                         </h3>
                         <div className="admin-list">
