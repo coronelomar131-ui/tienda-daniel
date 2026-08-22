@@ -189,7 +189,7 @@ button { font-family: var(--body); }
 .section-head span { font-size: 12px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted-light); white-space: nowrap; }
 
 /* ---------- TARJETAS: sin marco, manda la foto ---------- */
-.grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 34px 24px; }
+.grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 34px 24px; }
 .card { background: transparent; border: none; display: flex; flex-direction: column; }
 .card.sold-out .card-photo { opacity: 0.55; }
 
@@ -246,7 +246,7 @@ button { font-family: var(--body); }
 .card-foot { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; margin-top: auto; }
 .price { font-family: var(--display); font-weight: 800; font-size: 32px; line-height: 1; color: var(--ink); font-variant-numeric: tabular-nums; }
 .price small { font-family: var(--body); font-size: 11px; font-weight: 600; color: var(--muted-light); margin-left: 5px; letter-spacing: 0.06em; }
-.card-actions { display: flex; gap: 7px; }
+.card-actions { display: flex; gap: 7px; min-width: 0; }
 .wa-btn, .add-btn {
   display: inline-flex; align-items: center; gap: 6px;
   font-family: var(--display); text-transform: uppercase; font-weight: 700;
@@ -284,7 +284,7 @@ button { font-family: var(--body); }
 /* ---------- CÓMO APARTAR (banda negra, secuencia real) ---------- */
 .howto { background: var(--ink); color: var(--cream); padding: 62px 0 68px; }
 .howto h2 { font-family: var(--display); text-transform: uppercase; font-weight: 900; font-size: clamp(32px, 5.5vw, 56px); line-height: 0.9; margin-bottom: 32px; }
-.howto ol { list-style: none; display: grid; grid-template-columns: repeat(3, 1fr); gap: 26px; counter-reset: paso; }
+.howto ol { list-style: none; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 26px; counter-reset: paso; }
 .howto li { counter-increment: paso; padding-top: 15px; border-top: 2px solid var(--accent); }
 .howto li::before {
   content: counter(paso, decimal-leading-zero);
@@ -419,7 +419,7 @@ button { font-family: var(--body); }
 
 /* ---------- RESPONSIVE ---------- */
 @media (max-width: 1040px) {
-  .grid { grid-template-columns: repeat(2, 1fr); }
+  .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .admin-grid { grid-template-columns: 1fr; }
   .howto ol { grid-template-columns: 1fr; gap: 20px; }
 }
@@ -429,7 +429,20 @@ button { font-family: var(--body); }
   .navlinks { display: none; }
 }
 @media (max-width: 680px) {
-  .grid { grid-template-columns: repeat(2, 1fr); gap: 24px 14px; }
+  .wrap { padding: 0 18px; }
+  .nav { padding: 12px 0; gap: 10px; }
+  .logo { font-size: 21px; }
+  .cart-toggle { font-size: 14px; padding: 7px 12px; white-space: nowrap; }
+  .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 22px 12px; }
+  .card-body { padding: 12px 0 0; }
+  .card-body p.desc { display: none; }
+  .sizes-label { font-size: 9.5px; }
+  .size-chip { min-width: 34px; padding: 6px 7px; font-size: 12px; }
+  .card-foot { flex-direction: column; align-items: stretch; gap: 10px; }
+  /* apilados: lado a lado no caben en 2 columnas de celular */
+  .card-actions { flex-direction: column; width: 100%; gap: 6px; }
+  .add-btn, .wa-btn { width: 100%; min-width: 0; justify-content: center; padding: 10px 8px; font-size: 15px; }
+  .ml-link { font-size: 10px; }
   .card-body h3 { font-size: 21px; }
   .price { font-size: 25px; }
   .card-actions { width: 100%; }
