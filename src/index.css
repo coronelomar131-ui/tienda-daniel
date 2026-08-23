@@ -438,3 +438,116 @@ button { font-family: var(--body); }
   .site-footer .wrap { flex-direction: column; gap: 16px; text-align: center; }
   .section-head { flex-direction: column; align-items: flex-start; gap: 6px; }
 }
+
+/* ---------- FOTO CON VUELTA EN LA TARJETA ---------- */
+.photo-holder.con-vuelta { position: relative; }
+.photo-holder.con-vuelta .foto-2 {
+  position: absolute; inset: 0; opacity: 0; transition: opacity .35s ease;
+}
+.card:hover .photo-holder.con-vuelta .foto-2 { opacity: 1; }
+.card-photo { display: flex; }
+.badge-video { background: var(--ink); color: #fff; }
+
+/* ---------- FICHA DEL PAR ---------- */
+.ficha { background: var(--paper); padding: 26px 0 70px; }
+.volver {
+  background: none; border: none; cursor: pointer; color: var(--muted);
+  font-size: 13px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase;
+  padding: 8px 0; margin-bottom: 14px; transition: color .2s;
+}
+.volver:hover { color: var(--navy); }
+
+.ficha-grid { display: grid; grid-template-columns: 1.1fr 0.9fr; gap: 44px; align-items: start; }
+
+.ficha-principal {
+  position: relative; aspect-ratio: 1/1; background: var(--paper-2); border-radius: 3px;
+  overflow: hidden; display: flex; align-items: center; justify-content: center;
+}
+.ficha-principal img { width: 100%; height: 100%; object-fit: cover; }
+.ficha-principal .art { width: 78%; max-width: 380px; color: var(--muted); }
+
+.ficha-mini { display: flex; gap: 8px; margin-top: 10px; flex-wrap: wrap; }
+.mini {
+  width: 74px; height: 74px; padding: 0; overflow: hidden; cursor: pointer;
+  background: var(--paper-2); border: 2px solid transparent; border-radius: 3px;
+  transition: border-color .2s;
+}
+.mini img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.mini:hover { border-color: var(--line-strong); }
+.mini.activa { border-color: var(--navy); }
+
+.ficha-datos .tag { font-size: 12px; font-weight: 700; letter-spacing: 0.18em; text-transform: uppercase; color: var(--navy); display: block; margin-bottom: 6px; }
+.ficha-datos h1 {
+  font-family: var(--display); text-transform: uppercase; font-weight: 900;
+  font-size: clamp(34px, 5vw, 56px); line-height: 0.9; margin-bottom: 12px; color: var(--ink);
+}
+.ficha-precio { font-family: var(--display); font-weight: 800; font-size: 40px; line-height: 1; margin-bottom: 18px; font-variant-numeric: tabular-nums; }
+.ficha-precio small { font-family: var(--body); font-size: 12px; font-weight: 600; color: var(--muted); margin-left: 6px; letter-spacing: 0.06em; }
+.ficha-desc { font-size: 15px; color: var(--muted); line-height: 1.6; margin-bottom: 20px; max-width: 46ch; }
+.ficha-acciones { display: flex; gap: 10px; flex-wrap: wrap; margin: 22px 0 6px; }
+.ficha-acciones .btn-primary { border: 1.5px solid var(--navy); }
+.ficha-acciones .btn-primary:disabled { background: transparent; color: var(--muted); border-color: var(--line); cursor: not-allowed; transform: none; }
+.ficha-acciones .btn-ghost { display: inline-flex; align-items: center; gap: 8px; }
+.ficha-acciones .btn-ghost svg { width: 15px; height: 15px; }
+
+.ficha-video { margin-top: 24px; }
+.video-marco { position: relative; padding-top: 56.25%; border-radius: 3px; overflow: hidden; background: var(--paper-2); }
+.video-marco iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; }
+.video-enlace {
+  display: flex; align-items: center; gap: 14px;
+  border: 1.5px solid var(--line-strong); border-radius: 3px; padding: 14px 18px;
+  transition: border-color .2s, background .2s;
+}
+.video-enlace:hover { border-color: var(--navy); background: var(--navy-wash); }
+.video-play {
+  width: 40px; height: 40px; flex-shrink: 0; border-radius: 50%;
+  background: var(--navy); color: #fff;
+  display: flex; align-items: center; justify-content: center; font-size: 14px;
+}
+.video-enlace strong { display: block; font-family: var(--display); text-transform: uppercase; font-weight: 800; font-size: 19px; line-height: 1; }
+.video-enlace small { font-size: 12.5px; color: var(--muted); }
+
+/* ---------- PANEL: GALERIA, ORDEN Y SWITCH ---------- */
+.fotos-tira { display: flex; flex-wrap: wrap; gap: 7px; }
+.foto-chip { position: relative; width: 58px; height: 58px; border-radius: 3px; overflow: hidden; border: 1.5px solid var(--line); }
+.foto-chip.nueva { border-color: var(--navy); }
+.foto-chip img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.foto-chip button {
+  position: absolute; top: 2px; right: 2px; width: 18px; height: 18px;
+  border: none; border-radius: 50%; background: rgba(10, 10, 10, 0.75); color: #fff;
+  cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 0;
+}
+.foto-chip button:hover { background: var(--red); }
+
+.admin-item.editando { border-color: var(--navy); background: var(--navy-wash); }
+.admin-item .orden { display: flex; flex-direction: column; gap: 3px; flex-shrink: 0; }
+.admin-item .orden button {
+  width: 26px; height: 22px; border: 1.5px solid var(--line); background: var(--paper);
+  border-radius: 2px; cursor: pointer; color: var(--muted);
+  display: flex; align-items: center; justify-content: center; padding: 0;
+  transition: border-color .2s, color .2s;
+}
+.admin-item .orden button:hover:not(:disabled) { border-color: var(--navy); color: var(--navy); }
+.admin-item .orden button:disabled { opacity: 0.35; cursor: not-allowed; }
+.admin-item .del.editar:hover { border-color: var(--navy); color: var(--navy); }
+
+.switch { display: flex; align-items: center; gap: 7px; cursor: pointer; flex-shrink: 0; user-select: none; }
+.switch input { appearance: none; width: 36px; height: 20px; border-radius: 10px; background: var(--paper-3); border: 1.5px solid var(--line); position: relative; cursor: pointer; transition: background .2s, border-color .2s; margin: 0; }
+.switch input::after {
+  content: ""; position: absolute; top: 1px; left: 1px; width: 14px; height: 14px;
+  border-radius: 50%; background: var(--muted); transition: transform .2s, background .2s;
+}
+.switch input:checked { background: var(--red); border-color: var(--red); }
+.switch input:checked::after { transform: translateX(16px); background: #fff; }
+.switch span { font-size: 10.5px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); }
+.switch.on span { color: var(--red); }
+
+@media (max-width: 900px) {
+  .ficha-grid { grid-template-columns: 1fr; gap: 24px; }
+}
+@media (max-width: 680px) {
+  .admin-item { flex-wrap: wrap; }
+  .admin-item .info { flex-basis: 100%; order: 3; }
+  .switch { order: 4; }
+  .mini { width: 60px; height: 60px; }
+}

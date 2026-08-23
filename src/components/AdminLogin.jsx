@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { adminIsClaimed, adminClaim, adminLogin } from '../lib/shopApi';
+import { guardarSesion } from '../lib/adminSession';
 
 const AdminLogin = () => {
     const [claimed, setClaimed] = useState(null); // null = todavía revisando
@@ -38,8 +39,8 @@ const AdminLogin = () => {
                 const ok = await adminLogin(pass);
                 if (!ok) throw new Error('Clave incorrecta');
             }
-            // Se guarda en la pestaña, no en el disco: al cerrarla se borra.
-            sessionStorage.setItem('protheAdminPass', pass);
+            // La sesión dura una semana, para no pedir la clave a cada rato.
+            guardarSesion(pass);
             navigate('/admin/dashboard');
         } catch (err) {
             setError(err?.message || 'No se pudo entrar');

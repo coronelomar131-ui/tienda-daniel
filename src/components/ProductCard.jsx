@@ -1,4 +1,5 @@
 import React, { useContext, useState } from 'react';
+import { Link } from 'react-router-dom';
 import { ShopContext } from '../context/shop-context';
 import { config } from '../config';
 import { waLink } from '../lib/whatsapp';
@@ -33,17 +34,18 @@ const ProductCard = ({ product }) => {
 
     return (
         <div className={`card reveal${soldOut ? ' sold-out' : ''}`}>
-            <div className="card-photo">
+            <Link to={`/tenis/${product.id}`} className="card-photo">
                 <div className="badges">
                     {product.status === 'nuevo' && <span className="badge badge-new">Nuevo</span>}
                     {soldOut && <span className="badge badge-out">Agotado</span>}
+                    {product.videoUrl && <span className="badge badge-video">▶ Video</span>}
                 </div>
                 <ProductPhoto product={product} />
-            </div>
+            </Link>
 
             <div className="card-body">
                 <span className="tag">{product.brand}</span>
-                <h3>{product.name}</h3>
+                <h3><Link to={`/tenis/${product.id}`}>{product.name}</Link></h3>
                 {product.desc && <p className="desc">{product.desc}</p>}
 
                 {needsSize && (

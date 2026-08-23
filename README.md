@@ -5,8 +5,8 @@ y pedidos por WhatsApp. El dueño administra la tienda desde el celular, sin toc
 
 ## Cómo se ve
 
-Bandas de tinta y papel: barra y portada en negro, catálogo en blanco para que
-manden las fotos de los tenis, y naranja de caja de tenis como único acento.
+Fondo blanco, letras negras y azul marino (#1B2A52) para iconos y acentos.
+El rojo se reserva para avisos: el sello AGOTADO y los errores del panel.
 Tipografía Big Shoulders Display + Barlow.
 
 ## Qué hace
@@ -21,8 +21,14 @@ Tipografía Big Shoulders Display + Barlow.
   "Restock".
 - **Carrito** que junta varios pares (cada talla cuenta aparte) y manda el pedido
   completo con total por WhatsApp.
+- **Galería por par.** Varias fotos por producto; en el catálogo la segunda
+  aparece al pasar el cursor, y en la ficha hay miniaturas para cambiarlas.
+- **Página propia de cada par** en `/tenis/:id`, con fotos grandes. Sirve para
+  mandarle a un cliente el link de un modelo concreto.
+- **Video por link.** Pegas el de tu Reel, TikTok o YouTube: YouTube se
+  incrusta y los otros se muestran como tarjeta que lleva al post.
 - **Fotos comprimidas** al subirlas (máx. 1200 px, JPEG) para que la tienda no
-  pese; cada tarjeta pide su foto solo cuando aparece en pantalla.
+  pese; cada tarjeta pide sus fotos solo cuando aparece en pantalla.
 
 ## Panel de administración
 
@@ -30,8 +36,11 @@ Está en `/admin`.
 
 - **La primera vez que entras, tú creas la clave.** No hay clave de fábrica y no
   está escrita en el código: se guarda como hash en la base.
-- Desde ahí subes pares (marca, modelo, precio, tallas, etiqueta, foto), borras
-  los que ya vendiste y cambias tu clave.
+- Desde ahí subes pares (marca, modelo, precio, tallas, etiqueta, video y
+  varias fotos de un jalón), **editas** los que ya están sin borrarlos,
+  **reordenas** con flechas para decidir qué ve primero el cliente, marcas
+  **agotado con un switch** y cambias tu clave.
+- La sesión dura una semana: no te pide la clave cada vez que cierras la pestaña.
 - Tras 10 intentos fallidos, el acceso se bloquea 15 minutos.
 
 ## Seguridad del catálogo
