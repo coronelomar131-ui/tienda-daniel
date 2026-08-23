@@ -26,6 +26,10 @@ const AdminDashboard = () => {
     const [aviso, setAviso] = useState(null);
     const [ocupado, setOcupado] = useState(false);
 
+    // En celular el panel se parte en dos pestanas: lo que mas se usa a diario
+    // es el catalogo, asi que esa abre primero.
+    const [tab, setTab] = useState('catalogo');
+
     const [claveActual, setClaveActual] = useState('');
     const [claveNueva, setClaveNueva] = useState('');
 
@@ -83,6 +87,7 @@ const AdminDashboard = () => {
         setEditandoId(p.id);
         setFotosNuevas([]);
         setGaleria([]);
+        setTab('nuevo');
         window.scrollTo({ top: 0, behavior: 'smooth' });
         if (p.photoCount) {
             try { setGaleria(await fetchPhotos(p.id)); } catch { /* se muestra vacia */ }
@@ -120,6 +125,7 @@ const AdminDashboard = () => {
             );
         }
         limpiar();
+        setTab('catalogo');
     };
 
     const borrarFotoGuardada = async (fotoId) => {
@@ -166,8 +172,17 @@ const AdminDashboard = () => {
                     </div>
                 )}
 
-                <div className="admin-grid">
-                    <div>
+                <div className="admin-tabs">
+                    <button className={tab === 'catalogo' ? 'on' : ''} onClick={() => setTab('catalogo')}>
+                        Mi catálogo ({products.length})
+                    </button>
+                    <button className={tab === 'nuevo' ? 'on' : ''} onClick={() => setTab('nuevo')}>
+                        {editandoId ? 'Editando par' : '+ Añadir par'}
+                    </button>
+                </div>
+
+                <div className={`admin-grid tab-${tab}`}>
+                    <div className="col-form">
                         <div className="admin-card">
                             <h3>
                                 {editandoId
@@ -242,8 +257,8 @@ const AdminDashboard = () => {
                             </form>
                         </div>
 
-                        <div className="admin-card" style={{ marginTop: '18px' }}>
-                            <h3>Cambiar mi clave</h3>
+                        <details className="admin-card plegable" style={{ marginTop: '18px' }}>
+                            <summary>Cambiar mi clave</summary>
                             <form onSubmit={cambiarClave} className="admin-form">
                                 <input type="password" placeholder="Clave actual" value={claveActual}
                                     onChange={(e) => setClaveActual(e.target.value)} autoComplete="current-password" />
@@ -251,10 +266,10 @@ const AdminDashboard = () => {
                                     onChange={(e) => setClaveNueva(e.target.value)} autoComplete="new-password" />
                                 <button type="submit" className="btn-ghost">Cambiar clave</button>
                             </form>
-                        </div>
+                        </details>
                     </div>
 
-                    <div>
+                    <div className="col-lista">
                         <h3 className="admin-list-title">Catálogo ({products.length})</h3>
                         <p className="hint" style={{ marginBottom: '14px' }}>
                             El de hasta arriba es el primero que ven tus clientes. Usa las flechas para acomodarlos.
@@ -288,6 +303,7 @@ const AdminDashboard = () => {
                                         </span>
                                     </div>
 
+                                    <div className="acciones">
                                     <label className={`switch${p.status === 'agotado' ? ' on' : ''}`}>
                                         <input
                                             type="checkbox"
@@ -306,6 +322,7 @@ const AdminDashboard = () => {
                                     <button className="del" onClick={() => borrar(p)} aria-label={`Borrar ${p.name}`}>
                                         <Trash2 size={16} />
                                     </button>
+                                    </div>
                                 </div>
                             ))}
                         </div>
