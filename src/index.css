@@ -654,3 +654,18 @@ button { font-family: var(--body); }
   }
   .hero-band.con-video .hero { min-height: 0; }
 }
+
+/* ---------- VIDEO DE PORTADA EN CELULAR ----------
+   Como fondo no se veía: el velo que protege la lectura lo tapaba casi
+   entero. En pantallas chicas deja de ser fondo y pasa a ser una banda
+   propia arriba del título, sin nada encima. */
+@media (max-width: 860px) {
+  .hero-band.con-video::after { content: none; }
+  .hero-band.con-video .hero-video {
+    position: relative; inset: auto;
+    width: 100%; height: auto; aspect-ratio: 16 / 11;
+    display: block; z-index: 1;
+    border-bottom: 1px solid var(--line);
+  }
+  .hero-band.con-video .hero { padding-top: 34px; }
+}

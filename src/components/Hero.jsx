@@ -15,6 +15,16 @@ const Hero = () => {
         return () => { vivo = false; };
     }, []);
 
+    // iOS solo deja arrancar solo un video que ya esté mudo, y a veces no basta
+    // el atributo: hay que ponerlo por propiedad y pedirle reproducir a mano.
+    useEffect(() => {
+        const el = ref.current;
+        if (!el) return;
+        el.muted = true;
+        el.defaultMuted = true;
+        el.play?.().catch(() => { /* si el sistema lo bloquea, se ve el primer cuadro */ });
+    }, [video]);
+
     // Si el usuario pidió menos animación, no le ponemos video en bucle.
     const quietud = typeof window !== 'undefined'
         && window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
