@@ -9,6 +9,7 @@ import CartDrawer from './components/CartDrawer';
 import HowTo from './components/HowTo';
 import Newsletter from './components/Newsletter';
 import ProductPage from './components/ProductPage';
+import PagoResultado from './components/PagoResultado';
 import AdminLogin from './components/AdminLogin';
 import AdminDashboard from './components/AdminDashboard';
 import { ShopContext } from './context/shop-context';
@@ -102,6 +103,7 @@ function App() {
             <Routes>
                 <Route path="/" element={<StoreFront />} />
                 <Route path="/tenis/:id" element={<ProductPage />} />
+                <Route path="/pago/:id" element={<PagoResultado />} />
                 <Route path="/admin" element={<AdminLogin />} />
                 <Route path="/admin/dashboard" element={<AdminDashboard />} />
             </Routes>

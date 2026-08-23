@@ -12,6 +12,7 @@ import { subirVideo, LIMITE_MB } from '../lib/videoUpload';
 import { fetchHeroVideo, adminSetHeroVideo } from '../lib/shopApi';
 import { leerSesion, guardarSesion, cerrarSesion } from '../lib/adminSession';
 import SneakerArt from './SneakerArt';
+import Pedidos from './Pedidos';
 
 const VACIO = { brand: '', name: '', price: '', sizes: '', status: '', desc: '', mlLink: '', videoUrl: '' };
 
@@ -239,9 +240,14 @@ const AdminDashboard = () => {
                     <button className={tab === 'nuevo' ? 'on' : ''} onClick={() => setTab('nuevo')}>
                         {editandoId ? 'Editando par' : '+ Añadir par'}
                     </button>
+                    <button className={tab === 'pedidos' ? 'on' : ''} onClick={() => setTab('pedidos')}>
+                        Pedidos
+                    </button>
                 </div>
 
-                <div className={`admin-grid tab-${tab}`}>
+                {tab === 'pedidos' && <Pedidos pass={pass} />}
+
+                <div className={`admin-grid tab-${tab}`} hidden={tab === 'pedidos'}>
                     <div className="col-form">
                         <div className="admin-card">
                             <h3>

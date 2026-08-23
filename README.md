@@ -54,6 +54,35 @@ tope de 30 MB por archivo). Subir no se puede directo: el panel le pide un
 permiso temporal a la función `permiso-video`, que revisa la clave del dueño
 antes de darlo. Así la bodega nunca queda abierta a que cualquiera suba cosas.
 
+## Pagos con Mercado Pago
+
+Dos botones en el carrito: **Pagar ahora** (Mercado Pago) y **apartar por
+WhatsApp**, porque en reventa de tenis la plática suele cerrar la venta.
+Opcionalmente el cliente puede **apartar con anticipo** (el porcentaje se
+elige desde el panel).
+
+Cómo está armado, y por qué:
+
+- **El precio nunca viaja desde el navegador.** El cliente solo manda qué par
+  y qué talla; `crear-pago` busca el precio en la base y arma el cobro con
+  ese. Si el precio viniera del celular del cliente, cualquiera podría
+  cambiar un par de $5,600 a $1.
+- **Checkout Pro**: el cliente mete su tarjeta en la pantalla de Mercado
+  Pago, no en la tienda. Así los datos bancarios nunca pasan por aquí.
+- **El pago se confirma por aviso del servidor, no porque el cliente
+  regrese.** `aviso-pago` valida la firma, le vuelve a preguntar a Mercado
+  Pago por ese pago, y compara el monto contra lo que se pidió cobrar. Solo
+  entonces marca el pedido como pagado.
+- **`orders` y `order_items` tienen RLS sin policies**: llevan nombre y
+  teléfono de clientes, así que nadie los lee desde el navegador. Solo salen
+  por `admin_orders`, que exige la clave del dueño.
+
+Para encender los pagos hace falta una variable en Supabase (Edge Functions →
+Secrets): `MP_ACCESS_TOKEN` con el token de producción de Mercado Pago, y
+opcionalmente `MP_WEBHOOK_SECRET` para validar la firma de los avisos. Sin
+`MP_ACCESS_TOKEN`, el botón de pagar responde que los pagos no están
+configurados y la tienda sigue funcionando por WhatsApp.
+
 ## Seguridad del catálogo
 
 Cualquiera puede **leer** el catálogo (es una tienda). Para **escribir** no basta
