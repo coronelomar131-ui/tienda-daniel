@@ -616,3 +616,41 @@ button { font-family: var(--body); }
   .admin-card.plegable > summary { font-size: 19px; }
   .foto-chip { width: 66px; height: 66px; }
 }
+
+/* ---------- VIDEO ---------- */
+.video-propio {
+  width: 100%; border-radius: 3px; background: var(--ink); display: block;
+  max-height: 70vh;
+}
+
+/* Video de fondo en la portada: se asoma detrás del título sin taparlo. */
+.hero-band.con-video { position: relative; overflow: hidden; }
+.hero-video {
+  position: absolute; inset: 0; width: 100%; height: 100%;
+  object-fit: cover; z-index: 0;
+  opacity: 0; transition: opacity .8s ease;
+}
+.hero-video.visible { opacity: 1; }
+/* Velo blanco para que las letras negras siempre se lean encima del video. */
+.hero-band.con-video::after {
+  content: ""; position: absolute; inset: 0; z-index: 1; pointer-events: none;
+  background: linear-gradient(100deg,
+    rgba(255,255,255,0.96) 0%,
+    rgba(255,255,255,0.92) 42%,
+    rgba(255,255,255,0.55) 70%,
+    rgba(255,255,255,0.30) 100%);
+}
+.hero-band.con-video .hero { position: relative; z-index: 2; grid-template-columns: 1fr; min-height: 62vh; }
+.hero-band.con-video .hero-copy { max-width: 660px; }
+
+.hero-previo { width: 100%; border-radius: 3px; background: var(--ink); display: block; }
+
+@media (max-width: 860px) {
+  .hero-band.con-video::after {
+    background: linear-gradient(180deg,
+      rgba(255,255,255,0.95) 0%,
+      rgba(255,255,255,0.88) 55%,
+      rgba(255,255,255,0.45) 100%);
+  }
+  .hero-band.con-video .hero { min-height: 0; }
+}

@@ -8,6 +8,8 @@ import {
     adminSetPassword, fetchPhotos,
 } from '../lib/shopApi';
 import { comprimirImagen } from '../lib/image';
+import { subirVideo, LIMITE_MB } from '../lib/videoUpload';
+import { fetchHeroVideo, adminSetHeroVideo } from '../lib/shopApi';
 import { leerSesion, guardarSesion, cerrarSesion } from '../lib/adminSession';
 import SneakerArt from './SneakerArt';
 
@@ -30,6 +32,10 @@ const AdminDashboard = () => {
     // es el catalogo, asi que esa abre primero.
     const [tab, setTab] = useState('catalogo');
 
+    const [subiendoVideo, setSubiendoVideo] = useState('');
+    const [heroVideo, setHeroVideo] = useState('');
+    const [heroCargado, setHeroCargado] = useState(false);
+
     const [claveActual, setClaveActual] = useState('');
     const [claveNueva, setClaveNueva] = useState('');
 
@@ -39,6 +45,54 @@ const AdminDashboard = () => {
     );
 
     useEffect(() => { if (!pass) navigate('/admin'); }, [pass, navigate]);
+
+    useEffect(() => {
+        fetchHeroVideo()
+            .then(setHeroVideo)
+            .catch(() => { /* se queda vacio */ })
+            .finally(() => setHeroCargado(true));
+    }, []);
+
+    // Sube el archivo y deja el enlace en el campo del video del par.
+    const elegirVideo = async (e) => {
+        const file = e.target.files?.[0];
+        e.target.value = '';
+        if (!file) return;
+        setAviso(null);
+        try {
+            const url = await subirVideo(pass, file, setSubiendoVideo);
+            setForm(f => ({ ...f, videoUrl: url }));
+            setAviso({ tipo: 'ok', texto: 'Video subido. Guarda el par para que quede.' });
+        } catch (err) {
+            setAviso({ tipo: 'error', texto: err.message });
+        } finally {
+            setSubiendoVideo('');
+        }
+    };
+
+    const elegirVideoPortada = async (e) => {
+        const file = e.target.files?.[0];
+        e.target.value = '';
+        if (!file) return;
+        setAviso(null);
+        try {
+            const url = await subirVideo(pass, file, setSubiendoVideo);
+            await adminSetHeroVideo(pass, url);
+            setHeroVideo(url);
+            setAviso({ tipo: 'ok', texto: 'Listo, ya se ve en tu portada.' });
+        } catch (err) {
+            setAviso({ tipo: 'error', texto: err.message });
+        } finally {
+            setSubiendoVideo('');
+        }
+    };
+
+    const quitarVideoPortada = async () => {
+        await correr(async () => {
+            await adminSetHeroVideo(pass, '');
+            setHeroVideo('');
+        }, 'Video de portada quitado.');
+    };
 
     const set = (campo) => (e) => setForm(f => ({ ...f, [campo]: e.target.value }));
 
@@ -166,7 +220,13 @@ const AdminDashboard = () => {
                     <button onClick={salir} className="btn-ghost">Salir</button>
                 </div>
 
-                {aviso && (
+                {subiendoVideo && (
+                    <div className="admin-status ok" style={{ marginBottom: '20px' }}>
+                        {subiendoVideo} No cierres esta pantalla.
+                    </div>
+                )}
+
+                {aviso && !subiendoVideo && (
                     <div className={`admin-status ${aviso.tipo}`} style={{ marginBottom: '20px' }}>
                         {aviso.texto}
                     </div>
@@ -212,9 +272,24 @@ const AdminDashboard = () => {
                                 <textarea placeholder="Descripción corta" value={form.desc} onChange={set('desc')} rows={3} />
                                 <input type="text" placeholder="Link de Mercado Libre (opcional)" value={form.mlLink} onChange={set('mlLink')} />
 
-                                <input type="text" placeholder="Link del video (TikTok, Instagram o YouTube)"
+                                <label>
+                                    Video del par
+                                    <input type="file" accept="video/*" onChange={elegirVideo}
+                                        disabled={!!subiendoVideo} style={{ marginTop: '6px' }} />
+                                </label>
+                                <p className="hint">
+                                    Sube el archivo y se reproduce dentro de tu tienda, como las marcas
+                                    grandes. Máximo {LIMITE_MB} MB.
+                                </p>
+                                <input type="text" placeholder="…o pega un link de TikTok, Instagram o YouTube"
                                     value={form.videoUrl} onChange={set('videoUrl')} />
-                                <p className="hint">Pega el link de tu Reel o TikTok. Opcional.</p>
+                                {form.videoUrl && (
+                                    <p className="hint">
+                                        {form.videoUrl.includes('/videos/')
+                                            ? '✓ Video propio: se reproduce dentro de la tienda.'
+                                            : 'Link externo: saldrá un botón que lleva al post.'}
+                                    </p>
+                                )}
 
                                 <label>
                                     Fotos del par {total > 0 && `(${total})`}
@@ -256,6 +331,29 @@ const AdminDashboard = () => {
                                 )}
                             </form>
                         </div>
+
+                        <details className="admin-card plegable" style={{ marginTop: '18px' }}>
+                            <summary>Video de portada</summary>
+                            <p className="hint" style={{ marginTop: 0 }}>
+                                Se reproduce solo, en bucle y sin sonido, atrás del título de tu
+                                tienda. Es lo que más la hace ver viva. Máximo {LIMITE_MB} MB.
+                            </p>
+                            {heroCargado && heroVideo ? (
+                                <>
+                                    <video className="hero-previo" src={heroVideo} muted loop playsInline autoPlay />
+                                    <button type="button" className="btn-ghost" style={{ marginTop: '10px' }}
+                                        onClick={quitarVideoPortada} disabled={ocupado}>
+                                        Quitar video de portada
+                                    </button>
+                                </>
+                            ) : (
+                                <label>
+                                    Subir video de portada
+                                    <input type="file" accept="video/*" onChange={elegirVideoPortada}
+                                        disabled={!!subiendoVideo} style={{ marginTop: '6px' }} />
+                                </label>
+                            )}
+                        </details>
 
                         <details className="admin-card plegable" style={{ marginTop: '18px' }}>
                             <summary>Cambiar mi clave</summary>

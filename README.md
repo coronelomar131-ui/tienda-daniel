@@ -25,8 +25,12 @@ Tipografía Big Shoulders Display + Barlow.
   aparece al pasar el cursor, y en la ficha hay miniaturas para cambiarlas.
 - **Página propia de cada par** en `/tenis/:id`, con fotos grandes. Sirve para
   mandarle a un cliente el link de un modelo concreto.
-- **Video por link.** Pegas el de tu Reel, TikTok o YouTube: YouTube se
-  incrusta y los otros se muestran como tarjeta que lleva al post.
+- **Video propio.** Subes el archivo desde el panel y se reproduce dentro de
+  la tienda, sin logos de nadie más. También sirve pegar un link: YouTube se
+  incrusta, y TikTok e Instagram salen como tarjeta que lleva al post porque
+  no permiten reproducirse fuera de su app.
+- **Video de portada** que arranca solo, en bucle y sin sonido detrás del
+  título, con un velo que mantiene las letras legibles.
 - **Fotos comprimidas** al subirlas (máx. 1200 px, JPEG) para que la tienda no
   pese; cada tarjeta pide sus fotos solo cuando aparece en pantalla.
 
@@ -42,6 +46,13 @@ Está en `/admin`.
   **agotado con un switch** y cambias tu clave.
 - La sesión dura una semana: no te pide la clave cada vez que cierras la pestaña.
 - Tras 10 intentos fallidos, el acceso se bloquea 15 minutos.
+
+## Videos
+
+Viven en el almacenamiento de Supabase (bodega `videos`, pública para leer,
+tope de 30 MB por archivo). Subir no se puede directo: el panel le pide un
+permiso temporal a la función `permiso-video`, que revisa la clave del dueño
+antes de darlo. Así la bodega nunca queda abierta a que cualquiera suba cosas.
 
 ## Seguridad del catálogo
 

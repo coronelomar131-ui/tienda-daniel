@@ -176,7 +176,15 @@ const ProductPage = () => {
 
                             {video && (
                                 <div className="ficha-video">
-                                    {video.tipo === 'youtube' ? (
+                                    {video.tipo === 'propio' ? (
+                                        <video
+                                            className="video-propio"
+                                            src={video.url}
+                                            controls
+                                            playsInline
+                                            preload="metadata"
+                                        />
+                                    ) : video.tipo === 'youtube' ? (
                                         <div className="video-marco">
                                             <iframe
                                                 src={`https://www.youtube.com/embed/${video.id}`}

@@ -64,6 +64,17 @@ const rpc = async (fn, args, ms = LIMITE * 3) => {
     return data;
 };
 
+export async function fetchHeroVideo() {
+    const { data, error } = await conLimite(supabase
+        .from('site_settings')
+        .select('hero_video_url')
+        .maybeSingle());
+    if (error) throw new Error(mensajeDeError(error));
+    return data?.hero_video_url || '';
+}
+
+export const adminSetHeroVideo = (pass, url) => rpc('admin_set_hero_video', { pass, p_url: url });
+
 export const adminIsClaimed   = () => rpc('admin_is_claimed', {}, LIMITE);
 export const adminClaim       = (pass) => rpc('admin_claim', { new_pass: pass });
 export const adminLogin       = (pass) => rpc('admin_login', { pass });
