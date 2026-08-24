@@ -30,12 +30,31 @@
   /* Liquid Glass: vidrio esmerilado para lo que FLOTA encima del contenido
      (barra, carrito, botonera). En el contenido no va: ahí estorba y se ve
      recargado. La saturación es lo que evita que se vea gris y sucio. */
-  --vidrio: rgba(255, 255, 255, 0.68);
-  --vidrio-denso: rgba(255, 255, 255, 0.86);
-  --vidrio-blur: saturate(180%) blur(22px);
-  --vidrio-borde: rgba(10, 10, 10, 0.09);
-  --vidrio-brillo: inset 0 1px 0 rgba(255, 255, 255, 0.85);
-  --vidrio-sombra: 0 8px 32px rgba(10, 10, 10, 0.10);
+  --vidrio: rgba(255, 255, 255, 0.64);
+  --vidrio-denso: rgba(255, 255, 255, 0.74);
+  --vidrio-blur: saturate(200%) brightness(1.05) blur(34px);
+  --vidrio-borde: rgba(10, 10, 10, 0.07);
+
+  /* El brillo de arriba es lo que hace que parezca vidrio de verdad y no un
+     fondo translúcido: es la luz pegando en el canto curvo de la pieza. Va en
+     el background (no encima) para que el texto no se lave. */
+  --vidrio-luz: linear-gradient(
+      180deg,
+      rgba(255, 255, 255, 0.60) 0%,
+      rgba(255, 255, 255, 0.14) 42%,
+      rgba(255, 255, 255, 0) 62%);
+
+  /* Los cantos: filo de luz arriba, hilo de vidrio alrededor y la sombra
+     interior de abajo, que es donde se dobla lo que se ve a través. */
+  --vidrio-canto:
+      inset 0 1px 0 rgba(255, 255, 255, 0.92),
+      inset 0 0 0 1px rgba(255, 255, 255, 0.42),
+      inset 0 -16px 26px -20px rgba(10, 10, 10, 0.40);
+  --vidrio-sombra: 0 12px 38px rgba(10, 10, 10, 0.14), 0 2px 8px rgba(10, 10, 10, 0.06);
+
+  --vidrio-radio: 999px;
+  /* Rebote corto: la pieza se asienta, no llega de golpe */
+  --resorte: cubic-bezier(.34, 1.42, .64, 1);
 
   --display: 'Big Shoulders Display', 'Arial Narrow', Impact, sans-serif;
   --body: 'Barlow', system-ui, -apple-system, sans-serif;
@@ -80,11 +99,11 @@ button { font-family: var(--body); }
 /* ---------- HEADER ---------- */
 .site-header {
   position: sticky; top: 0; z-index: 50;
-  background: var(--vidrio);
+  background: var(--vidrio-luz), var(--vidrio);
   backdrop-filter: var(--vidrio-blur);
   -webkit-backdrop-filter: var(--vidrio-blur);
   border-bottom: 1px solid var(--vidrio-borde);
-  box-shadow: var(--vidrio-brillo);
+  box-shadow: var(--vidrio-canto);
   padding-top: env(safe-area-inset-top);
   padding-left: env(safe-area-inset-left);
   padding-right: env(safe-area-inset-right);
@@ -345,8 +364,8 @@ button { font-family: var(--body); }
 /* ---------- CARRITO ---------- */
 .cart-overlay {
   position: fixed; inset: 0; z-index: 90;
-  background: rgba(10, 10, 10, 0.38);
-  backdrop-filter: blur(3px); -webkit-backdrop-filter: blur(3px);
+  background: rgba(10, 10, 10, 0.34);
+  backdrop-filter: saturate(140%) blur(8px); -webkit-backdrop-filter: saturate(140%) blur(8px);
   animation: fadeIn .25s ease;
 }
 @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
@@ -355,11 +374,11 @@ button { font-family: var(--body); }
   /* 100dvh: en el celular la barra del navegador aparece y desaparece, y con
      100vh el botón de pagar quedaba cortado abajo */
   height: 100dvh;
-  background: var(--vidrio-denso); color: var(--ink); z-index: 100;
+  background: var(--vidrio-luz), var(--vidrio-denso); color: var(--ink); z-index: 100;
   backdrop-filter: var(--vidrio-blur);
   -webkit-backdrop-filter: var(--vidrio-blur);
   border-left: 1px solid var(--vidrio-borde);
-  box-shadow: -14px 0 44px rgba(10, 10, 10, 0.16), var(--vidrio-brillo);
+  box-shadow: -18px 0 52px rgba(10, 10, 10, 0.18), var(--vidrio-canto);
   display: flex; flex-direction: column; animation: slideIn .3s cubic-bezier(.32,.72,0,1);
   padding-top: env(safe-area-inset-top);
   padding-right: env(safe-area-inset-right);
@@ -392,10 +411,10 @@ button { font-family: var(--body); }
 .cart-foot {
   padding: 17px 24px calc(24px + env(safe-area-inset-bottom));
   border-top: 1px solid var(--vidrio-borde);
-  background: rgba(255, 255, 255, 0.7);
+  background: var(--vidrio-luz), rgba(255, 255, 255, 0.62);
   backdrop-filter: var(--vidrio-blur);
   -webkit-backdrop-filter: var(--vidrio-blur);
-  box-shadow: var(--vidrio-brillo);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.92);
 }
 .cart-total { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 13px; }
 .cart-total span { font-size: 11px; font-weight: 700; letter-spacing: 0.16em; text-transform: uppercase; color: var(--muted); }
@@ -623,7 +642,7 @@ button { font-family: var(--body); }
   .admin-tabs {
     display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px;
     position: sticky; top: 0; z-index: 20;
-    background: var(--vidrio); padding: 10px 0 12px; margin-bottom: 4px;
+    background: var(--vidrio-luz), var(--vidrio); padding: 10px 0 12px; margin-bottom: 4px;
     backdrop-filter: var(--vidrio-blur);
     -webkit-backdrop-filter: var(--vidrio-blur);
   }
@@ -833,19 +852,25 @@ button { font-family: var(--body); }
 @media (max-width: 900px) {
   .barra-compra {
     display: flex; align-items: center; gap: 10px;
-    position: fixed; left: 0; right: 0; bottom: 0; z-index: 60;
-    padding: 12px 16px calc(12px + env(safe-area-inset-bottom));
-    background: var(--vidrio);
+    position: fixed; z-index: 60;
+    left: max(12px, env(safe-area-inset-left));
+    right: max(12px, env(safe-area-inset-right));
+    bottom: calc(10px + env(safe-area-inset-bottom));
+    padding: 8px 8px 8px 20px;
+    border-radius: var(--vidrio-radio);
+    background: var(--vidrio-luz), var(--vidrio-denso);
     backdrop-filter: var(--vidrio-blur);
     -webkit-backdrop-filter: var(--vidrio-blur);
-    border-top: 1px solid var(--vidrio-borde);
-    box-shadow: 0 -8px 30px rgba(10, 10, 10, 0.10), var(--vidrio-brillo);
-    animation: subeBarra .35s cubic-bezier(.32,.72,0,1);
+    box-shadow: var(--vidrio-canto), var(--vidrio-sombra);
+    animation: subeBarra .42s var(--resorte);
   }
   @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
     .barra-compra { background: rgba(255, 255, 255, 0.97); }
   }
-  @keyframes subeBarra { from { transform: translateY(100%); } to { transform: translateY(0); } }
+  @keyframes subeBarra {
+    from { transform: translateY(calc(100% + 20px)); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+  }
 
   .barra-precio { display: flex; flex-direction: column; line-height: 1.1; min-width: 0; flex-shrink: 0; }
   .barra-precio span {
@@ -859,24 +884,66 @@ button { font-family: var(--body); }
     background: var(--navy); color: #fff; border: none; border-radius: 100px;
     font-family: var(--display); text-transform: uppercase; font-weight: 800;
     font-size: 18px; letter-spacing: 0.03em; cursor: pointer;
-    transition: background .2s, transform .12s;
+    transition: background .2s, transform .28s var(--resorte);
   }
-  .barra-btn:active:not(:disabled) { transform: scale(0.97); }
+  .barra-btn:active:not(:disabled) { transform: scale(0.95); }
   .barra-btn:disabled { background: rgba(10, 10, 10, 0.08); color: var(--muted); }
 
   .barra-wa {
     width: 48px; height: 48px; flex-shrink: 0; border-radius: 50%;
     display: flex; align-items: center; justify-content: center;
     border: 1.5px solid var(--line-strong); color: var(--ink);
-    transition: background .2s, color .2s, transform .12s;
+    transition: background .2s, color .2s, transform .28s var(--resorte);
   }
-  .barra-wa:active { transform: scale(0.94); }
+  .barra-wa:active { transform: scale(0.92); }
   .barra-wa svg { width: 20px; height: 20px; }
 
   /* Que la barra no tape el final de la ficha */
-  .ficha { padding-bottom: 110px; }
+  .ficha { padding-bottom: 124px; }
   /* Las acciones de arriba se ocultan: ya están en la barra */
   .ficha-acciones { display: none; }
+}
+
+/* ---------- EL VIDRIO FLOTANDO (celular) ----------
+   En el celular las piezas de vidrio se despegan de las orillas y quedan como
+   pastillas sueltas encima del contenido. Ahí es donde se nota que es vidrio:
+   se le ve el canto por los cuatro lados y el catálogo corre por debajo. */
+@media (max-width: 900px) {
+  .site-header {
+    top: calc(env(safe-area-inset-top) + 10px);
+    margin: calc(env(safe-area-inset-top) + 10px) 14px 0;
+    padding: 0;
+    border-radius: var(--vidrio-radio);
+    border-bottom: none;
+    box-shadow: var(--vidrio-canto), var(--vidrio-sombra);
+  }
+  .site-header .nav { padding: 8px 8px 8px 20px; }
+  .logo { font-size: 23px; }
+  .cart-toggle { border-radius: var(--vidrio-radio); padding: 10px 18px; font-size: 16px; }
+
+  /* El carrito sube como hoja desde abajo, que es como se abre en el celular,
+     y deja ver la tienda difuminada arriba. */
+  .cart-drawer {
+    top: auto; left: 0; right: 0; bottom: 0; width: 100%;
+    height: min(92dvh, 100dvh);
+    padding-top: 0;
+    border-left: none;
+    border-radius: 30px 30px 0 0;
+    overflow: hidden;
+    box-shadow: 0 -20px 56px rgba(10, 10, 10, 0.24), var(--vidrio-canto);
+    animation: subeHoja .42s var(--resorte);
+  }
+  @keyframes subeHoja {
+    from { transform: translateY(100%); }
+    to { transform: translateY(0); }
+  }
+  /* La agarradera: dice "esto se jala", sin escribirlo */
+  .cart-drawer::before {
+    content: ""; position: absolute; top: 9px; left: 50%; transform: translateX(-50%);
+    width: 42px; height: 5px; border-radius: 999px;
+    background: rgba(10, 10, 10, 0.16); pointer-events: none; z-index: 2;
+  }
+  .cart-head { padding-top: 26px; }
 }
 
 /* ---------- REBOTES Y TOQUES EN CELULAR ---------- */
@@ -884,7 +951,7 @@ button { font-family: var(--body); }
   /* Respuesta al toque: lo que se siente "de app" */
   .btn-primary:active, .cart-wa:active, .add-btn:active:not(:disabled),
   .brand-chip:active, .size-chip:active:not(:disabled) { transform: scale(0.97); }
-  .btn-primary, .cart-wa, .add-btn, .brand-chip, .size-chip { transition: transform .12s ease, background .2s, color .2s, border-color .2s; }
+  .btn-primary, .cart-wa, .add-btn, .brand-chip, .size-chip { transition: transform .28s var(--resorte), background .2s, color .2s, border-color .2s; }
 
   /* Áreas de toque cómodas en la ficha */
   .mini { width: 64px; height: 64px; }
