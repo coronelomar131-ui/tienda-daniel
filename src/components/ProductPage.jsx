@@ -215,6 +215,19 @@ const ProductPage = () => {
                 </div>
             </main>
 
+            <div className="barra-compra">
+                <div className="barra-precio">
+                    <span>{pideTalla && talla !== null ? `Talla ${talla}` : par.brand}</span>
+                    <strong>${par.price.toLocaleString('es-MX')}</strong>
+                </div>
+                <button className="barra-btn" onClick={agregar} disabled={!puedeAgregar}>
+                    {agotado ? 'Agotado' : agregado ? '✓ Agregado' : (pideTalla && talla === null ? 'Elige tu talla' : 'Agregar')}
+                </button>
+                <a href={waLink(texto)} target="_blank" rel="noreferrer" className="barra-wa" aria-label="Apartar por WhatsApp">
+                    <WhatsAppIcon />
+                </a>
+            </div>
+
             <CartDrawer open={cartOpen} onClose={() => setCartOpen(false)} />
         </>
     );

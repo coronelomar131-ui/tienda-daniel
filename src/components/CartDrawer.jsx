@@ -2,6 +2,7 @@ import React, { useContext, useEffect, useState } from 'react';
 import { ShopContext } from '../context/shop-context';
 import { waLink } from '../lib/whatsapp';
 import { crearPago, fetchAnticipo } from '../lib/pagos';
+import { useBloquearScroll } from '../lib/bloquearScroll';
 
 const WhatsAppIcon = () => (
     <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
@@ -18,6 +19,8 @@ const CartDrawer = ({ open, onClose }) => {
     const [datos, setDatos] = useState({ nombre: '', telefono: '', email: '' });
     const [anticipo, setAnticipo] = useState(false);
     const [pct, setPct] = useState(0);
+
+    useBloquearScroll(open);
 
     useEffect(() => {
         if (!open) return;

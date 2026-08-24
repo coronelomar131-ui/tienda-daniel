@@ -27,6 +27,16 @@
   --art-upper: #E4E4E7;
   --art-sole: #D6D6DA;
 
+  /* Liquid Glass: vidrio esmerilado para lo que FLOTA encima del contenido
+     (barra, carrito, botonera). En el contenido no va: ahí estorba y se ve
+     recargado. La saturación es lo que evita que se vea gris y sucio. */
+  --vidrio: rgba(255, 255, 255, 0.68);
+  --vidrio-denso: rgba(255, 255, 255, 0.86);
+  --vidrio-blur: saturate(180%) blur(22px);
+  --vidrio-borde: rgba(10, 10, 10, 0.09);
+  --vidrio-brillo: inset 0 1px 0 rgba(255, 255, 255, 0.85);
+  --vidrio-sombra: 0 8px 32px rgba(10, 10, 10, 0.10);
+
   --display: 'Big Shoulders Display', 'Arial Narrow', Impact, sans-serif;
   --body: 'Barlow', system-ui, -apple-system, sans-serif;
 }
@@ -43,7 +53,16 @@ body {
   -webkit-font-smoothing: antialiased;
   overflow-x: hidden;
   min-height: 100vh;
+  /* iOS agranda el texto solo al girar el teléfono si no se le dice que no */
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
 }
+
+/* Android pinta un recuadro gris al tocar; se ve sucio en botones propios */
+* { -webkit-tap-highlight-color: transparent; }
+
+/* Al llegar al final de una lista, que no arrastre la página de atrás */
+.cart-items, .admin-list, .pedidos-lista { overscroll-behavior: contain; }
 
 a { color: inherit; text-decoration: none; }
 button { font-family: var(--body); }
@@ -61,10 +80,18 @@ button { font-family: var(--body); }
 /* ---------- HEADER ---------- */
 .site-header {
   position: sticky; top: 0; z-index: 50;
-  background: rgba(255, 255, 255, 0.94);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  border-bottom: 1px solid var(--line);
+  background: var(--vidrio);
+  backdrop-filter: var(--vidrio-blur);
+  -webkit-backdrop-filter: var(--vidrio-blur);
+  border-bottom: 1px solid var(--vidrio-borde);
+  box-shadow: var(--vidrio-brillo);
+  padding-top: env(safe-area-inset-top);
+  padding-left: env(safe-area-inset-left);
+  padding-right: env(safe-area-inset-right);
+}
+/* Si el navegador no sabe difuminar, se pone opaca: nunca ilegible */
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .site-header { background: rgba(255, 255, 255, 0.97); }
 }
 .nav { display: flex; align-items: center; justify-content: space-between; padding: 15px 0; gap: 18px; }
 .logo {
@@ -307,7 +334,8 @@ button { font-family: var(--body); }
 /* ---------- FOOTER ---------- */
 .site-footer {
   background: var(--paper); color: var(--muted);
-  border-top: 1px solid var(--line); padding: 32px 0 38px;
+  border-top: 1px solid var(--line);
+  padding: 32px 0 calc(38px + env(safe-area-inset-bottom));
 }
 .site-footer .wrap { display: flex; justify-content: space-between; align-items: center; gap: 18px; font-size: 12px; font-weight: 500; letter-spacing: 0.06em; }
 .site-footer .flinks { display: flex; gap: 22px; text-transform: uppercase; font-weight: 600; letter-spacing: 0.12em; }
@@ -315,18 +343,34 @@ button { font-family: var(--body); }
 .site-footer .flinks a:hover { color: var(--navy); }
 
 /* ---------- CARRITO ---------- */
-.cart-overlay { position: fixed; inset: 0; background: rgba(10, 10, 10, 0.45); z-index: 90; animation: fadeIn .2s ease; }
+.cart-overlay {
+  position: fixed; inset: 0; z-index: 90;
+  background: rgba(10, 10, 10, 0.38);
+  backdrop-filter: blur(3px); -webkit-backdrop-filter: blur(3px);
+  animation: fadeIn .25s ease;
+}
 @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 .cart-drawer {
   position: fixed; top: 0; right: 0; bottom: 0; width: min(420px, 100vw);
-  background: var(--paper); color: var(--ink); z-index: 100;
-  border-left: 1px solid var(--line);
-  display: flex; flex-direction: column; animation: slideIn .26s ease;
+  /* 100dvh: en el celular la barra del navegador aparece y desaparece, y con
+     100vh el botón de pagar quedaba cortado abajo */
+  height: 100dvh;
+  background: var(--vidrio-denso); color: var(--ink); z-index: 100;
+  backdrop-filter: var(--vidrio-blur);
+  -webkit-backdrop-filter: var(--vidrio-blur);
+  border-left: 1px solid var(--vidrio-borde);
+  box-shadow: -14px 0 44px rgba(10, 10, 10, 0.16), var(--vidrio-brillo);
+  display: flex; flex-direction: column; animation: slideIn .3s cubic-bezier(.32,.72,0,1);
+  padding-top: env(safe-area-inset-top);
+  padding-right: env(safe-area-inset-right);
+}
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .cart-drawer { background: var(--paper); }
 }
 @keyframes slideIn { from { transform: translateX(100%); } to { transform: translateX(0); } }
 .cart-head {
   display: flex; justify-content: space-between; align-items: center;
-  padding: 19px 24px; border-bottom: 2px solid var(--line); background: var(--paper);
+  padding: 19px 24px; border-bottom: 1px solid var(--vidrio-borde); background: transparent;
 }
 .cart-head h3 { font-family: var(--display); text-transform: uppercase; font-weight: 900; font-size: 27px; line-height: 1; }
 .cart-close { background: none; border: none; cursor: pointer; font-size: 26px; color: var(--muted); line-height: 1; }
@@ -345,7 +389,14 @@ button { font-family: var(--body); }
 .qty-controls button:hover { border-color: var(--navy); color: var(--navy); }
 .qty-controls .qty { font-size: 14px; font-weight: 600; min-width: 18px; text-align: center; font-variant-numeric: tabular-nums; }
 .cart-empty { padding: 60px 0; text-align: center; color: var(--muted); font-family: var(--display); text-transform: uppercase; font-weight: 700; font-size: 20px; }
-.cart-foot { padding: 17px 24px 24px; border-top: 2px solid var(--line); background: var(--paper-2); }
+.cart-foot {
+  padding: 17px 24px calc(24px + env(safe-area-inset-bottom));
+  border-top: 1px solid var(--vidrio-borde);
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: var(--vidrio-blur);
+  -webkit-backdrop-filter: var(--vidrio-blur);
+  box-shadow: var(--vidrio-brillo);
+}
 .cart-total { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 13px; }
 .cart-total span { font-size: 11px; font-weight: 700; letter-spacing: 0.16em; text-transform: uppercase; color: var(--muted); }
 .cart-total strong { font-family: var(--display); font-size: 32px; font-weight: 900; line-height: 1; font-variant-numeric: tabular-nums; }
@@ -570,9 +621,14 @@ button { font-family: var(--body); }
 
 @media (max-width: 1040px) {
   .admin-tabs {
-    display: grid; grid-template-columns: 1fr 1fr; gap: 6px;
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px;
     position: sticky; top: 0; z-index: 20;
-    background: var(--paper); padding: 10px 0 12px; margin-bottom: 4px;
+    background: var(--vidrio); padding: 10px 0 12px; margin-bottom: 4px;
+    backdrop-filter: var(--vidrio-blur);
+    -webkit-backdrop-filter: var(--vidrio-blur);
+  }
+  @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+    .admin-tabs { background: var(--paper); }
   }
   .admin-tabs button {
     font-family: var(--display); text-transform: uppercase; font-weight: 800;
@@ -767,4 +823,70 @@ button { font-family: var(--body); }
   .pedidos-barra { flex-direction: column; align-items: stretch; }
   .anticipo-ajuste { flex-direction: column; align-items: flex-start; gap: 6px; }
   .anticipo-ajuste select { width: 100%; font-size: 16px; }
+}
+
+/* ---------- BARRA DE COMPRA FLOTANTE (celular) ----------
+   En la ficha, al bajar a ver las fotos el botón de comprar se perdía.
+   Esta barra de vidrio se queda pegada abajo, encima del contenido. */
+.barra-compra { display: none; }
+
+@media (max-width: 900px) {
+  .barra-compra {
+    display: flex; align-items: center; gap: 10px;
+    position: fixed; left: 0; right: 0; bottom: 0; z-index: 60;
+    padding: 12px 16px calc(12px + env(safe-area-inset-bottom));
+    background: var(--vidrio);
+    backdrop-filter: var(--vidrio-blur);
+    -webkit-backdrop-filter: var(--vidrio-blur);
+    border-top: 1px solid var(--vidrio-borde);
+    box-shadow: 0 -8px 30px rgba(10, 10, 10, 0.10), var(--vidrio-brillo);
+    animation: subeBarra .35s cubic-bezier(.32,.72,0,1);
+  }
+  @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+    .barra-compra { background: rgba(255, 255, 255, 0.97); }
+  }
+  @keyframes subeBarra { from { transform: translateY(100%); } to { transform: translateY(0); } }
+
+  .barra-precio { display: flex; flex-direction: column; line-height: 1.1; min-width: 0; flex-shrink: 0; }
+  .barra-precio span {
+    font-size: 10px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase;
+    color: var(--muted); margin-bottom: 3px; white-space: nowrap;
+  }
+  .barra-precio strong { font-family: var(--display); font-weight: 900; font-size: 24px; font-variant-numeric: tabular-nums; }
+
+  .barra-btn {
+    flex: 1; min-width: 0; min-height: 48px; padding: 12px;
+    background: var(--navy); color: #fff; border: none; border-radius: 100px;
+    font-family: var(--display); text-transform: uppercase; font-weight: 800;
+    font-size: 18px; letter-spacing: 0.03em; cursor: pointer;
+    transition: background .2s, transform .12s;
+  }
+  .barra-btn:active:not(:disabled) { transform: scale(0.97); }
+  .barra-btn:disabled { background: rgba(10, 10, 10, 0.08); color: var(--muted); }
+
+  .barra-wa {
+    width: 48px; height: 48px; flex-shrink: 0; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    border: 1.5px solid var(--line-strong); color: var(--ink);
+    transition: background .2s, color .2s, transform .12s;
+  }
+  .barra-wa:active { transform: scale(0.94); }
+  .barra-wa svg { width: 20px; height: 20px; }
+
+  /* Que la barra no tape el final de la ficha */
+  .ficha { padding-bottom: 110px; }
+  /* Las acciones de arriba se ocultan: ya están en la barra */
+  .ficha-acciones { display: none; }
+}
+
+/* ---------- REBOTES Y TOQUES EN CELULAR ---------- */
+@media (max-width: 900px) {
+  /* Respuesta al toque: lo que se siente "de app" */
+  .btn-primary:active, .cart-wa:active, .add-btn:active:not(:disabled),
+  .brand-chip:active, .size-chip:active:not(:disabled) { transform: scale(0.97); }
+  .btn-primary, .cart-wa, .add-btn, .brand-chip, .size-chip { transition: transform .12s ease, background .2s, color .2s, border-color .2s; }
+
+  /* Áreas de toque cómodas en la ficha */
+  .mini { width: 64px; height: 64px; }
+  .ficha-principal { border-radius: 0; margin: 0 -18px; width: calc(100% + 36px); }
 }
