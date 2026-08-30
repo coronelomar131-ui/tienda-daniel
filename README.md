@@ -47,6 +47,25 @@ Está en `/admin`.
 - La sesión dura una semana: no te pide la clave cada vez que cierras la pestaña.
 - Tras 10 intentos fallidos, el acceso se bloquea 15 minutos.
 
+### Si se te olvida la clave
+
+La clave **no se puede leer**: se guarda como hash bcrypt, que va en un solo
+sentido. Lo único que se puede hacer es volver a crearla, y para eso se abre
+una ventana con hora de cierre:
+
+```sql
+update public.admin_secret set reset_until = now() + interval '30 minutes';
+delete from public.admin_attempts;  -- por si quedaste bloqueado
+```
+
+Mientras la ventana está abierta, `/admin` vuelve a decir "Crea tu clave" y la
+clave vieja deja de entrar. En cuanto pones la nueva, la ventana se cierra
+sola: no sirve dos veces.
+
+Se hace así, y no borrando el renglón, porque sin renglón la tienda queda **sin
+dueño** y el primero que entre a `/admin` se queda con ella. Con la ventana, si
+nadie la usa, caduca y la clave vieja sigue mandando.
+
 ## Videos
 
 Viven en el almacenamiento de Supabase (bodega `videos`, pública para leer,
