@@ -66,6 +66,18 @@ Se hace así, y no borrando el renglón, porque sin renglón la tienda queda **s
 dueño** y el primero que entre a `/admin` se queda con ella. Con la ventana, si
 nadie la usa, caduca y la clave vieja sigue mandando.
 
+### Cuidado al escribir funciones que escriben
+
+La API entra a Postgres con el rol `authenticator`, que precarga `safeupdate`.
+Ese guardia **rechaza cualquier `UPDATE` o `DELETE` sin `WHERE`**, incluso
+dentro de una función `SECURITY DEFINER`. En una tabla de un solo renglón el
+`WHERE` se siente de más, pero sin él la función truena en producción con
+`UPDATE requires a WHERE clause`.
+
+Ojo: probar la función desde el SQL editor **no lo detecta**, porque ahí se
+corre como `postgres`, que no trae el guardia. Para revisarlo, listar las
+sentencias de todas las funciones y comprobar que traigan `WHERE`.
+
 ## Videos
 
 Viven en el almacenamiento de Supabase (bodega `videos`, pública para leer,
