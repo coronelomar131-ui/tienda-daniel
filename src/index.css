@@ -197,21 +197,71 @@ button { font-family: var(--body); }
 .catalog { background: var(--paper); color: var(--ink); padding-bottom: 20px; }
 
 .brands { padding: 34px 0 0; }
-.brands .row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+/* La etiqueta va ARRIBA, no al lado: puesta al lado, las capsulas le pasaban
+   por detras al correr la fila y se encimaban con ella. */
+.brands-fila { display: flex; flex-direction: column; align-items: flex-start; gap: 8px; min-width: 0; }
 .brands .row-label {
   font-size: 11px; font-weight: 700; letter-spacing: 0.18em; text-transform: uppercase;
-  color: var(--muted); margin-right: 6px;
+  color: var(--muted);
 }
+.brand-pista { width: 100%; }
+
+/* La pista corre de lado igual que las tallas, y el indicador vive DENTRO de
+   ella para que se arrastre junto con el contenido al hacer scroll. */
+.brand-pista {
+  position: relative; display: flex; gap: 8px; min-width: 0;
+  overflow-x: auto; scroll-snap-type: x proximity;
+  -webkit-overflow-scrolling: touch; overscroll-behavior-x: contain;
+  scrollbar-width: none; padding: 4px 2px 6px;
+}
+.brand-pista::-webkit-scrollbar { display: none; }
+
+/* El indicador que se desliza. Va debajo de los botones (z-index 0 contra 1)
+   para que el texto de la capsula elegida se lea encima de el. */
+.brand-indicador {
+  position: absolute; left: 0; top: 4px; bottom: 6px; z-index: 0;
+  border-radius: 999px; pointer-events: none;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.24), rgba(255, 255, 255, 0) 58%),
+    var(--navy);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.34),
+    0 3px 12px rgba(27, 42, 82, 0.32);
+}
+.brand-indicador.anda {
+  transition: transform .42s var(--resorte), width .42s var(--resorte);
+}
+
 .brand-chip {
+  position: relative; z-index: 1; flex: 0 0 auto; scroll-snap-align: start;
   font-family: var(--display); text-transform: uppercase; font-weight: 700;
   font-size: 18px; letter-spacing: 0.03em;
-  color: var(--muted); background: transparent;
-  border: 1.5px solid var(--line); border-radius: 2px;
-  padding: 7px 17px; cursor: pointer;
-  transition: color .2s, border-color .2s, background .2s;
+  color: var(--muted); border: none; border-radius: 999px;
+  padding: 10px 20px; min-height: 42px; cursor: pointer;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.92), rgba(255, 255, 255, 0.30) 56%, rgba(255, 255, 255, 0) 78%),
+    var(--paper-2);
+  backdrop-filter: saturate(180%) blur(14px);
+  -webkit-backdrop-filter: saturate(180%) blur(14px);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.95),
+    inset 0 0 0 1px rgba(10, 10, 10, 0.07),
+    0 1px 3px rgba(10, 10, 10, 0.07),
+    0 4px 12px rgba(10, 10, 10, 0.05);
+  transition: color .24s ease, box-shadow .2s;
 }
-.brand-chip:hover { color: var(--ink); border-color: var(--line-strong); }
-.brand-chip.active { background: var(--ink); color: var(--paper); border-color: var(--ink); }
+.brand-chip:hover:not(.active) { color: var(--ink); }
+/* La elegida se vuelve transparente: lo que se ve azul es el indicador que
+   llego hasta ella, no un fondo propio. Ese es el truco del deslizamiento. */
+.brand-chip.active {
+  color: #fff; background: none; box-shadow: none;
+  backdrop-filter: none; -webkit-backdrop-filter: none;
+}
+
+/* Si el visitante pidio menos movimiento, el indicador salta sin deslizarse */
+@media (prefers-reduced-motion: reduce) {
+  .brand-indicador.anda { transition: none; }
+}
 
 .section { padding: 26px 0 46px; }
 .section-head {
@@ -1098,6 +1148,16 @@ button { font-family: var(--body); }
     background: rgba(10, 10, 10, 0.16); pointer-events: none; z-index: 2;
   }
   .cart-head { padding-top: 26px; }
+}
+
+/* La pista de marcas tambien llega a la orilla en celular */
+@media (max-width: 900px) {
+  .brand-pista {
+    margin-left: -18px; margin-right: -18px;
+    padding-left: 18px; padding-right: 18px;
+    scroll-padding-left: 18px;
+  }
+  .brand-chip { font-size: 17px; padding: 9px 17px; }
 }
 
 /* En la ficha, las tallas corren hasta la orilla de la pantalla: así se ve
