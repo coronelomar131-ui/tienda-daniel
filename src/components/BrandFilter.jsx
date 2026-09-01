@@ -1,44 +1,43 @@
 import React, { useMemo } from 'react';
 import ProductPhoto from './ProductPhoto';
+import { CATEGORIAS, enRebajas, mismoFiltro } from '../lib/categorias';
 
-// Las marcas como bandas de ancho completo, al estilo de la app de Nike:
-// el nombre grande a la izquierda y un par de esa marca asomandose a la
-// derecha. Se lee de un vistazo y se toca sin apuntar.
-const BrandFilter = ({ brands, active, onSelect, products = [] }) => {
-    // Cada banda enseña un par real de su marca, no una foto generica: la
-    // primera del catalogo, que es la que el dueño puso hasta arriba.
-    const muestra = useMemo(() => {
-        const mapa = {};
-        for (const p of products) {
-            if (p.brand && !mapa[p.brand]) mapa[p.brand] = p;
+// Las bandas al estilo de la app de Nike: capsulas de vidrio con el nombre
+// grande y un par asomandose. Una banda solo existe si de verdad tiene pares
+// adentro; si no, seria un callejon sin salida para el cliente.
+const BrandFilter = ({ products = [], brands = [], active, onSelect }) => {
+    const bandas = useMemo(() => {
+        const primero = (lista) => lista[0] || null;
+        const lista = [{ filtro: { tipo: 'todos', valor: null }, texto: 'Todos los pares', par: products[0] || null }];
+
+        for (const { llave, texto } of CATEGORIAS) {
+            const dentro = products.filter(p => (p.categoria || 'calzado') === llave);
+            if (dentro.length === 0) continue;   // sin pares, no hay banda
+            lista.push({ filtro: { tipo: 'categoria', valor: llave }, texto, par: primero(dentro) });
         }
-        return mapa;
+
+        const rebajados = products.filter(enRebajas);
+        if (rebajados.length > 0) {
+            lista.push({ filtro: { tipo: 'rebajas', valor: null }, texto: 'Rebajas', par: primero(rebajados) });
+        }
+        return lista;
     }, [products]);
 
-    const elegir = (brand) => {
-        onSelect(brand);
+    const elegir = (filtro) => {
+        onSelect(filtro);
         document.getElementById('coleccion')?.scrollIntoView({ behavior: 'smooth' });
     };
 
-    const bandas = [
-        { valor: null, texto: 'Todos los pares', par: products[0] || null },
-        ...brands.map(b => ({ valor: b, texto: b, par: muestra[b] || null })),
-    ];
-
     return (
         <div className="brands">
-            <div className="wrap">
-                <span className="row-label">Marca</span>
-            </div>
             <div className="bandas">
-                {bandas.map(({ valor, texto, par }, i) => (
+                {bandas.map(({ filtro, texto, par }, i) => (
                     <button
-                        key={String(valor)}
-                        className={`banda reveal${active === valor ? ' activa' : ''}`}
-                        // Entran escalonadas: una tras otra, no todas de golpe.
+                        key={`${filtro.tipo}-${filtro.valor}`}
+                        className={`banda reveal${mismoFiltro(active, filtro) ? ' activa' : ''}${filtro.tipo === 'rebajas' ? ' banda-rebajas' : ''}`}
                         style={{ '--retraso': `${i * 70}ms` }}
-                        onClick={() => elegir(valor)}
-                        aria-pressed={active === valor}
+                        onClick={() => elegir(filtro)}
+                        aria-pressed={mismoFiltro(active, filtro)}
                     >
                         <span className="banda-brillo" aria-hidden="true" />
                         <span className="banda-nombre">{texto}</span>
@@ -50,6 +49,29 @@ const BrandFilter = ({ brands, active, onSelect, products = [] }) => {
                     </button>
                 ))}
             </div>
+
+            {/* La marca sigue siendo el filtro que mas se usa en una tienda de
+                tenis, asi que se queda; nomas en chico, para no competir con
+                las bandas. */}
+            {brands.length > 1 && (
+                <div className="wrap">
+                    <div className="marcas-mini">
+                        <span className="row-label">Marca</span>
+                        <div className="marcas-mini-fila">
+                            {brands.map(b => {
+                                const filtro = { tipo: 'marca', valor: b };
+                                return (
+                                    <button
+                                        key={b}
+                                        className={`mini-chip${mismoFiltro(active, filtro) ? ' on' : ''}`}
+                                        onClick={() => elegir(filtro)}
+                                    >{b}</button>
+                                );
+                            })}
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };

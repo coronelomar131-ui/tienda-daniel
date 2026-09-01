@@ -304,6 +304,34 @@ button { font-family: var(--body); }
   transition: opacity .5s ease var(--retraso, 0ms), transform .6s var(--resorte) var(--retraso, 0ms);
 }
 
+/* Rebajas: el mismo vidrio pero con el naranja de oferta en el canto, para
+   que se distinga de las categorias sin gritar. */
+.banda-rebajas {
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.45),
+    inset 0 0 0 1.5px rgba(194, 87, 13, 0.75),
+    inset 0 -18px 30px -24px rgba(0, 0, 0, 0.55),
+    0 6px 20px rgba(0, 0, 0, 0.22);
+}
+.banda-rebajas.activa {
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.65),
+    inset 0 0 0 2px rgba(194, 87, 13, 0.95),
+    0 10px 26px rgba(0, 0, 0, 0.28);
+}
+
+/* Filtro de marca, en chico debajo de las bandas */
+.marcas-mini { padding: 16px 0 2px; }
+.marcas-mini-fila { display: flex; flex-wrap: wrap; gap: 7px; margin-top: 8px; }
+.mini-chip {
+  font-family: var(--body); font-weight: 700; font-size: 12.5px; letter-spacing: 0.04em;
+  color: var(--muted); background: var(--paper-2); border: 1px solid var(--line);
+  border-radius: 999px; padding: 7px 14px; min-height: 34px; cursor: pointer;
+  transition: color .2s, background .2s, border-color .2s;
+}
+.mini-chip:hover { color: var(--ink); border-color: var(--line-strong); }
+.mini-chip.on { background: var(--navy); border-color: var(--navy); color: #fff; }
+
 @media (max-width: 700px) {
   .banda { min-height: 86px; }
   .banda-foto { height: 68px; }

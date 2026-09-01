@@ -16,6 +16,7 @@ import AdminDashboard from './components/AdminDashboard';
 import { ShopContext } from './context/shop-context';
 import { config } from './config';
 import { waPlain } from './lib/whatsapp';
+import { filtrar, tituloFiltro } from './lib/categorias';
 
 function useScrollReveal(deps) {
     useEffect(() => {
@@ -35,7 +36,7 @@ function useScrollReveal(deps) {
 
 function StoreFront() {
     const { products, loading, loadError, demo } = useContext(ShopContext);
-    const [brand, setBrand] = useState(null);
+    const [filtro, setFiltro] = useState({ tipo: 'todos', valor: null });
     const [cartOpen, setCartOpen] = useState(false);
 
     // Las marcas del filtro salen del propio catálogo, así que al agregar un
@@ -45,9 +46,9 @@ function StoreFront() {
         [products]
     );
 
-    const visible = brand ? products.filter(p => p.brand === brand) : products;
+    const visible = filtrar(products, filtro);
 
-    useScrollReveal([visible.length, brand, loading]);
+    useScrollReveal([visible.length, filtro.tipo, filtro.valor, loading]);
 
     return (
         <>
@@ -59,12 +60,12 @@ function StoreFront() {
                 {/* El filtro vive dentro del ancla para que al saltar al catálogo
                     se vea junto con los resultados y no quede tapado por el header. */}
                 <div id="coleccion" className="catalog">
-                    <BrandFilter brands={brands} active={brand} onSelect={setBrand} products={products} />
+                    <BrandFilter brands={brands} active={filtro} onSelect={setFiltro} products={products} />
 
                     <section className="section">
                         <div className="wrap">
                             <div className="section-head reveal">
-                                <h2>{brand || 'Lo que hay'}</h2>
+                                <h2>{tituloFiltro(filtro)}</h2>
                                 <span>{visible.length} {visible.length === 1 ? 'modelo' : 'modelos'}</span>
                             </div>
                             {demo && (

@@ -15,8 +15,9 @@ import SneakerArt from './SneakerArt';
 import Pedidos from './Pedidos';
 import { leerTallas, escribirTallas } from '../lib/tallas';
 import { verDescuento, pesos } from '../lib/descuento';
+import { CATEGORIAS } from '../lib/categorias';
 
-const VACIO = { brand: '', name: '', price: '', priceBefore: '', sizes: '', status: '', desc: '', mlLink: '', videoUrl: '' };
+const VACIO = { brand: '', name: '', price: '', priceBefore: '', categoria: 'calzado', sizes: '', status: '', desc: '', mlLink: '', videoUrl: '' };
 
 const AdminDashboard = () => {
     const { products, reload } = useContext(ShopContext);
@@ -145,7 +146,7 @@ const AdminDashboard = () => {
     const abrirEdicion = async (p) => {
         setForm({
             brand: p.brand, name: p.name, price: String(p.price),
-            sizes: escribirTallas(p.sizes), status: p.status, priceBefore: p.priceBefore || '',
+            sizes: escribirTallas(p.sizes), status: p.status, priceBefore: p.priceBefore || '', categoria: p.categoria || 'calzado',
             desc: p.desc, mlLink: p.mlLink, videoUrl: p.videoUrl,
         });
         setEditandoId(p.id);
@@ -170,6 +171,7 @@ const AdminDashboard = () => {
             name: form.name.trim(),
             price: Number(form.price),
             priceBefore: form.priceBefore === '' ? null : Number(form.priceBefore),
+            categoria: form.categoria || 'calzado',
             sizes: leerTallas(form.sizes),
             status: form.status,
             desc: form.desc,
@@ -284,6 +286,15 @@ const AdminDashboard = () => {
                                 ) : (
                                     <p className="hint hint-mal">El precio de antes tiene que ser mayor al de ahora. Así no se guarda oferta.</p>
                                 )}
+
+                                {/* La categoria decide en que banda sale. Si nada mas
+                                    vendes tenis, dejalo en Calzado. */}
+                                <select value={form.categoria} onChange={set('categoria')}>
+                                    {CATEGORIAS.map(c => (
+                                        <option key={c.llave} value={c.llave}>{c.texto}</option>
+                                    ))}
+                                </select>
+                                <p className="hint">La banda de una categoría solo sale si tiene algo adentro.</p>
 
                                 <input type="text" placeholder="Tallas MX: 25, 26, 27.5" value={form.sizes} onChange={set('sizes')} />
                                 {/* Se le enseña lo que se entendio ANTES de guardar: antes un par

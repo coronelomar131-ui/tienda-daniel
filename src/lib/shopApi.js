@@ -15,6 +15,7 @@ const toApp = (row) => ({
     photoCount: row.photo_count || 0,
     sortOrder: row.sort_order || 0,
     destacado: row.destacado === true,
+    categoria: row.categoria || 'calzado',
 });
 
 const LIMITE = 7000;
@@ -26,7 +27,7 @@ const conLimite = (promesa, ms = LIMITE) => Promise.race([
     ),
 ]);
 
-const CAMPOS = 'id, brand, name, description, price, price_before, sizes, status, ml_link, video_url, photo_count, sort_order';
+const CAMPOS = 'id, brand, name, description, price, price_before, sizes, status, ml_link, video_url, photo_count, sort_order, destacado, categoria';
 
 // La lista NO trae las fotos: cada tarjeta pide las suyas cuando aparece en
 // pantalla, para que el catalogo abra rapido aunque haya muchos pares.
@@ -89,6 +90,7 @@ const campos = (p) => ({
     p_description: p.desc || '',
     p_price: p.price,
     p_price_before: p.priceBefore || null,
+    p_categoria: p.categoria || 'calzado',
     p_sizes: p.sizes || [],
     p_status: p.status || '',
     p_ml_link: p.mlLink || '',
