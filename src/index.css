@@ -339,19 +339,28 @@ button { font-family: var(--body); }
 }
 .banda:hover .banda-foto :is(img, svg) { transform: scale(1.1); }
 
-/* Las fotos de la banda se turnan con un fundido: todas estan puestas encima
-   una de otra y solo se prende la que toca. Cambiarlas de golpe se ve como
-   parpadeo; con el fundido parece que la pieza respira. */
-.rotativa { position: relative; display: block; width: 100%; height: 100%; }
+/* Las fotos de la banda se turnan DESLIZANDO, no con fundido. Con fundido las
+   dos se ven al mismo tiempo a media opacidad y se encimaban; deslizando, la
+   que sale y la que entra nunca ocupan el mismo lugar. El circulo recorta,
+   asi que las que esperan no se asoman. */
+.rotativa { position: relative; display: block; width: 100%; height: 100%; overflow: hidden; }
 .rotativa-foto {
   position: absolute; inset: 0;
   width: 100%; height: 100%; object-fit: cover;
-  opacity: 0; transition: opacity .8s ease, transform .55s var(--resorte);
+  transform: translateY(100%);      /* esperando abajo */
+  transition: none;                 /* las que esperan no se animan */
 }
-.rotativa-foto.viendose { opacity: 1; }
+.rotativa-foto.viendose {
+  transform: translateY(0);
+  transition: transform .62s cubic-bezier(.32, .72, 0, 1);
+}
+.rotativa-foto.saliendo {
+  transform: translateY(-100%);
+  transition: transform .62s cubic-bezier(.32, .72, 0, 1);
+}
 .rotativa > svg { width: 100%; height: 100%; object-fit: contain; }
 @media (prefers-reduced-motion: reduce) {
-  .rotativa-foto { transition: none; }
+  .rotativa-foto.viendose, .rotativa-foto.saliendo { transition: none; }
 }
 
 /* El barrido de luz cruza la capsula: una vez al elegir la marca, y siguiendo
