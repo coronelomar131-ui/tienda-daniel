@@ -10,10 +10,13 @@ const SUPABASE_KEY = 'sb_publishable_3cNkW5MfBML-0CMsh8eh-w_gTzFuNtF';
 // entero antes de rendirse. Preferimos fallar rapido y mostrar el respaldo.
 const TIEMPO_LIMITE = 9000;
 
+// no-store: el catalogo cambia cuando el dueño sube o edita un par, y Safari
+// en iPhone guarda las respuestas GET sin preguntar. Sin esto, subes tallas y
+// el celular te sigue enseñando la version vieja hasta que caduque el cache.
 const fetchConLimite = (input, init = {}) => {
     const ctrl = new AbortController();
     const corte = setTimeout(() => ctrl.abort(), TIEMPO_LIMITE);
-    return fetch(input, { ...init, signal: ctrl.signal })
+    return fetch(input, { ...init, cache: 'no-store', signal: ctrl.signal })
         .finally(() => clearTimeout(corte));
 };
 

@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState } from 'react';
+import React, { useCallback, useContext, useEffect, useRef, useState } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { ShopContext } from '../context/shop-context';
 import { fetchProduct, fetchPhotos } from '../lib/shopApi';
@@ -8,6 +8,7 @@ import { config } from '../config';
 import SneakerArt from './SneakerArt';
 import Navbar from './Navbar';
 import CartDrawer from './CartDrawer';
+import { useRefrescarAlVolver } from '../lib/alVolver';
 
 const WhatsAppIcon = () => (
     <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
@@ -29,33 +30,40 @@ const ProductPage = () => {
     const [cartOpen, setCartOpen] = useState(false);
     const [agregado, setAgregado] = useState(false);
 
-    useEffect(() => {
-        let vivo = true;
-        setCargando(true);
+    // Un token por carga: si el visitante cambia de par a media petición, la
+    // respuesta vieja llega tarde y no debe pisar a la nueva.
+    const vigente = useRef(0);
+
+    const cargar = useCallback(async ({ mostrarCarga = true } = {}) => {
+        const mio = ++vigente.current;
+        if (mostrarCarga) setCargando(true);
         setError(null);
-
-        (async () => {
-            try {
-                const p = await fetchProduct(id);
-                if (!vivo) return;
-                if (!p) { setError('Ese par ya no está en la tienda'); return; }
-                setPar(p);
-                if (p.photoCount) {
-                    const f = await fetchPhotos(id);
-                    if (vivo) setFotos(f);
-                }
-            } catch (err) {
-                // Sin conexion caemos al catalogo que ya tenga cargado la app.
-                const local = products.find(p => String(p.id) === String(id));
-                if (vivo) local ? setPar(local) : setError(err.message);
-            } finally {
-                if (vivo) setCargando(false);
+        try {
+            const p = await fetchProduct(id);
+            if (mio !== vigente.current) return;
+            if (!p) { setError('Ese par ya no está en la tienda'); return; }
+            setPar(p);
+            if (p.photoCount) {
+                const f = await fetchPhotos(id);
+                if (mio === vigente.current) setFotos(f);
             }
-        })();
-
-        return () => { vivo = false; };
+        } catch (err) {
+            // Sin conexion caemos al catalogo que ya tenga cargado la app.
+            const local = products.find(p => String(p.id) === String(id));
+            if (mio !== vigente.current) return;
+            local ? setPar(local) : setError(err.message);
+        } finally {
+            if (mio === vigente.current) setCargando(false);
+        }
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [id]);
+
+    useEffect(() => { cargar(); }, [cargar]);
+
+    // Al volver a la pestaña se pide de nuevo, sin pantalla de carga: si el
+    // dueño acaba de editar las tallas desde el panel, aqui ya salen.
+    const recargarCallado = useCallback(() => cargar({ mostrarCarga: false }), [cargar]);
+    useRefrescarAlVolver(recargarCallado);
 
     if (cargando) {
         return (

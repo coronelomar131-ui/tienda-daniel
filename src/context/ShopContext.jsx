@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { ShopContext } from './shop-context';
 import { fetchProducts } from '../lib/shopApi';
 import { sampleProducts } from '../data/sampleProducts';
+import { useRefrescarAlVolver } from '../lib/alVolver';
 
 // Cada línea del carrito es un par producto+talla, para que 2 tallas del mismo
 // modelo se cuenten por separado.
@@ -41,6 +42,10 @@ export const ShopProvider = ({ children }) => {
     }, []);
 
     useEffect(() => { reload(); }, [reload]);
+
+    // Al regresar a la pestaña se vuelve a pedir el catalogo: si el dueño
+    // acaba de subir un par desde el panel, aqui ya sale.
+    useRefrescarAlVolver(reload);
 
     // El carrito sí es de cada visitante, por eso se queda en su navegador.
     useEffect(() => {
