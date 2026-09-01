@@ -210,27 +210,40 @@ button { font-family: var(--body); }
   position: relative; isolation: isolate; overflow: hidden;
   display: flex; flex-direction: column; gap: 10px;
   padding: 12px clamp(12px, 3vw, 22px);
-  background: linear-gradient(160deg, #F2F3F7 0%, #E4E7EF 100%);
+  background: linear-gradient(160deg, #EFF1F6 0%, #E2E6EE 100%);
 }
 
-/* Manchas de color detras del riel. No son adorno: el vidrio solo se ve como
-   vidrio si tiene ALGO variado que doblar. Sobre un azul liso, difuminar no
-   cambia nada y las capsulas se ven como plastico. */
-.bandas::before {
-  content: ""; position: absolute; inset: -20%; z-index: -1;
-  background:
-    radial-gradient(38% 45% at 18% 22%, rgba(27, 42, 82, 0.20), transparent 68%),
-    radial-gradient(32% 40% at 82% 30%, rgba(194, 87, 13, 0.14), transparent 70%),
-    radial-gradient(45% 50% at 62% 85%, rgba(70, 110, 210, 0.22), transparent 70%),
-    radial-gradient(30% 36% at 30% 78%, rgba(255, 255, 255, 0.85), transparent 70%);
-  filter: blur(6px);
-  animation: nadan 26s ease-in-out infinite alternate;
+/* Las fotos que corren por detras del vidrio. Esto es lo que hace que las
+   capsulas cambien de color: un vidrio sobre un fondo liso no cambia nada,
+   se queda gris. Sobre fotos que pasan, agarra el color de cada una. */
+.riel-fotos {
+  position: absolute; inset: 0; z-index: -2; overflow: hidden;
+  pointer-events: none;
 }
-/* Se mueven lentisimo: el vidrio cambia mientras lo ves, sin que se note que
-   algo se esta moviendo. */
-@keyframes nadan {
-  from { transform: translate3d(-3%, -2%, 0) scale(1); }
-  to   { transform: translate3d(3%, 2%, 0) scale(1.08); }
+.riel-cinta {
+  display: flex; align-items: center; gap: 0; height: 130%; margin-top: -15%;
+  width: max-content;
+  /* Bien difuminadas: no son un collage que se deba reconocer, son las
+     manchas de color que el vidrio va a agarrar. Sin esto se ven como fotos
+     sueltas tiradas atras de las capsulas. */
+  filter: blur(26px) saturate(150%);
+  animation: corren 48s linear infinite;
+}
+.riel-foto { flex: 0 0 auto; width: 150px; height: 100%; display: block; }
+.riel-foto .photo-holder { width: 100%; height: 100%; display: block; }
+.riel-foto :is(img, svg) { width: 100%; height: 100%; object-fit: contain; }
+@keyframes corren {
+  from { transform: translate3d(0, 0, 0); }
+  to   { transform: translate3d(-50%, 0, 0); }
+}
+
+/* Un velo claro encima de las fotos: sin el, sobre una foto oscura el texto
+   negro de las capsulas se volveria ilegible. Deja pasar el color pero
+   mantiene todo en el rango claro. */
+.bandas::before {
+  content: ""; position: absolute; inset: 0; z-index: -1;
+  background: rgba(255, 255, 255, 0.58);
+  pointer-events: none;
 }
 
 .banda {
@@ -242,10 +255,17 @@ button { font-family: var(--body); }
 
   /* Vidrio oscuro: escarcha clara encima del riel azul, filo de luz arriba y
      hilo blanco alrededor. Eso es lo que le da el canto. */
-  background: var(--vidrio-luz), rgba(255, 255, 255, 0.58);
-  backdrop-filter: var(--vidrio-blur);
-  -webkit-backdrop-filter: var(--vidrio-blur);
-  box-shadow: var(--vidrio-canto), var(--vidrio-sombra);
+  /* Casi sin tinte propio: lo que se ve es el color de la foto que va pasando
+     por detras. Ese es justo el efecto de la barra de Nike sobre el verde. */
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.34), rgba(255, 255, 255, 0.06) 55%, rgba(255, 255, 255, 0) 80%),
+    rgba(255, 255, 255, 0.26);
+  backdrop-filter: saturate(210%) blur(26px);
+  -webkit-backdrop-filter: saturate(210%) blur(26px);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.85),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.35),
+    0 8px 24px rgba(10, 10, 10, 0.13);
   transition: transform .38s var(--resorte), background .3s ease, box-shadow .3s ease;
 }
 @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
@@ -275,7 +295,7 @@ button { font-family: var(--body); }
 .banda-nombre, .banda-foto { position: relative; z-index: 3; }
 
 /* Al tocarla se levanta tantito, como si flotara mas alto */
-.banda:hover { transform: translateY(-2px); background: var(--vidrio-luz), rgba(255, 255, 255, 0.74); }
+.banda:hover { transform: translateY(-2px); background: rgba(255, 255, 255, 0.38); }
 .banda:active { transform: translateY(0) scale(0.985); }
 
 /* La elegida se pone mas clara y su nombre queda subrayado. Solo por tono no
@@ -377,7 +397,7 @@ button { font-family: var(--body); }
 }
 @media (prefers-reduced-motion: reduce) {
   .banda-brillo { display: none; }
-  .bandas::before { animation: none; }
+  .riel-cinta { animation: none; }
   .banda, .banda-foto :is(img, svg) { transition: none; }
   .banda:hover { transform: none; }
   .banda:hover .banda-foto :is(img, svg) { transform: none; }

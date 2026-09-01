@@ -23,6 +23,15 @@ const BrandFilter = ({ products = [], brands = [], active, onSelect }) => {
         return lista;
     }, [products]);
 
+    // Se repiten hasta llenar la cinta: con uno o dos pares no alcanzaria a
+    // cubrir el ancho y se verian huecos.
+    const fondo = useMemo(() => {
+        if (products.length === 0) return [];
+        const salida = [];
+        while (salida.length < 12) salida.push(...products);
+        return salida.slice(0, 12);
+    }, [products]);
+
     const elegir = (filtro) => {
         onSelect(filtro);
         document.getElementById('coleccion')?.scrollIntoView({ behavior: 'smooth' });
@@ -31,6 +40,20 @@ const BrandFilter = ({ products = [], brands = [], active, onSelect }) => {
     return (
         <div className="brands">
             <div className="bandas">
+                {/* Las fotos corren por DETRAS del vidrio. Son lo que le da
+                    color a las capsulas: sin nada real atras, un vidrio no
+                    cambia de color, nomas se ve gris. */}
+                {fondo.length > 0 && (
+                    <div className="riel-fotos" aria-hidden="true">
+                        <div className="riel-cinta">
+                            {fondo.map((par, i) => (
+                                <span className="riel-foto" key={`${par.id}-${i}`}>
+                                    <ProductPhoto product={par} />
+                                </span>
+                            ))}
+                        </div>
+                    </div>
+                )}
                 {bandas.map(({ filtro, texto, par }, i) => (
                     <button
                         key={`${filtro.tipo}-${filtro.valor}`}
