@@ -59,7 +59,7 @@ function StoreFront() {
                 {/* El filtro vive dentro del ancla para que al saltar al catálogo
                     se vea junto con los resultados y no quede tapado por el header. */}
                 <div id="coleccion" className="catalog">
-                    <BrandFilter brands={brands} active={brand} onSelect={setBrand} />
+                    <BrandFilter brands={brands} active={brand} onSelect={setBrand} products={products} />
 
                     <section className="section">
                         <div className="wrap">
