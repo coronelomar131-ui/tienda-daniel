@@ -13,6 +13,7 @@ import { fetchHeroVideo, adminSetHeroVideo } from '../lib/shopApi';
 import { leerSesion, guardarSesion, cerrarSesion } from '../lib/adminSession';
 import SneakerArt from './SneakerArt';
 import Pedidos from './Pedidos';
+import { leerTallas, escribirTallas } from '../lib/tallas';
 
 const VACIO = { brand: '', name: '', price: '', sizes: '', status: '', desc: '', mlLink: '', videoUrl: '' };
 
@@ -22,6 +23,8 @@ const AdminDashboard = () => {
     const pass = leerSesion();
 
     const [form, setForm] = useState(VACIO);
+    // Lo que se entendió del campo de tallas, para enseñárselo mientras escribe.
+    const tallasLeidas = useMemo(() => leerTallas(form.sizes), [form.sizes]);
     const [editandoId, setEditandoId] = useState(null);   // null = alta nueva
     const [fotosNuevas, setFotosNuevas] = useState([]);   // data URLs por subir
     const [galeria, setGaleria] = useState([]);           // fotos ya guardadas del par en edicion
@@ -136,7 +139,7 @@ const AdminDashboard = () => {
     const abrirEdicion = async (p) => {
         setForm({
             brand: p.brand, name: p.name, price: String(p.price),
-            sizes: (p.sizes || []).join(', '), status: p.status,
+            sizes: escribirTallas(p.sizes), status: p.status,
             desc: p.desc, mlLink: p.mlLink, videoUrl: p.videoUrl,
         });
         setEditandoId(p.id);
@@ -160,8 +163,7 @@ const AdminDashboard = () => {
             brand: form.brand.trim(),
             name: form.name.trim(),
             price: Number(form.price),
-            sizes: form.sizes.split(',').map(s => Number(s.trim().replace(',', '.')))
-                .filter(n => !Number.isNaN(n) && n > 0),
+            sizes: leerTallas(form.sizes),
             status: form.status,
             desc: form.desc,
             mlLink: form.mlLink,
@@ -267,7 +269,15 @@ const AdminDashboard = () => {
                                 <input type="number" placeholder="Precio (MXN)" value={form.price} onChange={set('price')} min="0" />
 
                                 <input type="text" placeholder="Tallas MX: 25, 26, 27.5" value={form.sizes} onChange={set('sizes')} />
-                                <p className="hint">Sepáralas con comas. Vacío = sin tallas.</p>
+                                {/* Se le enseña lo que se entendio ANTES de guardar: antes un par
+                                    se guardaba sin tallas y el dueño se enteraba hasta ver la tienda. */}
+                                {form.sizes.trim() === '' ? (
+                                    <p className="hint">Sepáralas como quieras: comas, espacios o diagonales. Vacío = sin tallas.</p>
+                                ) : tallasLeidas.length ? (
+                                    <p className="hint hint-ok">Se van a guardar {tallasLeidas.length} tallas: {escribirTallas(tallasLeidas)}</p>
+                                ) : (
+                                    <p className="hint hint-mal">No le entendí ninguna talla. Escribe números, por ejemplo: 25, 26, 27.5</p>
+                                )}
 
                                 <select value={form.status} onChange={set('status')}>
                                     <option value="">Sin etiqueta</option>
