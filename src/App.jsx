@@ -1,4 +1,4 @@
-import React, { useContext, useState, useEffect, useMemo } from 'react';
+import React, { lazy, Suspense, useContext, useState, useEffect, useMemo } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Navbar from './components/Navbar';
 import Hero from './components/Hero';
@@ -10,9 +10,12 @@ import CartDrawer from './components/CartDrawer';
 import HowTo from './components/HowTo';
 import Newsletter from './components/Newsletter';
 import ProductPage from './components/ProductPage';
-import PagoResultado from './components/PagoResultado';
-import AdminLogin from './components/AdminLogin';
-import AdminDashboard from './components/AdminDashboard';
+// El panel se carga aparte, solo si alguien entra a /admin. Iba dentro del
+// mismo archivo que la tienda, asi que TODOS los clientes se bajaban el
+// panel completo (subida de fotos, videos, pedidos) sin poder usarlo nunca.
+const AdminLogin = lazy(() => import('./components/AdminLogin'));
+const AdminDashboard = lazy(() => import('./components/AdminDashboard'));
+const PagoResultado = lazy(() => import('./components/PagoResultado'));
 import { ShopContext } from './context/shop-context';
 import { config } from './config';
 import { waPlain } from './lib/whatsapp';
@@ -103,6 +106,7 @@ function StoreFront() {
 function App() {
     return (
         <Router>
+            <Suspense fallback={<div className="cargando-ruta">Cargando…</div>}>
             <Routes>
                 <Route path="/" element={<StoreFront />} />
                 <Route path="/tenis/:id" element={<ProductPage />} />
@@ -110,6 +114,7 @@ function App() {
                 <Route path="/admin" element={<AdminLogin />} />
                 <Route path="/admin/dashboard" element={<AdminDashboard />} />
             </Routes>
+            </Suspense>
         </Router>
     );
 }

@@ -1,4 +1,6 @@
-@import url('https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@600;700;800;900&family=Barlow:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&display=swap');
+/* Las tipografias se piden desde index.html, NO con @import aqui.
+   Con @import el navegador no puede ni empezar a bajarlas hasta que termino
+   de leer este archivo: HTML -> CSS -> fuentes -> pintar, todo en fila. */
 
 /* =========================================================
    PROTHE SHOP
@@ -227,6 +229,11 @@ button { font-family: var(--body); }
      manchas de color que el vidrio va a agarrar. Sin esto se ven como fotos
      sueltas tiradas atras de las capsulas. */
   filter: blur(26px) saturate(150%);
+  /* Sin esto, animar un elemento difuminado lo hace volver a rasterizar en
+     cada cuadro. Con la capa aparte el difuminado se calcula una vez y solo
+     se desplaza. */
+  will-change: transform;
+  transform: translate3d(0, 0, 0);
   animation: corren 48s linear infinite;
 }
 .riel-foto { flex: 0 0 auto; width: 150px; height: 100%; display: block; }
@@ -252,6 +259,7 @@ button { font-family: var(--body); }
   width: 100%; min-height: 96px; padding: 0 clamp(20px, 5vw, 46px);
   border: none; cursor: pointer; text-align: left; color: var(--ink);
   border-radius: 999px;
+  contain: paint;
 
   /* Vidrio oscuro: escarcha clara encima del riel azul, filo de luz arriba y
      hilo blanco alrededor. Eso es lo que le da el canto. */
@@ -279,9 +287,17 @@ button { font-family: var(--body); }
 .banda::after {
   content: ""; position: absolute; inset: 0; border-radius: inherit;
   pointer-events: none; z-index: 1;
-  padding: 12px;
-  backdrop-filter: blur(7px) saturate(240%) brightness(1.08);
-  -webkit-backdrop-filter: blur(7px) saturate(240%) brightness(1.08);
+  /* El canto se dibuja con un degradado, NO con un segundo backdrop-filter.
+     Un difuminado extra por capsula era lo mas caro de toda la pantalla y en
+     una franja de 12px casi no se notaba la diferencia. */
+  background:
+    linear-gradient(150deg,
+      rgba(255, 255, 255, 0.95) 0%,
+      rgba(255, 255, 255, 0.28) 26%,
+      rgba(255, 255, 255, 0) 46%,
+      rgba(255, 255, 255, 0.22) 72%,
+      rgba(255, 255, 255, 0.75) 100%);
+  padding: 11px;
   -webkit-mask: linear-gradient(#000, #000) content-box, linear-gradient(#000, #000);
   -webkit-mask-composite: xor;
   mask: linear-gradient(#000, #000) content-box, linear-gradient(#000, #000);
@@ -344,6 +360,10 @@ button { font-family: var(--body); }
    que sale y la que entra nunca ocupan el mismo lugar. El circulo recorta,
    asi que las que esperan no se asoman. */
 .rotativa { position: relative; display: block; width: 100%; height: 100%; overflow: hidden; }
+/* Punto invisible para saber si la banda se esta viendo */
+.mirilla { position: absolute; inset: 0; pointer-events: none; }
+/* Fuera de pantalla la cinta se detiene: nadie la ve y si gasta bateria */
+.riel-cinta.quieta { animation-play-state: paused; }
 .rotativa-foto {
   position: absolute; inset: 0;
   width: 100%; height: 100%; object-fit: cover;
@@ -1380,4 +1400,12 @@ button { font-family: var(--body); }
   /* Áreas de toque cómodas en la ficha */
   .mini { width: 64px; height: 64px; }
   .ficha-principal { border-radius: 0; margin: 0 -18px; width: calc(100% + 36px); }
+}
+
+/* Mientras baja una pantalla que se carga aparte (el panel, el resultado del
+   pago). Dura un parpadeo, pero mejor eso que la pagina en blanco. */
+.cargando-ruta {
+  min-height: 60vh; display: flex; align-items: center; justify-content: center;
+  font-family: var(--display); text-transform: uppercase; font-weight: 700;
+  font-size: 20px; color: var(--muted);
 }

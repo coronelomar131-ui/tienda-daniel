@@ -6,6 +6,20 @@
     <title>PROTHE SHOP — Tenis Originales</title>
     <meta name="description" content="Tenis originales, no réplicas. Escoge tu talla, apártalos por WhatsApp y te llegan a donde estés. Envíos a todo México." />
 
+    <!-- Tipografias: preconnect para abrir la conexion desde el primer momento,
+         y la hoja se carga sin bloquear el pintado (media=print y al cargar se
+         activa). Asi el texto sale de inmediato con la letra del sistema y se
+         cambia sola cuando llega la buena. Se quitaron el peso 300 y las
+         cursivas de Barlow: se bajaban y no se usaban en ningun lado. -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="stylesheet" media="print" onload="this.media='all'"
+          href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@600;700;800;900&family=Barlow:wght@400;500;600;700&display=swap" />
+    <noscript>
+      <link rel="stylesheet"
+            href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@600;700;800;900&family=Barlow:wght@400;500;600;700&display=swap" />
+    </noscript>
+
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="apple-touch-icon" href="/icono-180.png" />
     <meta name="theme-color" content="#FFFFFF" />
