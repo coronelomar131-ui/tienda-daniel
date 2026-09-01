@@ -4,6 +4,7 @@ import { ShopContext } from '../context/shop-context';
 import { config } from '../config';
 import { waLink } from '../lib/whatsapp';
 import ProductPhoto from './ProductPhoto';
+import { verDescuento, pesos } from '../lib/descuento';
 
 const WhatsAppIcon = () => (
     <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
@@ -15,6 +16,7 @@ const ProductCard = ({ product }) => {
     const { addToCart } = useContext(ShopContext);
     const [size, setSize] = useState(null);
 
+    const oferta = verDescuento(product);
     const soldOut = product.status === 'agotado';
     const sizes = product.sizes || [];
     const needsSize = sizes.length > 0;
@@ -36,6 +38,7 @@ const ProductCard = ({ product }) => {
         <div className={`card reveal${soldOut ? ' sold-out' : ''}`}>
             <Link to={`/tenis/${product.id}`} className="card-photo">
                 <div className="badges">
+                    {oferta && <span className="badge badge-oferta">-{oferta.pct}%</span>}
                     {product.status === 'nuevo' && <span className="badge badge-new">Nuevo</span>}
                     {soldOut && <span className="badge badge-out">Agotado</span>}
                     {product.videoUrl && <span className="badge badge-video">▶ Video</span>}
@@ -69,8 +72,9 @@ const ProductCard = ({ product }) => {
                 )}
 
                 <div className="card-foot">
-                    <span className="price">
+                    <span className={`price${oferta ? ' price-oferta' : ''}`}>
                         ${product.price.toLocaleString('es-MX')}<small>MXN</small>
+                        {oferta && <s className="price-antes">{pesos(oferta.antes)}</s>}
                     </span>
                     <div className="card-actions">
                         <button

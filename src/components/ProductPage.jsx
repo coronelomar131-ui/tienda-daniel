@@ -9,6 +9,7 @@ import SneakerArt from './SneakerArt';
 import Navbar from './Navbar';
 import CartDrawer from './CartDrawer';
 import { useRefrescarAlVolver } from '../lib/alVolver';
+import { verDescuento, pesos } from '../lib/descuento';
 
 const WhatsAppIcon = () => (
     <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
@@ -91,6 +92,7 @@ const ProductPage = () => {
     }
 
     const agotado = par.status === 'agotado';
+    const oferta = verDescuento(par);
     const tallas = par.sizes || [];
     const pideTalla = tallas.length > 0;
     const puedeAgregar = !agotado && (!pideTalla || talla !== null);
@@ -147,8 +149,14 @@ const ProductPage = () => {
                         <div className="ficha-datos">
                             <span className="tag">{par.brand}</span>
                             <h1>{par.name}</h1>
-                            <div className="ficha-precio">
+                            <div className={`ficha-precio${oferta ? ' ficha-precio-oferta' : ''}`}>
                                 ${par.price.toLocaleString('es-MX')}<small>MXN</small>
+                                {oferta && (
+                                    <span className="oferta-linea">
+                                        <s>{pesos(oferta.antes)}</s>
+                                        <b className="oferta-pct">-{oferta.pct}%</b>
+                                    </span>
+                                )}
                             </div>
 
                             {par.desc && <p className="ficha-desc">{par.desc}</p>}
@@ -225,8 +233,14 @@ const ProductPage = () => {
 
             <div className="barra-compra">
                 <div className="barra-precio">
-                    <span>{pideTalla && talla !== null ? `Talla ${talla}` : par.brand}</span>
-                    <strong>${par.price.toLocaleString('es-MX')}</strong>
+                    <span>
+                        {pideTalla && talla !== null
+                            ? `Talla ${talla}`
+                            : oferta ? <s>{pesos(oferta.antes)}</s> : par.brand}
+                    </span>
+                    <strong className={oferta ? 'barra-oferta' : undefined}>
+                        ${par.price.toLocaleString('es-MX')}
+                    </strong>
                 </div>
                 <button className="barra-btn" onClick={agregar} disabled={!puedeAgregar}>
                     {agotado ? 'Agotado' : agregado ? '✓ Agregado' : (pideTalla && talla === null ? 'Elige tu talla' : 'Agregar')}

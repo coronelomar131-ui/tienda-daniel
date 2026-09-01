@@ -7,6 +7,7 @@ const toApp = (row) => ({
     name: row.name,
     desc: row.description || '',
     price: Number(row.price),
+    priceBefore: row.price_before == null ? null : Number(row.price_before),
     sizes: (row.sizes || []).map(Number),
     status: row.status || '',
     mlLink: row.ml_link || '',
@@ -24,7 +25,7 @@ const conLimite = (promesa, ms = LIMITE) => Promise.race([
     ),
 ]);
 
-const CAMPOS = 'id, brand, name, description, price, sizes, status, ml_link, video_url, photo_count, sort_order';
+const CAMPOS = 'id, brand, name, description, price, price_before, sizes, status, ml_link, video_url, photo_count, sort_order';
 
 // La lista NO trae las fotos: cada tarjeta pide las suyas cuando aparece en
 // pantalla, para que el catalogo abra rapido aunque haya muchos pares.
@@ -86,6 +87,7 @@ const campos = (p) => ({
     p_name: p.name,
     p_description: p.desc || '',
     p_price: p.price,
+    p_price_before: p.priceBefore || null,
     p_sizes: p.sizes || [],
     p_status: p.status || '',
     p_ml_link: p.mlLink || '',

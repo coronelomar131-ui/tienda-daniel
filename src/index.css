@@ -23,6 +23,11 @@
   /* aviso */
   --red: #B3261E;
 
+  /* Naranja de oferta. Es el unico lugar donde entra: si se usa en mas cosas
+     deja de gritar "descuento" y se vuelve decoracion. Con texto blanco da
+     4.5:1, que es el minimo legible. */
+  --naranja: #C2570D;
+
   /* el dibujo de tenis se adapta al fondo donde vive */
   --art-upper: #E4E4E7;
   --art-sole: #D6D6DA;
@@ -249,6 +254,7 @@ button { font-family: var(--body); }
   font-size: 15px; letter-spacing: 0.09em; padding: 4px 11px; border-radius: 1px;
 }
 .badge-new { background: var(--navy); color: #fff; }
+.badge-oferta { background: var(--naranja); color: #fff; font-variant-numeric: tabular-nums; }
 .badge-out { background: var(--paper); color: var(--red); border: 2px solid var(--red); }
 
 .card-body { padding: 15px 2px 0; display: flex; flex-direction: column; flex: 1; }
@@ -318,6 +324,12 @@ button { font-family: var(--body); }
 
 .card-foot { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; margin-top: auto; }
 .price { font-family: var(--display); font-weight: 800; font-size: 32px; line-height: 1; color: var(--ink); font-variant-numeric: tabular-nums; }
+/* En oferta el precio se pone rojo y a un lado va el viejo tachado */
+.price-oferta { color: var(--red); }
+.price-antes {
+  font-family: var(--body); font-size: 14px; font-weight: 600; color: var(--muted);
+  margin-left: 8px; text-decoration-thickness: 1.5px;
+}
 .price small { font-family: var(--body); font-size: 11px; font-weight: 600; color: var(--muted); margin-left: 5px; letter-spacing: 0.06em; }
 .card-actions { display: flex; gap: 7px; min-width: 0; }
 .wa-btn, .add-btn {
@@ -602,6 +614,14 @@ button { font-family: var(--body); }
 }
 .ficha-precio { font-family: var(--display); font-weight: 800; font-size: 40px; line-height: 1; margin-bottom: 18px; font-variant-numeric: tabular-nums; }
 .ficha-precio small { font-family: var(--body); font-size: 12px; font-weight: 600; color: var(--muted); margin-left: 6px; letter-spacing: 0.06em; }
+.ficha-precio-oferta { color: var(--red); }
+.oferta-linea { display: inline-flex; align-items: center; gap: 10px; margin-left: 12px; vertical-align: middle; }
+.oferta-linea s { font-family: var(--body); font-size: 17px; font-weight: 600; color: var(--muted); text-decoration-thickness: 2px; }
+.oferta-pct {
+  font-family: var(--body); font-size: 13px; font-weight: 800; letter-spacing: 0.04em;
+  color: #fff; background: var(--naranja); padding: 4px 9px; border-radius: 999px;
+  font-variant-numeric: tabular-nums;
+}
 .ficha-desc { font-size: 15px; color: var(--muted); line-height: 1.6; margin-bottom: 20px; max-width: 46ch; }
 .ficha-acciones { display: flex; gap: 10px; flex-wrap: wrap; margin: 22px 0 6px; }
 .ficha-acciones .btn-primary { border: 1.5px solid var(--navy); }
@@ -927,6 +947,11 @@ button { font-family: var(--body); }
     color: var(--muted); margin-bottom: 3px; white-space: nowrap;
   }
   .barra-precio strong { font-family: var(--display); font-weight: 900; font-size: 24px; font-variant-numeric: tabular-nums; }
+  /* Solo cambia de color: el tachado va en el renglon de arriba para que la
+     barra no se ensanche y el boton no parta su texto en dos. */
+  .barra-oferta { color: var(--red); }
+  .barra-precio span s { text-decoration-thickness: 1.5px; }
+  .barra-btn { white-space: nowrap; }
 
   .barra-btn {
     flex: 1; min-width: 0; min-height: 48px; padding: 12px;

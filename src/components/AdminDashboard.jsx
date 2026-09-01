@@ -14,8 +14,9 @@ import { leerSesion, guardarSesion, cerrarSesion } from '../lib/adminSession';
 import SneakerArt from './SneakerArt';
 import Pedidos from './Pedidos';
 import { leerTallas, escribirTallas } from '../lib/tallas';
+import { verDescuento, pesos } from '../lib/descuento';
 
-const VACIO = { brand: '', name: '', price: '', sizes: '', status: '', desc: '', mlLink: '', videoUrl: '' };
+const VACIO = { brand: '', name: '', price: '', priceBefore: '', sizes: '', status: '', desc: '', mlLink: '', videoUrl: '' };
 
 const AdminDashboard = () => {
     const { products, reload } = useContext(ShopContext);
@@ -25,6 +26,11 @@ const AdminDashboard = () => {
     const [form, setForm] = useState(VACIO);
     // Lo que se entendió del campo de tallas, para enseñárselo mientras escribe.
     const tallasLeidas = useMemo(() => leerTallas(form.sizes), [form.sizes]);
+    // El descuento que va a ver el cliente, calculado igual que en la tienda.
+    const ofertaPrevia = useMemo(
+        () => verDescuento({ price: Number(form.price), priceBefore: Number(form.priceBefore) }),
+        [form.price, form.priceBefore]
+    );
     const [editandoId, setEditandoId] = useState(null);   // null = alta nueva
     const [fotosNuevas, setFotosNuevas] = useState([]);   // data URLs por subir
     const [galeria, setGaleria] = useState([]);           // fotos ya guardadas del par en edicion
@@ -139,7 +145,7 @@ const AdminDashboard = () => {
     const abrirEdicion = async (p) => {
         setForm({
             brand: p.brand, name: p.name, price: String(p.price),
-            sizes: escribirTallas(p.sizes), status: p.status,
+            sizes: escribirTallas(p.sizes), status: p.status, priceBefore: p.priceBefore || '',
             desc: p.desc, mlLink: p.mlLink, videoUrl: p.videoUrl,
         });
         setEditandoId(p.id);
@@ -163,6 +169,7 @@ const AdminDashboard = () => {
             brand: form.brand.trim(),
             name: form.name.trim(),
             price: Number(form.price),
+            priceBefore: form.priceBefore === '' ? null : Number(form.priceBefore),
             sizes: leerTallas(form.sizes),
             status: form.status,
             desc: form.desc,
@@ -267,6 +274,16 @@ const AdminDashboard = () => {
 
                                 <input type="text" placeholder="Modelo (Air Max 90...)" value={form.name} onChange={set('name')} />
                                 <input type="number" placeholder="Precio (MXN)" value={form.price} onChange={set('price')} min="0" />
+                                <input type="number" placeholder="Precio antes (opcional, para oferta)" value={form.priceBefore} onChange={set('priceBefore')} min="0" />
+                                {/* Se le enseña el descuento ya calculado, para que no publique
+                                    una oferta al reves sin darse cuenta. */}
+                                {form.priceBefore === '' ? (
+                                    <p className="hint">Déjalo vacío si no hay oferta. Si lo llenas, sale el precio tachado.</p>
+                                ) : ofertaPrevia ? (
+                                    <p className="hint hint-ok">Se verá {pesos(ofertaPrevia.ahora)} con {pesos(ofertaPrevia.antes)} tachado, y la etiqueta −{ofertaPrevia.pct}%</p>
+                                ) : (
+                                    <p className="hint hint-mal">El precio de antes tiene que ser mayor al de ahora. Así no se guarda oferta.</p>
+                                )}
 
                                 <input type="text" placeholder="Tallas MX: 25, 26, 27.5" value={form.sizes} onChange={set('sizes')} />
                                 {/* Se le enseña lo que se entendio ANTES de guardar: antes un par
