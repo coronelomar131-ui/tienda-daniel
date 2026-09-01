@@ -31,10 +31,12 @@ const BrandFilter = ({ brands, active, onSelect, products = [] }) => {
                 <span className="row-label">Marca</span>
             </div>
             <div className="bandas">
-                {bandas.map(({ valor, texto, par }) => (
+                {bandas.map(({ valor, texto, par }, i) => (
                     <button
                         key={String(valor)}
-                        className={`banda${active === valor ? ' activa' : ''}`}
+                        className={`banda reveal${active === valor ? ' activa' : ''}`}
+                        // Entran escalonadas: una tras otra, no todas de golpe.
+                        style={{ '--retraso': `${i * 70}ms` }}
                         onClick={() => elegir(valor)}
                         aria-pressed={active === valor}
                     >
