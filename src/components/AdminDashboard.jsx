@@ -14,10 +14,10 @@ import { leerSesion, guardarSesion, cerrarSesion } from '../lib/adminSession';
 import SneakerArt from './SneakerArt';
 import Pedidos from './Pedidos';
 import { leerTallas, escribirTallas } from '../lib/tallas';
-import { verDescuento, pesos } from '../lib/descuento';
+import { verDescuento, pesos, antesDesdePct, pctDesdeAntes } from '../lib/descuento';
 import { CATEGORIAS } from '../lib/categorias';
 
-const VACIO = { brand: '', name: '', price: '', priceBefore: '', categoria: 'calzado', sizes: '', status: '', desc: '', mlLink: '', videoUrl: '' };
+const VACIO = { brand: '', name: '', price: '', priceBefore: '', pct: '', categoria: 'calzado', sizes: '', status: '', desc: '', mlLink: '', videoUrl: '' };
 
 const AdminDashboard = () => {
     const { products, reload } = useContext(ShopContext);
@@ -32,6 +32,30 @@ const AdminDashboard = () => {
         () => verDescuento({ price: Number(form.price), priceBefore: Number(form.priceBefore) }),
         [form.price, form.priceBefore]
     );
+
+    // Los dos campos de oferta estan ligados: escribes uno y el otro se llena.
+    // Se guarda el precio anterior; el porcentaje es solo la forma comoda de
+    // capturarlo.
+    const escribirPct = (valor) => setForm(f => ({
+        ...f,
+        pct: valor,
+        priceBefore: valor === '' ? '' : (antesDesdePct(f.price, valor) ?? ''),
+    }));
+
+    const escribirAntes = (valor) => setForm(f => ({
+        ...f,
+        priceBefore: valor,
+        pct: valor === '' ? '' : (pctDesdeAntes(f.price, valor) ?? ''),
+    }));
+
+    // Si cambia el precio y ya habia un descuento puesto, se respeta el
+    // PORCENTAJE y se recalcula el "antes". Al reves, poner un par en oferta
+    // del 25% y bajarle el precio lo dejaria de pronto en 31% sin pedirlo.
+    const escribirPrecio = (valor) => setForm(f => ({
+        ...f,
+        price: valor,
+        priceBefore: f.pct === '' ? f.priceBefore : (antesDesdePct(valor, f.pct) ?? ''),
+    }));
     const [editandoId, setEditandoId] = useState(null);   // null = alta nueva
     const [fotosNuevas, setFotosNuevas] = useState([]);   // data URLs por subir
     const [galeria, setGaleria] = useState([]);           // fotos ya guardadas del par en edicion
@@ -146,7 +170,7 @@ const AdminDashboard = () => {
     const abrirEdicion = async (p) => {
         setForm({
             brand: p.brand, name: p.name, price: String(p.price),
-            sizes: escribirTallas(p.sizes), status: p.status, priceBefore: p.priceBefore || '', categoria: p.categoria || 'calzado',
+            sizes: escribirTallas(p.sizes), status: p.status, priceBefore: p.priceBefore || '', pct: pctDesdeAntes(p.price, p.priceBefore) || '', categoria: p.categoria || 'calzado',
             desc: p.desc, mlLink: p.mlLink, videoUrl: p.videoUrl,
         });
         setEditandoId(p.id);
@@ -275,16 +299,24 @@ const AdminDashboard = () => {
                                 </datalist>
 
                                 <input type="text" placeholder="Modelo (Air Max 90...)" value={form.name} onChange={set('name')} />
-                                <input type="number" placeholder="Precio (MXN)" value={form.price} onChange={set('price')} min="0" />
-                                <input type="number" placeholder="Precio antes (opcional, para oferta)" value={form.priceBefore} onChange={set('priceBefore')} min="0" />
+                                <input type="number" placeholder="Precio (MXN)" value={form.price} onChange={(e) => escribirPrecio(e.target.value)} min="0" />
+
+                                <div className="oferta-campos">
+                                    <input type="number" placeholder="% de descuento"
+                                        value={form.pct} onChange={(e) => escribirPct(e.target.value)}
+                                        min="1" max="99" />
+                                    <input type="number" placeholder="o precio antes"
+                                        value={form.priceBefore} onChange={(e) => escribirAntes(e.target.value)}
+                                        min="0" />
+                                </div>
                                 {/* Se le enseña el descuento ya calculado, para que no publique
                                     una oferta al reves sin darse cuenta. */}
-                                {form.priceBefore === '' ? (
-                                    <p className="hint">Déjalo vacío si no hay oferta. Si lo llenas, sale el precio tachado.</p>
+                                {form.priceBefore === '' && form.pct === '' ? (
+                                    <p className="hint">Llena cualquiera de los dos y el otro se calcula solo. Vacíos = sin oferta.</p>
                                 ) : ofertaPrevia ? (
                                     <p className="hint hint-ok">Se verá {pesos(ofertaPrevia.ahora)} con {pesos(ofertaPrevia.antes)} tachado, y la etiqueta −{ofertaPrevia.pct}%</p>
                                 ) : (
-                                    <p className="hint hint-mal">El precio de antes tiene que ser mayor al de ahora. Así no se guarda oferta.</p>
+                                    <p className="hint hint-mal">Pon un porcentaje entre 1 y 99, o un precio anterior mayor al de ahora.</p>
                                 )}
 
                                 {/* La categoria decide en que banda sale. Si nada mas
