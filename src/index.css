@@ -207,11 +207,30 @@ button { font-family: var(--body); }
    Van montadas sobre un riel azul: el vidrio necesita ALGO ATRAS que
    difuminar, y sobre el fondo blanco de la pagina no se notaria nada. */
 .bandas {
+  position: relative; isolation: isolate; overflow: hidden;
   display: flex; flex-direction: column; gap: 10px;
   padding: 12px clamp(12px, 3vw, 22px);
+  background: linear-gradient(160deg, #1d2e58 0%, #131e38 100%);
+}
+
+/* Manchas de color detras del riel. No son adorno: el vidrio solo se ve como
+   vidrio si tiene ALGO variado que doblar. Sobre un azul liso, difuminar no
+   cambia nada y las capsulas se ven como plastico. */
+.bandas::before {
+  content: ""; position: absolute; inset: -20%; z-index: -1;
   background:
-    radial-gradient(120% 90% at 85% 0%, rgba(255, 255, 255, 0.13), transparent 60%),
-    linear-gradient(160deg, var(--navy) 0%, #16223f 100%);
+    radial-gradient(38% 45% at 18% 22%, rgba(120, 160, 255, 0.55), transparent 68%),
+    radial-gradient(32% 40% at 82% 30%, rgba(194, 87, 13, 0.32), transparent 70%),
+    radial-gradient(45% 50% at 62% 85%, rgba(90, 130, 230, 0.42), transparent 70%),
+    radial-gradient(30% 36% at 30% 78%, rgba(255, 255, 255, 0.16), transparent 70%);
+  filter: blur(6px);
+  animation: nadan 26s ease-in-out infinite alternate;
+}
+/* Se mueven lentisimo: el vidrio cambia mientras lo ves, sin que se note que
+   algo se esta moviendo. */
+@keyframes nadan {
+  from { transform: translate3d(-3%, -2%, 0) scale(1); }
+  to   { transform: translate3d(3%, 2%, 0) scale(1.08); }
 }
 
 .banda {
@@ -239,6 +258,28 @@ button { font-family: var(--body); }
   .banda { background: rgba(255, 255, 255, 0.16); }
 }
 
+/* El canto grueso que dobla la luz. Solo el borde lleva este difuminado extra
+   (el resto se recorta con la mascara), asi que lo que se ve a traves de la
+   orilla queda corrido respecto al centro. Eso es lo que hace que la pieza se
+   sienta gruesa y no una calcomania. */
+.banda::after {
+  content: ""; position: absolute; inset: 0; border-radius: inherit;
+  pointer-events: none; z-index: 1;
+  padding: 12px;
+  backdrop-filter: blur(7px) saturate(260%) brightness(1.18);
+  -webkit-backdrop-filter: blur(7px) saturate(260%) brightness(1.18);
+  -webkit-mask: linear-gradient(#000, #000) content-box, linear-gradient(#000, #000);
+  -webkit-mask-composite: xor;
+  mask: linear-gradient(#000, #000) content-box, linear-gradient(#000, #000);
+  mask-composite: exclude;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.5),
+    inset 0 -1px 0 rgba(255, 255, 255, 0.14);
+}
+
+/* Chispa de luz en la esquina de arriba, como cuando pega en un canto curvo */
+.banda-nombre, .banda-foto { position: relative; z-index: 3; }
+
 /* Al tocarla se levanta tantito, como si flotara mas alto */
 .banda:hover { transform: translateY(-2px); background: rgba(255, 255, 255, 0.10); }
 .banda:active { transform: translateY(0) scale(0.985); }
@@ -260,7 +301,7 @@ button { font-family: var(--body); }
 }
 
 .banda-nombre {
-  position: relative; z-index: 2;
+  position: relative;
   font-family: var(--display); text-transform: uppercase; font-weight: 900;
   font-size: clamp(25px, 6.2vw, 38px); line-height: 1; letter-spacing: 0.01em;
   text-shadow: 0 1px 12px rgba(0, 0, 0, 0.35);
@@ -272,7 +313,7 @@ button { font-family: var(--body); }
    veian como un rectangulo gris tirado encima de la capsula. Metida en un
    circulo se lee como una pieza a proposito, y funciona con cualquier foto. */
 .banda-foto {
-  position: relative; z-index: 2; flex-shrink: 0;
+  position: relative; flex-shrink: 0;
   width: 72px; height: 72px; border-radius: 999px; overflow: hidden;
   background: rgba(255, 255, 255, 0.92);
   box-shadow:
@@ -289,7 +330,7 @@ button { font-family: var(--body); }
 /* El barrido de luz cruza la capsula: una vez al elegir la marca, y siguiendo
    al cursor en compu. Es lo unico que se mueve, por eso no se ve recargado. */
 .banda-brillo {
-  position: absolute; inset: 0; z-index: 1; pointer-events: none;
+  position: absolute; inset: 0; z-index: 2; pointer-events: none;
   background: linear-gradient(105deg,
     transparent 30%, rgba(255, 255, 255, 0.28) 46%, transparent 62%);
   transform: translateX(-110%);
@@ -343,6 +384,7 @@ button { font-family: var(--body); }
 }
 @media (prefers-reduced-motion: reduce) {
   .banda-brillo { display: none; }
+  .bandas::before { animation: none; }
   .banda, .banda-foto :is(img, svg) { transition: none; }
   .banda:hover { transform: none; }
   .banda:hover .banda-foto :is(img, svg) { transform: none; }
