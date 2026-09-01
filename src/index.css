@@ -1028,6 +1028,46 @@ button { font-family: var(--body); }
   .ficha-acciones { display: none; }
 }
 
+/* ---------- LOS QUE MAS SE VENDEN ----------
+   Rejilla limpia de foto + nombre, separada por hilos finos. Sin precios ni
+   botones: aqui lo unico que tiene que pasar es que reconozcan el modelo. */
+.vendidos { padding-top: 8px; }
+.vendidos-rejilla {
+  display: grid; grid-template-columns: repeat(3, minmax(0, 1fr));
+  border-top: 1px solid var(--line); border-left: 1px solid var(--line);
+}
+.vendido {
+  display: flex; flex-direction: column; align-items: center;
+  padding: 22px 14px 20px; text-align: center;
+  border-right: 1px solid var(--line); border-bottom: 1px solid var(--line);
+  background: var(--paper);
+  transition: background .25s ease;
+}
+.vendido:hover { background: var(--paper-2); }
+.vendido-foto {
+  width: 100%; aspect-ratio: 4 / 3; display: flex; align-items: center; justify-content: center;
+  overflow: hidden; margin-bottom: 12px;
+}
+/* La foto crece un poco al pasar encima: le da vida sin mover la rejilla */
+.vendido-foto :is(img, svg) {
+  max-width: 100%; max-height: 100%; object-fit: contain;
+  transition: transform .45s var(--resorte);
+}
+.vendido:hover .vendido-foto :is(img, svg) { transform: scale(1.06); }
+.vendido-nombre {
+  font-family: var(--body); font-weight: 700; font-size: 15px; color: var(--ink);
+  line-height: 1.25;
+}
+@media (prefers-reduced-motion: reduce) {
+  .vendido-foto :is(img, svg) { transition: none; }
+  .vendido:hover .vendido-foto :is(img, svg) { transform: none; }
+}
+@media (max-width: 700px) {
+  .vendidos-rejilla { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .vendido { padding: 16px 10px 14px; }
+  .vendido-nombre { font-size: 13.5px; }
+}
+
 /* ---------- OPCIONES DE UN RENGLON DEL CARRITO ----------
    Los tres puntos abren una hoja, como en las apps de las marcas: cambiar
    cantidad, cambiar talla, guardar para despues o eliminar. Antes lo unico

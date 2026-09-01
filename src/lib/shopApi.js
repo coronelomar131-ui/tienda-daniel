@@ -14,6 +14,7 @@ const toApp = (row) => ({
     videoUrl: row.video_url || '',
     photoCount: row.photo_count || 0,
     sortOrder: row.sort_order || 0,
+    destacado: row.destacado === true,
 });
 
 const LIMITE = 7000;
@@ -102,6 +103,19 @@ export const adminAddProduct = (pass, p) =>
 
 export const adminUpdateProduct = (pass, id, p) =>
     rpc('admin_update_product', { pass, p_id: id, ...campos(p) });
+
+// Los mas vendidos salen de una funcion del servidor, no del catalogo: el
+// conteo vive en las ordenes pagadas y esas no se pueden leer desde el cliente.
+export const fetchTopVendidos = async (limite = 6) => {
+    const { data, error } = await conLimite(
+        supabase.rpc('top_vendidos', { p_limite: limite })
+    );
+    if (error) throw new Error(mensajeDeError(error));
+    return (data || []).map(toApp);
+};
+
+export const adminSetDestacado = (pass, id, on) =>
+    rpc('admin_set_destacado', { pass, p_id: id, p_on: on });
 
 export const adminDeleteProduct = (pass, id) => rpc('admin_delete_product', { pass, p_id: id });
 export const adminSetStatus     = (pass, id, status) => rpc('admin_set_status', { pass, p_id: id, p_status: status });

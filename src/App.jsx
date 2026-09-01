@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Navbar from './components/Navbar';
 import Hero from './components/Hero';
 import Marquee from './components/Marquee';
+import MasVendidos from './components/MasVendidos';
 import BrandFilter from './components/BrandFilter';
 import ProductGrid from './components/ProductGrid';
 import CartDrawer from './components/CartDrawer';
@@ -54,6 +55,7 @@ function StoreFront() {
             <main>
                 <Hero />
                 <Marquee />
+                <MasVendidos />
                 {/* El filtro vive dentro del ancla para que al saltar al catálogo
                     se vea junto con los resultados y no quede tapado por el header. */}
                 <div id="coleccion" className="catalog">

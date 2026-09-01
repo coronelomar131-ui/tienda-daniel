@@ -4,7 +4,7 @@ import { Trash2, Plus, Pencil, ChevronUp, ChevronDown, X, Image as ImageIcon } f
 import { ShopContext } from '../context/shop-context';
 import {
     adminAddProduct, adminUpdateProduct, adminDeleteProduct,
-    adminSetStatus, adminMoveProduct, adminAddPhotos, adminDeletePhoto,
+    adminSetStatus, adminSetDestacado, adminMoveProduct, adminAddPhotos, adminDeletePhoto,
     adminSetPassword, fetchPhotos,
 } from '../lib/shopApi';
 import { comprimirImagen } from '../lib/image';
@@ -445,6 +445,21 @@ const AdminDashboard = () => {
                                             )}
                                         />
                                         <span>Agotado</span>
+                                    </label>
+
+                                    {/* Fija el par en "los que mas se venden". Sirve mientras no
+                                        haya ventas con tarjeta: los pedidos por WhatsApp no pasan
+                                        por la base y no se pueden contar solos. */}
+                                    <label className={`switch${p.destacado ? ' on' : ''}`}>
+                                        <input
+                                            type="checkbox"
+                                            checked={!!p.destacado}
+                                            disabled={ocupado}
+                                            onChange={(e) => correr(() =>
+                                                adminSetDestacado(pass, p.id, e.target.checked)
+                                            )}
+                                        />
+                                        <span>Destacado</span>
                                     </label>
 
                                     <button className="del editar" onClick={() => abrirEdicion(p)} aria-label={`Editar ${p.name}`}>
