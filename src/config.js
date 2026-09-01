@@ -1,5 +1,5 @@
 // =========================================================================
-// ARCHIVO DE CONFIGURACIÓN PRINCIPAL - PROTHE SHOPS
+// ARCHIVO DE CONFIGURACIÓN PRINCIPAL - PROTHE SHOP
 // =========================================================================
 // Aquí puedes modificar tus datos. Solo cambia el texto entre las comillas.
 // Guardar este archivo actualizará la página automáticamente.

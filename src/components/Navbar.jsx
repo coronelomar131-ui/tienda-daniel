@@ -9,7 +9,7 @@ const Navbar = ({ onOpenCart }) => {
     return (
         <header className="site-header">
             <nav className="nav wrap">
-                <a href="#top" className="logo">Prothe <em>Shops</em></a>
+                <a href="#top" className="logo">Prothe <em>Shop</em></a>
                 <div className="navlinks">
                     <a href="#coleccion">Catálogo</a>
                     <a href="#comoapartar">Cómo apartar</a>

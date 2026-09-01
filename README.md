@@ -1,4 +1,4 @@
-# PROTHE SHOPS
+# PROTHE SHOP
 
 Tienda de tenis (sneakers) hecha con React + Vite, con catálogo en base de datos
 y pedidos por WhatsApp. El dueño administra la tienda desde el celular, sin tocar código.

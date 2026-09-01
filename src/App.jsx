@@ -83,7 +83,7 @@ function StoreFront() {
 
             <footer className="site-footer">
                 <div className="wrap">
-                    <div>© 2026 Prothe Shops</div>
+                    <div>© 2026 Prothe Shop</div>
                     <div className="flinks">
                         <a href={config.instagramLink} target="_blank" rel="noreferrer">Instagram</a>
                         <a href={config.tiktokLink} target="_blank" rel="noreferrer">TikTok</a>

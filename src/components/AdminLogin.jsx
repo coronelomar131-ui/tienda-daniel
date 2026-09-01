@@ -54,7 +54,7 @@ const AdminLogin = () => {
     return (
         <div className="login-page">
             <form className="login-card" onSubmit={entrar}>
-                <h2>Prothe <em>Shops</em></h2>
+                <h2>Prothe <em>Shop</em></h2>
                 <p>{primeraVez ? 'Crea tu clave' : 'Acceso empleados'}</p>
 
                 {primeraVez && (

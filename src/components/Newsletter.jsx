@@ -7,7 +7,7 @@ const Newsletter = () => {
     const inputRef = useRef(null);
 
     // El registro llega a tu WhatsApp para que tengas la lista de interesados.
-    const link = waLink(`Hola, quiero enterarme de lo que va llegando a Prothe Shops. Mi correo es: ${email}`);
+    const link = waLink(`Hola, quiero enterarme de lo que va llegando a Prothe Shop. Mi correo es: ${email}`);
 
     const handleClick = (e) => {
         if (!email.trim()) {
