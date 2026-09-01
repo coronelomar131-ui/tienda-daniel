@@ -210,7 +210,7 @@ button { font-family: var(--body); }
   position: relative; isolation: isolate; overflow: hidden;
   display: flex; flex-direction: column; gap: 10px;
   padding: 12px clamp(12px, 3vw, 22px);
-  background: linear-gradient(160deg, #1d2e58 0%, #131e38 100%);
+  background: linear-gradient(160deg, #F2F3F7 0%, #E4E7EF 100%);
 }
 
 /* Manchas de color detras del riel. No son adorno: el vidrio solo se ve como
@@ -219,10 +219,10 @@ button { font-family: var(--body); }
 .bandas::before {
   content: ""; position: absolute; inset: -20%; z-index: -1;
   background:
-    radial-gradient(38% 45% at 18% 22%, rgba(120, 160, 255, 0.55), transparent 68%),
-    radial-gradient(32% 40% at 82% 30%, rgba(194, 87, 13, 0.32), transparent 70%),
-    radial-gradient(45% 50% at 62% 85%, rgba(90, 130, 230, 0.42), transparent 70%),
-    radial-gradient(30% 36% at 30% 78%, rgba(255, 255, 255, 0.16), transparent 70%);
+    radial-gradient(38% 45% at 18% 22%, rgba(27, 42, 82, 0.20), transparent 68%),
+    radial-gradient(32% 40% at 82% 30%, rgba(194, 87, 13, 0.14), transparent 70%),
+    radial-gradient(45% 50% at 62% 85%, rgba(70, 110, 210, 0.22), transparent 70%),
+    radial-gradient(30% 36% at 30% 78%, rgba(255, 255, 255, 0.85), transparent 70%);
   filter: blur(6px);
   animation: nadan 26s ease-in-out infinite alternate;
 }
@@ -237,25 +237,19 @@ button { font-family: var(--body); }
   position: relative; overflow: hidden;
   display: flex; align-items: center; justify-content: space-between; gap: 14px;
   width: 100%; min-height: 96px; padding: 0 clamp(20px, 5vw, 46px);
-  border: none; cursor: pointer; text-align: left; color: #fff;
+  border: none; cursor: pointer; text-align: left; color: var(--ink);
   border-radius: 999px;
 
   /* Vidrio oscuro: escarcha clara encima del riel azul, filo de luz arriba y
      hilo blanco alrededor. Eso es lo que le da el canto. */
-  background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.13), rgba(255, 255, 255, 0.02) 52%, rgba(255, 255, 255, 0) 78%),
-    rgba(255, 255, 255, 0.05);
-  backdrop-filter: saturate(190%) blur(22px);
-  -webkit-backdrop-filter: saturate(190%) blur(22px);
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.34),
-    inset 0 0 0 1px rgba(255, 255, 255, 0.13),
-    inset 0 -18px 30px -24px rgba(0, 0, 0, 0.45),
-    0 6px 18px rgba(0, 0, 0, 0.18);
+  background: var(--vidrio-luz), rgba(255, 255, 255, 0.58);
+  backdrop-filter: var(--vidrio-blur);
+  -webkit-backdrop-filter: var(--vidrio-blur);
+  box-shadow: var(--vidrio-canto), var(--vidrio-sombra);
   transition: transform .38s var(--resorte), background .3s ease, box-shadow .3s ease;
 }
 @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
-  .banda { background: rgba(255, 255, 255, 0.16); }
+  .banda { background: rgba(255, 255, 255, 0.95); }
 }
 
 /* El canto grueso que dobla la luz. Solo el borde lleva este difuminado extra
@@ -266,45 +260,43 @@ button { font-family: var(--body); }
   content: ""; position: absolute; inset: 0; border-radius: inherit;
   pointer-events: none; z-index: 1;
   padding: 12px;
-  backdrop-filter: blur(7px) saturate(260%) brightness(1.18);
-  -webkit-backdrop-filter: blur(7px) saturate(260%) brightness(1.18);
+  backdrop-filter: blur(7px) saturate(240%) brightness(1.08);
+  -webkit-backdrop-filter: blur(7px) saturate(240%) brightness(1.08);
   -webkit-mask: linear-gradient(#000, #000) content-box, linear-gradient(#000, #000);
   -webkit-mask-composite: xor;
   mask: linear-gradient(#000, #000) content-box, linear-gradient(#000, #000);
   mask-composite: exclude;
   box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.5),
-    inset 0 -1px 0 rgba(255, 255, 255, 0.14);
+    inset 0 1px 0 rgba(255, 255, 255, 0.9),
+    inset 0 -1px 0 rgba(10, 10, 10, 0.06);
 }
 
 /* Chispa de luz en la esquina de arriba, como cuando pega en un canto curvo */
 .banda-nombre, .banda-foto { position: relative; z-index: 3; }
 
 /* Al tocarla se levanta tantito, como si flotara mas alto */
-.banda:hover { transform: translateY(-2px); background: rgba(255, 255, 255, 0.10); }
+.banda:hover { transform: translateY(-2px); background: var(--vidrio-luz), rgba(255, 255, 255, 0.74); }
 .banda:active { transform: translateY(0) scale(0.985); }
 
 /* La elegida se pone mas clara y su nombre queda subrayado. Solo por tono no
    bastaria: quien no distingue bien los azules no la vería. */
+/* La elegida se rellena de navy, igual que el boton del carrito. Contra las
+   demas, que son vidrio claro, se distingue de un vistazo sin depender del
+   tono: una es clara y la otra oscura. */
 .banda.activa {
+  color: #fff;
   background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.22), rgba(255, 255, 255, 0.05) 52%, rgba(255, 255, 255, 0) 78%),
-    rgba(255, 255, 255, 0.14);
+    linear-gradient(180deg, rgba(255, 255, 255, 0.24), rgba(255, 255, 255, 0) 58%),
+    var(--navy);
   box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.55),
-    inset 0 0 0 1px rgba(255, 255, 255, 0.26),
-    0 10px 24px rgba(0, 0, 0, 0.24);
-}
-.banda.activa .banda-nombre::after {
-  content: ""; display: block; height: 4px; margin-top: 7px; border-radius: 2px;
-  background: #fff;
+    inset 0 1px 0 rgba(255, 255, 255, 0.34),
+    0 10px 26px rgba(27, 42, 82, 0.32);
 }
 
 .banda-nombre {
   position: relative;
   font-family: var(--display); text-transform: uppercase; font-weight: 900;
   font-size: clamp(25px, 6.2vw, 38px); line-height: 1; letter-spacing: 0.01em;
-  text-shadow: 0 1px 12px rgba(0, 0, 0, 0.35);
 }
 
 /* El par se asoma por la derecha y la capsula lo recorta con su curva */
@@ -315,10 +307,10 @@ button { font-family: var(--body); }
 .banda-foto {
   position: relative; flex-shrink: 0;
   width: 72px; height: 72px; border-radius: 999px; overflow: hidden;
-  background: rgba(255, 255, 255, 0.92);
+  background: #fff;
   box-shadow:
-    inset 0 0 0 1px rgba(255, 255, 255, 0.5),
-    0 6px 16px rgba(0, 0, 0, 0.28);
+    inset 0 0 0 1px rgba(10, 10, 10, 0.08),
+    0 4px 12px rgba(10, 10, 10, 0.14);
 }
 .banda-foto .photo-holder { width: 100%; height: 100%; display: block; }
 .banda-foto :is(img, svg) {
@@ -332,7 +324,7 @@ button { font-family: var(--body); }
 .banda-brillo {
   position: absolute; inset: 0; z-index: 2; pointer-events: none;
   background: linear-gradient(105deg,
-    transparent 30%, rgba(255, 255, 255, 0.28) 46%, transparent 62%);
+    transparent 30%, rgba(255, 255, 255, 0.65) 46%, transparent 62%);
   transform: translateX(-110%);
   transition: transform .85s ease;
 }
@@ -354,16 +346,17 @@ button { font-family: var(--body); }
    que se distinga de las categorias sin gritar. */
 .banda-rebajas {
   box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.45),
-    inset 0 0 0 1.5px rgba(194, 87, 13, 0.75),
-    inset 0 -18px 30px -24px rgba(0, 0, 0, 0.55),
-    0 6px 20px rgba(0, 0, 0, 0.22);
+    inset 0 1px 0 rgba(255, 255, 255, 0.9),
+    inset 0 0 0 1.5px rgba(194, 87, 13, 0.55),
+    var(--vidrio-sombra);
 }
 .banda-rebajas.activa {
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.24), rgba(255, 255, 255, 0) 58%),
+    var(--naranja);
   box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.65),
-    inset 0 0 0 2px rgba(194, 87, 13, 0.95),
-    0 10px 26px rgba(0, 0, 0, 0.28);
+    inset 0 1px 0 rgba(255, 255, 255, 0.34),
+    0 10px 26px rgba(194, 87, 13, 0.34);
 }
 
 /* Filtro de marca, en chico debajo de las bandas */
