@@ -978,6 +978,86 @@ button { font-family: var(--body); }
   .ficha-acciones { display: none; }
 }
 
+/* ---------- OPCIONES DE UN RENGLON DEL CARRITO ----------
+   Los tres puntos abren una hoja, como en las apps de las marcas: cambiar
+   cantidad, cambiar talla, guardar para despues o eliminar. Antes lo unico
+   que se podia era bajarle a la cantidad hasta que desapareciera. */
+.item-menu {
+  flex-shrink: 0; width: 34px; height: 34px; border: none; background: transparent;
+  color: var(--muted); font-size: 21px; line-height: 1; cursor: pointer;
+  border-radius: 999px; transition: background .18s, color .18s;
+}
+.item-menu:hover { background: var(--paper-2); color: var(--ink); }
+
+.menu-velo {
+  position: fixed; inset: 0; z-index: 120;
+  background: rgba(10, 10, 10, 0.34);
+  backdrop-filter: saturate(140%) blur(8px); -webkit-backdrop-filter: saturate(140%) blur(8px);
+  animation: fadeIn .2s ease;
+}
+.menu-hoja {
+  position: fixed; z-index: 121; left: 0; right: 0; bottom: 0;
+  max-height: 82dvh; overflow-y: auto; overscroll-behavior: contain;
+  border-radius: 30px 30px 0 0;
+  padding-bottom: calc(10px + env(safe-area-inset-bottom));
+  background: var(--vidrio-luz), var(--vidrio-denso);
+  backdrop-filter: var(--vidrio-blur); -webkit-backdrop-filter: var(--vidrio-blur);
+  box-shadow: 0 -20px 56px rgba(10, 10, 10, 0.24), var(--vidrio-canto);
+  animation: subeHojaMenu .38s var(--resorte);
+}
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .menu-hoja { background: var(--paper); }
+}
+@keyframes subeHojaMenu { from { transform: translateY(100%); } to { transform: translateY(0); } }
+/* En pantalla grande deja de ser hoja y se centra como tarjeta */
+@media (min-width: 901px) {
+  .menu-hoja {
+    left: 50%; top: 50%; right: auto; bottom: auto;
+    transform: translate(-50%, -50%); width: min(420px, 92vw);
+    border-radius: 20px; animation: none;
+  }
+}
+
+.menu-cabeza {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 22px 24px 12px;
+}
+.menu-cabeza h4 {
+  font-family: var(--display); text-transform: uppercase; font-weight: 900;
+  font-size: 23px; line-height: 1;
+}
+.menu-lista { padding: 0 12px 8px; }
+.menu-fila {
+  width: 100%; display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  padding: 16px 12px; min-height: 56px; text-align: left;
+  background: transparent; border: none; border-top: 1px solid var(--line);
+  font-family: var(--body); font-size: 16px; font-weight: 600; color: var(--ink);
+  cursor: pointer; transition: background .18s;
+}
+.menu-fila:hover:not(:disabled) { background: rgba(10, 10, 10, 0.04); }
+.menu-fila:disabled { color: var(--muted); cursor: not-allowed; }
+.menu-fila small { font-size: 13px; font-weight: 500; color: var(--muted); }
+.menu-borrar { color: var(--red); }
+.menu-cantidad { cursor: default; }
+.menu-tallas { padding: 14px 12px 6px; }
+
+/* ---------- GUARDADOS PARA DESPUES ---------- */
+.guardados { margin-top: 22px; padding-top: 4px; }
+.guardados-titulo {
+  font-family: var(--display); text-transform: uppercase; font-weight: 900;
+  font-size: 19px; line-height: 1; margin-bottom: 4px;
+}
+.guardados-nota { font-size: 12px; color: var(--muted); margin-bottom: 6px; }
+.cart-item.guardado { opacity: 0.82; align-items: flex-start; }
+.guardado-acciones { display: flex; flex-direction: column; align-items: flex-end; gap: 6px; flex-shrink: 0; }
+.link-btn {
+  background: none; border: none; cursor: pointer; padding: 4px 0;
+  font-family: var(--body); font-size: 12.5px; font-weight: 700;
+  letter-spacing: 0.04em; color: var(--navy); white-space: nowrap;
+}
+.link-btn:hover { text-decoration: underline; }
+.link-mal { color: var(--muted); }
+
 /* ---------- EL VIDRIO FLOTANDO (celular) ----------
    En el celular las piezas de vidrio se despegan de las orillas y quedan como
    pastillas sueltas encima del contenido. Ahí es donde se nota que es vidrio:

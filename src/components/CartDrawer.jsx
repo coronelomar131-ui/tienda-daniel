@@ -11,7 +11,15 @@ const WhatsAppIcon = () => (
 );
 
 const CartDrawer = ({ open, onClose }) => {
-    const { cart, updateQty, clearCart, cartTotal } = useContext(ShopContext);
+    const {
+        cart, updateQty, clearCart, cartTotal, products,
+        removeLine, changeSize,
+        guardados, guardarParaDespues, regresarAlCarrito, borrarGuardado,
+    } = useContext(ShopContext);
+
+    // key del renglon cuyo menu esta abierto, y en que vista va ese menu
+    const [menu, setMenu] = useState(null);
+    const [vistaMenu, setVistaMenu] = useState('opciones');
 
     const [pagando, setPagando] = useState(false);   // mostrando el formulario
     const [enviando, setEnviando] = useState(false);
@@ -28,6 +36,14 @@ const CartDrawer = ({ open, onClose }) => {
     }, [open]);
 
     if (!open) return null;
+
+    const linea = menu ? cart.find(item => item.key === menu) : null;
+    const cerrarMenu = () => { setMenu(null); setVistaMenu('opciones'); };
+    // Las tallas salen del catalogo, no del renglon: el carrito solo guarda
+    // la talla elegida, no todas las que maneja el par.
+    const tallasDelPar = linea
+        ? (products.find(p => String(p.id) === String(linea.id))?.sizes || [])
+        : [];
 
     const orderLines = cart.map(item =>
         `• ${item.qty}x ${item.brand} ${item.name}${item.size ? ` — Talla ${item.size}` : ''} — $${(item.price * item.qty).toLocaleString('es-MX')} MXN`
@@ -115,8 +131,41 @@ const CartDrawer = ({ open, onClose }) => {
                                     <span className="qty">{item.qty}</span>
                                     <button onClick={() => updateQty(item.key, 1)} aria-label="Agregar uno">+</button>
                                 </div>
+                                <button
+                                    className="item-menu"
+                                    onClick={() => { setMenu(item.key); setVistaMenu('opciones'); }}
+                                    aria-label={`Opciones de ${item.name}`}
+                                >⋮</button>
                             </div>
                         ))
+                    )}
+
+                    {!pagando && guardados.length > 0 && (
+                        <div className="guardados">
+                            <h4 className="guardados-titulo">Guardados para después</h4>
+                            <p className="guardados-nota">
+                                Se quedan en este celular. No apartan el par.
+                            </p>
+                            {guardados.map(item => (
+                                <div className="cart-item guardado" key={item.key}>
+                                    <div className="cart-item-info">
+                                        <div className="meta">
+                                            {item.brand}{item.size ? ` · Talla ${item.size}` : ''}
+                                        </div>
+                                        <h4>{item.name}</h4>
+                                        <span className="p">${item.price.toLocaleString('es-MX')} MXN c/u</span>
+                                    </div>
+                                    <div className="guardado-acciones">
+                                        <button className="link-btn" onClick={() => regresarAlCarrito(item.key)}>
+                                            Regresar al carrito
+                                        </button>
+                                        <button className="link-btn link-mal" onClick={() => borrarGuardado(item.key)}>
+                                            Quitar
+                                        </button>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
                     )}
                 </div>
 
@@ -149,6 +198,64 @@ const CartDrawer = ({ open, onClose }) => {
                     </div>
                 )}
             </aside>
+
+            {/* Hoja de opciones del renglon, como en las apps de las marcas */}
+            {linea && (
+                <>
+                    <div className="menu-velo" onClick={cerrarMenu} />
+                    <div className="menu-hoja" role="dialog" aria-label="Opciones del par">
+                        <div className="menu-cabeza">
+                            <h4>{vistaMenu === 'talla' ? 'Cambiar talla' : 'Opciones'}</h4>
+                            <button className="cart-close" onClick={cerrarMenu} aria-label="Cerrar">×</button>
+                        </div>
+
+                        {vistaMenu === 'opciones' ? (
+                            <div className="menu-lista">
+                                <div className="menu-fila menu-cantidad">
+                                    <span>Cantidad</span>
+                                    <div className="qty-controls">
+                                        <button onClick={() => updateQty(linea.key, -1)} aria-label="Quitar uno">−</button>
+                                        <span className="qty">{linea.qty}</span>
+                                        <button onClick={() => updateQty(linea.key, 1)} aria-label="Agregar uno">+</button>
+                                    </div>
+                                </div>
+
+                                <button
+                                    className="menu-fila"
+                                    onClick={() => setVistaMenu('talla')}
+                                    disabled={tallasDelPar.length === 0}
+                                >
+                                    <span>Cambiar talla</span>
+                                    <small>{tallasDelPar.length ? (linea.size ?? '—') : 'Este par no maneja tallas'}</small>
+                                </button>
+
+                                <button className="menu-fila" onClick={() => { guardarParaDespues(linea.key); cerrarMenu(); }}>
+                                    <span>Guardar para después</span>
+                                </button>
+
+                                <button className="menu-fila menu-borrar" onClick={() => { removeLine(linea.key); cerrarMenu(); }}>
+                                    <span>Eliminar del carrito</span>
+                                </button>
+                            </div>
+                        ) : (
+                            <div className="menu-lista">
+                                <div className="size-row menu-tallas">
+                                    {tallasDelPar.map(t => (
+                                        <button
+                                            key={t}
+                                            className={`size-chip${linea.size === t ? ' selected' : ''}`}
+                                            onClick={() => { changeSize(linea.key, t); cerrarMenu(); }}
+                                        >{t}</button>
+                                    ))}
+                                </div>
+                                <button className="menu-fila" onClick={() => setVistaMenu('opciones')}>
+                                    <span>← Regresar</span>
+                                </button>
+                            </div>
+                        )}
+                    </div>
+                </>
+            )}
         </>
     );
 };
