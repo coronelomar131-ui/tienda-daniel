@@ -51,3 +51,45 @@ export const adminSetAnticipo = async (pass, pct) => {
     if (error) throw new Error(mensajeDeError(error));
     return true;
 };
+
+// --- Pedido sin pago en linea ---
+// Se guarda el pedido con folio y DESPUES se abre WhatsApp con ese folio.
+// Antes el pedido solo existia en el chat: si el mensaje se perdia entre
+// otras conversaciones, se perdia la venta.
+export async function crearPedido({ cart, nombre, telefono, direccion, email, nota, anticipo }) {
+    // Igual que en el cobro con tarjeta: solo viaja QUE par y QUE talla. El
+    // precio y el porcentaje del anticipo los pone el servidor.
+    const items = cart.map(i => ({ id: i.id, size: i.size, qty: i.qty }));
+    const { data, error } = await supabase.rpc('crear_pedido', {
+        p_items: items,
+        p_nombre: nombre,
+        p_telefono: telefono,
+        p_direccion: direccion || null,
+        p_email: email || null,
+        p_nota: nota || null,
+        p_anticipo: !!anticipo,
+    });
+    if (error) throw new Error(mensajeDeError(error));
+    const fila = Array.isArray(data) ? data[0] : data;
+    if (!fila) throw new Error('No se pudo guardar el pedido');
+    return {
+        folio: fila.folio,
+        total: fila.total,
+        aPagar: fila.a_pagar ?? fila.total,
+        esAnticipo: !!fila.es_anticipo,
+    };
+}
+
+export async function datosPago() {
+    const { data, error } = await supabase.rpc('datos_pago');
+    if (error) return null;
+    return (Array.isArray(data) ? data[0] : data) || null;
+}
+
+export const adminEstadoPedido = (pass, id, estado) =>
+    supabase.rpc('admin_estado_pedido', { pass, p_id: id, p_estado: estado })
+        .then(({ error }) => { if (error) throw new Error(mensajeDeError(error)); return true; });
+
+export const adminSetDatosPago = (pass, clabe, banco, titular) =>
+    supabase.rpc('admin_set_datos_pago', { pass, p_clabe: clabe, p_banco: banco, p_titular: titular })
+        .then(({ error }) => { if (error) throw new Error(mensajeDeError(error)); return true; });

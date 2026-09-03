@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { RefreshCw } from 'lucide-react';
-import { adminOrders, adminOrdersResumen, adminSetAnticipo, fetchAnticipo } from '../lib/pagos';
+import { adminOrders, adminOrdersResumen, adminSetAnticipo, fetchAnticipo,
+         datosPago, adminSetDatosPago, adminEstadoPedido } from '../lib/pagos';
 
 const pesos = (n) => '$' + Number(n || 0).toLocaleString('es-MX');
 
@@ -37,6 +38,31 @@ const Pedidos = ({ pass }) => {
     }, [pass]);
 
     useEffect(() => { cargar(); }, [cargar]);
+
+    // Datos de tu cuenta, que es a donde le van a depositar
+    const [cuenta, setCuenta] = useState({ clabe: '', banco: '', titular: '' });
+    const [guardandoCuenta, setGuardandoCuenta] = useState(false);
+
+    useEffect(() => {
+        datosPago().then(d => d && setCuenta({
+            clabe: d.clabe || '', banco: d.banco || '', titular: d.titular || '',
+        })).catch(() => {});
+    }, []);
+
+    const guardarCuenta = async (e) => {
+        e.preventDefault();
+        setGuardandoCuenta(true);
+        setError(null);
+        try {
+            await adminSetDatosPago(pass, cuenta.clabe, cuenta.banco, cuenta.titular);
+        } catch (err) { setError(err.message); }
+        finally { setGuardandoCuenta(false); }
+    };
+
+    const cambiarEstado = async (pedido, estado) => {
+        try { await adminEstadoPedido(pass, pedido.id, estado); cargar(); }
+        catch (err) { setError(err.message); }
+    };
 
     const guardarPct = async (valor) => {
         setGuardandoPct(true);
@@ -86,14 +112,36 @@ const Pedidos = ({ pass }) => {
                 </button>
             </div>
 
+            {/* Sin esto la tienda no puede enseñarle al cliente a donde depositar,
+                y el pedido se queda a medias. */}
+            <details className="admin-card plegable cuenta-card" open={!cuenta.clabe}>
+                <summary>Tu cuenta para transferencias {cuenta.clabe ? '✓' : '— falta'}</summary>
+                <form className="admin-form" onSubmit={guardarCuenta}>
+                    <p className="hint">
+                        Esto es lo que ve el cliente cuando termina su pedido. Si lo dejas
+                        vacío, solo le decimos que te escriba por WhatsApp.
+                    </p>
+                    <input type="text" placeholder="CLABE (18 dígitos)" value={cuenta.clabe}
+                        onChange={(e) => setCuenta(c => ({ ...c, clabe: e.target.value }))}
+                        inputMode="numeric" maxLength={18} />
+                    <input type="text" placeholder="Banco (BBVA, Banorte…)" value={cuenta.banco}
+                        onChange={(e) => setCuenta(c => ({ ...c, banco: e.target.value }))} />
+                    <input type="text" placeholder="A nombre de" value={cuenta.titular}
+                        onChange={(e) => setCuenta(c => ({ ...c, titular: e.target.value }))} />
+                    <button type="submit" className="btn-ghost" disabled={guardandoCuenta}>
+                        {guardandoCuenta ? 'Guardando…' : 'Guardar mi cuenta'}
+                    </button>
+                </form>
+            </details>
+
             {error && <div className="admin-status error">{error}</div>}
 
             {cargando && pedidos.length === 0 && <p className="hint">Cargando pedidos…</p>}
 
             {!cargando && pedidos.length === 0 && !error && (
                 <div className="pedidos-vacio">
-                    Todavía no hay pedidos pagados por la web.
-                    <span>Los que te llegan por WhatsApp no aparecen aquí.</span>
+                    Todavía no hay pedidos.
+                    <span>Aquí van a caer los que hagan desde la tienda, con su folio.</span>
                 </div>
             )}
 
@@ -115,6 +163,8 @@ const Pedidos = ({ pass }) => {
                                 {p.nombre || 'Sin nombre'}
                                 {p.telefono && <> · <a href={`https://wa.me/${p.telefono.replace(/\D/g, '')}`} target="_blank" rel="noreferrer">{p.telefono}</a></>}
                             </div>
+                            {p.direccion && <div className="pedido-envio">{p.direccion}</div>}
+                            {p.nota && <div className="pedido-nota">“{p.nota}”</div>}
 
                             <ul className="pedido-items">
                                 {(p.items || []).map((it, i) => (
@@ -130,6 +180,26 @@ const Pedidos = ({ pass }) => {
                                 {new Date(p.created_at).toLocaleString('es-MX', { dateStyle: 'medium', timeStyle: 'short' })}
                                 {p.es_anticipo && p.estado === 'pagado' && (
                                     <span className="pedido-resta">Falta cobrar {pesos(p.total - p.monto_cobrado)}</span>
+                                )}
+                            </div>
+
+                            {/* Mover el pedido conforme avanza. Antes solo se podia mirar. */}
+                            <div className="pedido-acciones">
+                                {p.estado !== 'pagado' && (
+                                    <button className="btn-ghost" onClick={() => cambiarEstado(p, 'pagado')}>
+                                        Ya me pagó
+                                    </button>
+                                )}
+                                {p.estado !== 'enviado' && (
+                                    <button className="btn-ghost" onClick={() => cambiarEstado(p, 'enviado')}>
+                                        Ya lo mandé
+                                    </button>
+                                )}
+                                {p.estado !== 'cancelado' && (
+                                    <button className="btn-ghost pedido-cancelar"
+                                        onClick={() => window.confirm(`¿Cancelar el pedido #${p.numero}?`) && cambiarEstado(p, 'cancelado')}>
+                                        Cancelar
+                                    </button>
                                 )}
                             </div>
                         </div>

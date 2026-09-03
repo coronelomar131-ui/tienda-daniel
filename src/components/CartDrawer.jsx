@@ -1,7 +1,7 @@
 import React, { useContext, useEffect, useState } from 'react';
 import { ShopContext } from '../context/shop-context';
 import { waLink } from '../lib/whatsapp';
-import { crearPago, fetchAnticipo } from '../lib/pagos';
+import { fetchAnticipo, crearPedido, datosPago } from '../lib/pagos';
 import { useBloquearScroll } from '../lib/bloquearScroll';
 
 const WhatsAppIcon = () => (
@@ -24,7 +24,10 @@ const CartDrawer = ({ open, onClose }) => {
     const [pagando, setPagando] = useState(false);   // mostrando el formulario
     const [enviando, setEnviando] = useState(false);
     const [error, setError] = useState(null);
-    const [datos, setDatos] = useState({ nombre: '', telefono: '', email: '' });
+    const [datos, setDatos] = useState({ nombre: '', telefono: '', direccion: '', email: '', nota: '' });
+    // Cuando el pedido ya quedo guardado: folio, total y a donde depositar
+    const [hecho, setHecho] = useState(null);
+    const [cuenta, setCuenta] = useState(null);
     const [anticipo, setAnticipo] = useState(false);
     const [pct, setPct] = useState(0);
 
@@ -33,6 +36,7 @@ const CartDrawer = ({ open, onClose }) => {
     useEffect(() => {
         if (!open) return;
         fetchAnticipo().then(setPct).catch(() => setPct(0));
+        datosPago().then(setCuenta).catch(() => setCuenta(null));
     }, [open]);
 
     if (!open) return null;
@@ -56,40 +60,99 @@ const CartDrawer = ({ open, onClose }) => {
         setTimeout(() => { clearCart(); onClose(); }, 400);
     };
 
-    const conAnticipo = pct > 0 && pct < 100;
-    const aCobrar = anticipo && conAnticipo ? Math.round(cartTotal * pct / 100) : cartTotal;
-
-    const pagar = async (e) => {
+    // Guardar el pedido con folio. Antes el pedido solo existia en el chat de
+    // WhatsApp: si el mensaje se perdia entre otras conversaciones, se perdia
+    // la venta y no quedaba de que agarrarse.
+    const hacerPedido = async (e) => {
         e.preventDefault();
         if (!datos.nombre.trim() || !datos.telefono.trim()) {
-            setError('Necesitamos tu nombre y teléfono para el envío');
+            setError('Necesitamos tu nombre y teléfono');
             return;
         }
         setEnviando(true);
         setError(null);
         try {
-            const r = await crearPago({ cart, ...datos, anticipo: anticipo && conAnticipo });
-            window.location.href = r.pagar_en;
+            const r = await crearPedido({ cart, ...datos, anticipo: anticipo && conAnticipo });
+            setHecho({ ...r, lineas: [...cart] });
+            clearCart();
         } catch (err) {
             setError(err.message);
+        } finally {
             setEnviando(false);
         }
     };
+
+    // El mensaje que se manda ya lleva el folio, para que ambos hablen del
+    // mismo pedido en vez de describirlo otra vez.
+    const avisoWhats = hecho && waLink(
+        `Hola, acabo de hacer el pedido #${hecho.folio} por $${hecho.aPagar.toLocaleString('es-MX')} MXN` +
+        (hecho.esAnticipo ? ' (anticipo).' : '.') +
+        (cuenta?.clabe ? '\n\nYa hice la transferencia, aquí va mi comprobante:' : '\n\n¿Cómo le hago para pagar?')
+    );
+
+    // El cobro con tarjeta (crearPago, en lib/pagos.js) sigue armado pero no se
+    // ofrece: no hay token de Mercado Pago cargado, asi que enseñar el boton
+    // seria mandar al cliente a una pantalla que truena. Cuando se active, aqui
+    // vuelve el boton.
+    const conAnticipo = pct > 0 && pct < 100;
 
     return (
         <>
             <div className="cart-overlay" onClick={onClose} />
             <aside className="cart-drawer">
                 <div className="cart-head">
-                    <h3>{pagando ? 'Tus datos' : 'Tu pedido'}</h3>
+                    <h3>{hecho ? `Pedido #${hecho.folio}` : pagando ? 'Tus datos' : 'Tu pedido'}</h3>
                     <button className="cart-close" onClick={onClose} aria-label="Cerrar">×</button>
                 </div>
 
                 <div className="cart-items">
-                    {cart.length === 0 ? (
+                    {hecho ? (
+                        <div className="listo">
+                            <div className="listo-folio">
+                                <span>Tu folio</span>
+                                <strong>#{hecho.folio}</strong>
+                            </div>
+                            <p className="listo-texto">
+                                Ya guardamos tu pedido. Apúntale el folio: con ese número
+                                le damos seguimiento.
+                            </p>
+
+                            <div className="listo-total">
+                                <span>{hecho.esAnticipo ? `Anticipo (${pct}%)` : 'A pagar'}</span>
+                                <strong>${hecho.aPagar.toLocaleString('es-MX')} MXN</strong>
+                            </div>
+                            {hecho.esAnticipo && (
+                                <p className="hint">
+                                    Total del pedido ${hecho.total.toLocaleString('es-MX')} MXN.
+                                    El resto lo pagas al recibir.
+                                </p>
+                            )}
+
+                            {cuenta?.clabe ? (
+                                <div className="listo-cuenta">
+                                    <p className="listo-titulo">Transfiere a:</p>
+                                    {cuenta.banco && <div><span>Banco</span><strong>{cuenta.banco}</strong></div>}
+                                    {cuenta.titular && <div><span>A nombre de</span><strong>{cuenta.titular}</strong></div>}
+                                    <div><span>CLABE</span><strong className="clabe">{cuenta.clabe}</strong></div>
+                                    <button type="button" className="link-btn"
+                                        onClick={() => navigator.clipboard?.writeText(cuenta.clabe)}>
+                                        Copiar CLABE
+                                    </button>
+                                    <p className="hint">
+                                        Pon <strong>#{hecho.folio}</strong> en el concepto y mándanos
+                                        tu comprobante por WhatsApp.
+                                    </p>
+                                </div>
+                            ) : (
+                                <p className="listo-texto">
+                                    Escríbenos por WhatsApp con tu folio y te decimos cómo pagar.
+                                </p>
+                            )}
+                        </div>
+                    ) : cart.length === 0 ? (
                         <div className="cart-empty">Tu carrito está vacío</div>
                     ) : pagando ? (
-                        <form id="form-pago" className="pago-form" onSubmit={pagar}>
+                        <form id="form-pago" className="pago-form" onSubmit={hacerPedido}>
                             <p className="pago-intro">
                                 Para mandarte tu pedido necesitamos saber a quién y a dónde.
                             </p>
@@ -99,9 +162,15 @@ const CartDrawer = ({ open, onClose }) => {
                             <input type="tel" placeholder="Tu WhatsApp" value={datos.telefono}
                                 onChange={(e) => setDatos(d => ({ ...d, telefono: e.target.value }))}
                                 autoComplete="tel" />
+                            <input type="text" placeholder="Dirección de entrega" value={datos.direccion}
+                                onChange={(e) => setDatos(d => ({ ...d, direccion: e.target.value }))}
+                                autoComplete="street-address" />
                             <input type="email" placeholder="Tu correo (opcional)" value={datos.email}
                                 onChange={(e) => setDatos(d => ({ ...d, email: e.target.value }))}
                                 autoComplete="email" />
+                            <textarea placeholder="¿Algo que debamos saber? (opcional)" rows="2"
+                                value={datos.nota}
+                                onChange={(e) => setDatos(d => ({ ...d, nota: e.target.value }))} />
 
                             {conAnticipo && (
                                 <label className="pago-anticipo">
@@ -169,17 +238,27 @@ const CartDrawer = ({ open, onClose }) => {
                     )}
                 </div>
 
-                {cart.length > 0 && (
+                {hecho ? (
+                    <div className="cart-foot">
+                        <a href={avisoWhats} target="_blank" rel="noreferrer" className="cart-wa"
+                           onClick={() => setTimeout(onClose, 400)}>
+                            {cuenta?.clabe ? 'Mandar comprobante' : 'Escribirnos'} <WhatsAppIcon />
+                        </a>
+                        <button className="cart-volver" onClick={() => { setHecho(null); setPagando(false); onClose(); }}>
+                            Seguir viendo
+                        </button>
+                    </div>
+                ) : cart.length > 0 && (
                     <div className="cart-foot">
                         <div className="cart-total">
-                            <span>{anticipo && conAnticipo ? `Anticipo ${pct}%` : 'Total'}</span>
-                            <strong>${aCobrar.toLocaleString('es-MX')} MXN</strong>
+                            <span>Total</span>
+                            <strong>${cartTotal.toLocaleString('es-MX')} MXN</strong>
                         </div>
 
                         {pagando ? (
                             <>
                                 <button type="submit" form="form-pago" className="cart-wa" disabled={enviando}>
-                                    {enviando ? 'Abriendo Mercado Pago…' : 'Ir a pagar'}
+                                    {enviando ? 'Guardando…' : 'Hacer mi pedido'}
                                 </button>
                                 <button className="cart-volver" onClick={() => { setPagando(false); setError(null); }}>
                                     Volver al carrito
@@ -188,10 +267,10 @@ const CartDrawer = ({ open, onClose }) => {
                         ) : (
                             <>
                                 <button className="cart-wa" onClick={() => setPagando(true)}>
-                                    Pagar ahora
+                                    Hacer mi pedido
                                 </button>
                                 <a href={link} target="_blank" rel="noreferrer" className="cart-whats" onClick={handleOrder}>
-                                    O apartar por WhatsApp <WhatsAppIcon />
+                                    O preguntar por WhatsApp <WhatsAppIcon />
                                 </a>
                             </>
                         )}
