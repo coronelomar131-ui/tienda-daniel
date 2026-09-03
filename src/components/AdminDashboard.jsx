@@ -1,6 +1,6 @@
 import React, { useCallback, useState, useContext, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Trash2, Plus, Pencil, ChevronUp, ChevronDown, X, Image as ImageIcon } from 'lucide-react';
+import { Trash2, Plus, Pencil, ChevronUp, ChevronDown, X, Package, Receipt } from 'lucide-react';
 import { ShopContext } from '../context/shop-context';
 import {
     adminAddProduct, adminUpdateProduct, adminDeleteProduct,
@@ -313,17 +313,41 @@ const AdminDashboard = () => {
                     </div>
                 )}
 
-                <div className="admin-tabs">
-                    <button className={tab === 'catalogo' ? 'on' : ''} onClick={() => setTab('catalogo')}>
-                        Mi catálogo ({products.length})
-                    </button>
-                    <button className={tab === 'nuevo' ? 'on' : ''} onClick={() => setTab('nuevo')}>
-                        {editandoId ? 'Editando par' : '+ Añadir par'}
-                    </button>
-                    <button className={tab === 'pedidos' ? 'on' : ''} onClick={() => setTab('pedidos')}>
-                        Pedidos
-                    </button>
+                {/* Barra flotante abajo: se alcanza con el pulgar. Arriba, en un
+                    celular grande, había que estirar la mano para cambiar de
+                    pantalla. La pestaña abierta se rellena y enseña su nombre;
+                    las otras se quedan en puro icono, como en las apps. */}
+                {/* Resumen de un vistazo, como la cartera de la referencia */}
+                <div className="cartera">
+                    <div className="carta">
+                        <span>En el catálogo</span>
+                        <strong>{products.length}</strong>
+                        <small>{products.filter(p => p.status === 'agotado').length} agotados</small>
+                    </div>
+                    <div className="carta">
+                        <span>Con oferta</span>
+                        <strong>{products.filter(p => p.priceBefore).length}</strong>
+                        <small>{products.filter(p => p.destacado).length} destacados</small>
+                    </div>
                 </div>
+
+                <nav className="barra-admin" aria-label="Secciones del panel">
+                    <button className={`pest ${tab === 'catalogo' ? 'on' : ''}`}
+                            onClick={() => setTab('catalogo')} aria-current={tab === 'catalogo'}>
+                        <Package size={19} />
+                        <span>Catálogo</span>
+                    </button>
+                    <button className={`pest ${tab === 'nuevo' ? 'on' : ''}`}
+                            onClick={() => setTab('nuevo')} aria-current={tab === 'nuevo'}>
+                        <Plus size={19} />
+                        <span>{editandoId ? 'Editando' : 'Añadir'}</span>
+                    </button>
+                    <button className={`pest ${tab === 'pedidos' ? 'on' : ''}`}
+                            onClick={() => setTab('pedidos')} aria-current={tab === 'pedidos'}>
+                        <Receipt size={19} />
+                        <span>Pedidos</span>
+                    </button>
+                </nav>
 
                 {tab === 'pedidos' && <Pedidos pass={pass} />}
 

@@ -1681,3 +1681,291 @@ button { font-family: var(--body); }
 
 /* La tira de fotos del formulario */
 .foto-chip { border-radius: 14px; overflow: hidden; box-shadow: inset 0 0 0 1px rgba(10,10,10,.09); }
+
+/* ═══════════════════════════════════════════════════════════════
+   PANEL EN OSCURO, ESTILO DE LA REFERENCIA
+   Va al final del archivo a proposito: asi manda sobre las reglas
+   claras de arriba sin tener que ir persiguiendolas una por una.
+   ═══════════════════════════════════════════════════════════════ */
+
+.admin-page {
+  --tinta: #F5F6F8;              /* texto principal */
+  --tenue: #8B8F98;              /* texto secundario */
+  --carta: rgba(255, 255, 255, 0.055);
+  --canto: rgba(255, 255, 255, 0.10);
+  color: var(--tinta);
+  background: #08090C;
+  padding-bottom: calc(120px + env(safe-area-inset-bottom));
+}
+/* Las manchas de color, mucho mas tenues: sobre negro cualquier color grita */
+.admin-page::before {
+  background:
+    radial-gradient(36% 32% at 18% 10%, rgba(70, 110, 210, 0.24), transparent 70%),
+    radial-gradient(30% 26% at 82% 16%, rgba(194, 87, 13, 0.16), transparent 72%),
+    radial-gradient(42% 34% at 66% 86%, rgba(60, 90, 190, 0.20), transparent 72%);
+  filter: blur(14px);
+}
+
+/* Las tarjetas: vidrio oscuro con luz cayendo de arriba a la izquierda,
+   igual que en la referencia. */
+.admin-page .admin-head,
+.admin-page .admin-card,
+.admin-page .admin-item,
+.admin-page .pedido,
+.admin-page .cartera .carta {
+  background:
+    linear-gradient(145deg, rgba(255, 255, 255, 0.09) 0%, rgba(255, 255, 255, 0.02) 46%, rgba(255, 255, 255, 0) 72%),
+    var(--carta);
+  backdrop-filter: saturate(150%) blur(22px);
+  -webkit-backdrop-filter: saturate(150%) blur(22px);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.13),
+    inset 0 0 0 1px var(--canto),
+    0 10px 30px rgba(0, 0, 0, 0.5);
+}
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .admin-page .admin-head, .admin-page .admin-card,
+  .admin-page .admin-item, .admin-page .cartera .carta { background: #16181E; }
+}
+
+.admin-page .admin-head h2,
+.admin-page .admin-card h3,
+.admin-page .admin-list-title,
+.admin-page .admin-item .info h4 { color: var(--tinta); }
+.admin-page .hint,
+.admin-page .admin-item .info span,
+.admin-page .admin-card p { color: var(--tenue); }
+
+/* Los campos, hundidos en vez de levantados */
+.admin-page .admin-form input,
+.admin-page .admin-form select,
+.admin-page .admin-form textarea {
+  background: rgba(0, 0, 0, 0.34); color: var(--tinta);
+  box-shadow: inset 0 0 0 1px var(--canto);
+}
+.admin-page .admin-form input::placeholder,
+.admin-page .admin-form textarea::placeholder { color: #6B7079; }
+.admin-page .admin-form input:focus,
+.admin-page .admin-form select:focus,
+.admin-page .admin-form textarea:focus {
+  background: rgba(0, 0, 0, 0.5); box-shadow: inset 0 0 0 2px rgba(255, 255, 255, 0.5);
+}
+.admin-page .admin-form select { color: var(--tinta); }
+.admin-page .admin-form select option { background: #16181E; color: var(--tinta); }
+
+/* Botones: el principal en blanco, como el "Iniciar" de la referencia */
+.admin-page .btn-primary,
+.admin-page .cart-wa {
+  background: #fff; color: #0A0A0A;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.45);
+}
+.admin-page .btn-primary:hover { background: #E9EAEE; }
+.admin-page .btn-ghost {
+  background: rgba(255, 255, 255, 0.07); color: var(--tinta);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.12), inset 0 0 0 1px var(--canto);
+}
+.admin-page .btn-ghost:hover { background: rgba(255, 255, 255, 0.13); }
+
+.admin-page .admin-item .del,
+.admin-page .admin-item .orden button {
+  background: rgba(255, 255, 255, 0.07); color: var(--tenue);
+  box-shadow: inset 0 0 0 1px var(--canto);
+}
+.admin-page .admin-item .del:hover { color: #FF6B60; box-shadow: inset 0 0 0 1.5px rgba(255, 107, 96, 0.6); }
+.admin-page .admin-item .orden button:hover:not(:disabled) { color: var(--tinta); box-shadow: inset 0 0 0 1.5px rgba(255,255,255,.4); }
+.admin-page .admin-item .thumb { background: rgba(255, 255, 255, 0.06); box-shadow: inset 0 0 0 1px var(--canto); }
+.admin-page .admin-item.editando { box-shadow: inset 0 0 0 2px #fff, 0 10px 30px rgba(0,0,0,.5); }
+
+.admin-page .switch input { background: rgba(255, 255, 255, 0.12); border-color: transparent; }
+.admin-page .switch span { color: var(--tenue); }
+.admin-page .admin-status {
+  background: rgba(255, 255, 255, 0.06); color: var(--tenue);
+  box-shadow: inset 0 0 0 1px var(--canto);
+}
+.admin-page .admin-status.ok { color: #fff; background: rgba(255,255,255,.1); box-shadow: inset 0 0 0 1.5px rgba(255,255,255,.35); }
+.admin-page .admin-status.error { color: #FF6B60; background: rgba(255, 107, 96, 0.1); box-shadow: inset 0 0 0 1.5px rgba(255, 107, 96, 0.4); }
+.admin-page .admin-card.plegable > summary:hover { background: rgba(255, 255, 255, 0.05); }
+.admin-page .foto-chip { box-shadow: inset 0 0 0 1px var(--canto); }
+.admin-page .link-btn { color: #9FB4E8; }
+.admin-page .cara-foto { background: rgba(255,255,255,.08); box-shadow: inset 0 0 0 1px var(--canto); }
+.admin-page .cara-iniciales { color: var(--tinta); }
+.admin-page .gente-fila { background: rgba(255, 255, 255, 0.05); }
+.admin-page .listo-cuenta, .admin-page .pedidos-vacio { background: rgba(255,255,255,.05); color: var(--tenue); }
+
+/* ---------- LA CARTERA: resumen de un vistazo ---------- */
+.cartera { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; margin-bottom: 16px; }
+.cartera .carta { border-radius: 20px; padding: 16px 18px; display: flex; flex-direction: column; gap: 2px; }
+.cartera .carta span {
+  font-size: 10px; font-weight: 700; letter-spacing: 0.16em; text-transform: uppercase; color: var(--tenue);
+}
+.cartera .carta strong {
+  font-family: var(--display); font-weight: 900; font-size: 40px; line-height: 1.05; color: var(--tinta);
+  font-variant-numeric: tabular-nums;
+}
+.cartera .carta small { font-size: 12px; color: var(--tenue); }
+
+/* ---------- BARRA FLOTANTE DE ABAJO ---------- */
+.barra-admin {
+  position: fixed; z-index: 70;
+  left: 50%; transform: translateX(-50%);
+  bottom: calc(14px + env(safe-area-inset-bottom));
+  display: flex; align-items: center; gap: 4px;
+  padding: 6px; border-radius: 999px;
+  background: rgba(22, 24, 30, 0.72);
+  backdrop-filter: saturate(170%) blur(26px);
+  -webkit-backdrop-filter: saturate(170%) blur(26px);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.16),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.09),
+    0 12px 34px rgba(0, 0, 0, 0.55);
+}
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .barra-admin { background: #1B1D24; }
+}
+.barra-admin .pest {
+  display: flex; align-items: center; gap: 7px;
+  min-height: 46px; padding: 0 15px; border: none; border-radius: 999px;
+  background: transparent; color: var(--tenue); cursor: pointer;
+  font-family: var(--body); font-weight: 700; font-size: 13.5px;
+  transition: color .2s, background .3s ease, padding .3s var(--resorte);
+}
+/* Las que no estan abiertas se quedan en puro icono, como en las apps */
+.barra-admin .pest span { display: none; white-space: nowrap; }
+.barra-admin .pest.on {
+  color: #0A0A0A; background: #fff; padding: 0 18px;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.4);
+}
+.barra-admin .pest.on span { display: inline; }
+.barra-admin .pest:active { transform: scale(0.95); }
+@media (prefers-reduced-motion: reduce) { .barra-admin .pest { transition: none; } }
+
+/* En pantalla grande el panel cabe en dos columnas y la barra estorba */
+@media (min-width: 1041px) { .barra-admin { display: none; } }
+
+/* Sin esto, al rebotar el scroll en el celular se asoma el blanco del body
+   por debajo del panel oscuro y se ve como si la pagina se rompiera. */
+html:has(.admin-page), body:has(.admin-page) { background: #08090C; }
+
+/* ---------- LA LISTA DEL CATALOGO EN EL CELULAR ----------
+   Antes cada par ocupaba 267px: la tarjeta se armaba sola con flex-wrap y cada
+   cosa caia en su propio renglon. Con un chingo de pares eso son tres pantallas
+   por cada tres tenis. Aqui se arma a proposito en dos renglones:
+       [foto] [nombre y precio] [flechas]
+       [agotado] [destacado]          [editar] [borrar]
+   Va al final del archivo y con .admin-page adelante para que le gane a las
+   reglas de mas arriba sin tener que borrarlas. */
+@media (max-width: 680px) {
+  .admin-page .admin-item {
+    display: grid;
+    grid-template-columns: 44px minmax(0, 1fr) auto;
+    grid-template-areas:
+      "foto texto flechas"
+      "mandos mandos mandos";
+    column-gap: 10px; row-gap: 9px;
+    align-items: center;
+    padding: 12px;
+  }
+  .admin-page .admin-item .thumb,
+  .admin-page .admin-item > img { grid-area: foto; width: 44px; height: 44px; margin: 0; }
+  .admin-page .admin-item .info { grid-area: texto; flex-basis: auto; min-width: 0; }
+  .admin-page .admin-item .orden { grid-area: flechas; flex-direction: row; gap: 6px; }
+  .admin-page .admin-item .acciones { grid-area: mandos; }
+
+  /* Dos renglones y lo que sobre se corta: el nombre completo ya se ve en la
+     tienda, aqui solo hace falta reconocer cual par es. */
+  .admin-page .admin-item .info h4 {
+    font-size: 15px; line-height: 1.18; margin-bottom: 2px;
+    display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2;
+    overflow: hidden;
+  }
+  .admin-page .admin-item .info span { font-size: 11px; line-height: 1.4; }
+
+  .admin-page .admin-item .orden button { width: 34px; min-height: 34px; }
+
+  /* Los cuatro mandos en un solo renglon. El flex-wrap es la red por si el
+     telefono es mas angosto de lo que calcule. */
+  .admin-page .admin-item .acciones {
+    display: flex; flex-wrap: wrap; align-items: center; gap: 7px;
+    padding-top: 2px;
+  }
+  /* Medido, no calculado a ojo: dentro de la tarjeta en una pantalla de 360px
+     solo quedan 300px libres. Con los interruptores de 44px y las etiquetas
+     grandes los cuatro mandos pedian 338px, se brincaban de renglon y cada par
+     crecia 48px de mas. Asi piden 287 y caben hasta en las chicas. Lo que se
+     toca sigue siendo toda la etiqueta, no el interruptor solito. */
+  .admin-page .admin-item .acciones .switch { gap: 5px; }
+  .admin-page .admin-item .acciones .switch span { font-size: 10px; letter-spacing: 0; }
+  .admin-page .admin-item .acciones .switch input { width: 36px; height: 22px; border-radius: 11px; }
+  .admin-page .admin-item .acciones .switch input::after { width: 16px; height: 16px; }
+  .admin-page .admin-item .acciones .switch input:checked::after { transform: translateX(14px); }
+  .admin-page .admin-item .acciones .del {
+    width: 38px; min-height: 38px; padding: 0;
+    display: inline-flex; align-items: center; justify-content: center;
+  }
+  /* El primero de los dos botones empuja a los dos hasta la orilla derecha */
+  .admin-page .admin-item .acciones .del.editar { margin-left: auto; }
+}
+
+/* En las pantallas mas angostas los cuatro mandos no caben en un renglon (piden
+   302px y solo hay 300). Dejandolo al flex-wrap, el lapiz se quedaba arriba y
+   el bote de basura se caia solo al renglon de abajo, del lado izquierdo: se
+   veia como error. Aqui el brinco se hace a proposito: los dos interruptores
+   arriba y los dos botones abajo, pegados a la derecha. */
+@media (max-width: 380px) {
+  .admin-page .admin-item .acciones {
+    display: grid; grid-template-columns: minmax(0, 1fr) auto auto;
+    gap: 8px 7px; align-items: center;
+  }
+  .admin-page .admin-item .acciones .switch { grid-row: 1; }
+  .admin-page .admin-item .acciones .switch:first-child { grid-column: 1; }
+  .admin-page .admin-item .acciones .switch.switch-destacado { grid-column: 2 / 4; }
+  .admin-page .admin-item .acciones .del.editar { grid-row: 2; grid-column: 2; margin-left: 0; }
+  .admin-page .admin-item .acciones .del:not(.editar) { grid-row: 2; grid-column: 3; }
+}
+
+/* ---------- PEDIDOS EN OSCURO ----------
+   Esta pantalla se quedo con los colores claros: las cuatro cifras seguian en
+   tarjeta blanca con el numero blanco encima (no se veian), y todo lo que usa
+   --muted o --navy queda muy apagado sobre el negro. */
+.admin-page .cifra {
+  border: none; border-radius: 18px;
+  background:
+    linear-gradient(145deg, rgba(255, 255, 255, 0.09) 0%, rgba(255, 255, 255, 0.02) 46%, rgba(255, 255, 255, 0) 72%),
+    var(--carta);
+  backdrop-filter: saturate(150%) blur(22px);
+  -webkit-backdrop-filter: saturate(150%) blur(22px);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.13),
+    inset 0 0 0 1px var(--canto),
+    0 10px 30px rgba(0, 0, 0, 0.5);
+}
+.admin-page .cifra span { color: var(--tenue); }
+.admin-page .cifra strong { color: var(--tinta); }
+
+.admin-page .anticipo-ajuste { color: var(--tenue); }
+.admin-page .anticipo-ajuste select {
+  background: rgba(255, 255, 255, 0.07); color: var(--tinta);
+  border: none; box-shadow: inset 0 0 0 1px var(--canto);
+}
+.admin-page .anticipo-ajuste select option { background: #16181E; color: var(--tinta); }
+.admin-page .anticipo-ajuste select:focus { box-shadow: inset 0 0 0 1.5px rgba(255, 255, 255, 0.45); }
+
+.admin-page .pedido-cliente,
+.admin-page .pedido-envio,
+.admin-page .pedido-nota,
+.admin-page .pedido-abajo,
+.admin-page .pedido-items li span,
+.admin-page label { color: var(--tenue); }
+.admin-page .pedido-num,
+.admin-page .pedido-arriba strong,
+.admin-page .pedido-items li { color: var(--tinta); }
+.admin-page .pedido-items { border-top-color: var(--canto); }
+.admin-page .pedido-cliente a { color: #9FB4E8; }
+.admin-page .pedido-resta { color: #FFC46B; }
+.admin-page .pedido-cancelar { color: #FF6B60; }
+
+/* Las etiquetas de estado: en claro eran pastel con letra oscura; aqui van al
+   reves, fondo tenue de color y letra clara. */
+.admin-page .pedido-estado.ok     { background: rgba(52, 199, 89, 0.16);  color: #6FE39A; }
+.admin-page .pedido-estado.espera { background: rgba(255, 196, 107, 0.15); color: #FFC46B; }
+.admin-page .pedido-estado.falla  { background: rgba(255, 107, 96, 0.15);  color: #FF8078; }
