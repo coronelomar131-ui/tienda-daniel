@@ -19,6 +19,7 @@ import { verDescuento, pesos, antesDesdePct, pctDesdeAntes } from '../lib/descue
 import { CATEGORIAS } from '../lib/categorias';
 import { comprimirAvatar } from '../lib/avatar';
 import { subirFotos } from '../lib/fotoUpload';
+import MiniFoto from './MiniFoto';
 
 const VACIO = { brand: '', name: '', price: '', priceBefore: '', pct: '', categoria: 'calzado', sizes: '', status: '', desc: '', mlLink: '', videoUrl: '' };
 
@@ -552,9 +553,7 @@ const AdminDashboard = () => {
                                         </button>
                                     </div>
 
-                                    <div className="thumb">
-                                        {p.photoCount ? <ImageIcon size={18} /> : <SneakerArt />}
-                                    </div>
+                                    <MiniFoto par={p} />
 
                                     <div className="info">
                                         <h4>{p.brand} {p.name}</h4>
@@ -582,7 +581,7 @@ const AdminDashboard = () => {
                                     {/* Fija el par en "los que mas se venden". Sirve mientras no
                                         haya ventas con tarjeta: los pedidos por WhatsApp no pasan
                                         por la base y no se pueden contar solos. */}
-                                    <label className={`switch${p.destacado ? ' on' : ''}`}>
+                                    <label className={`switch switch-destacado${p.destacado ? ' on' : ''}`}>
                                         <input
                                             type="checkbox"
                                             checked={!!p.destacado}

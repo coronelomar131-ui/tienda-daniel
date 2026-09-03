@@ -719,44 +719,117 @@ button { font-family: var(--body); }
 .cart-wa:hover { background: var(--navy-soft); }
 .cart-wa svg { width: 16px; height: 16px; }
 
-/* ---------- PANEL ---------- */
-.admin-page { min-height: 100vh; padding: 44px 0; background: var(--paper); color: var(--ink); }
-.admin-head { display: flex; justify-content: space-between; align-items: center; gap: 16px; margin-bottom: 34px; padding-bottom: 17px; border-bottom: 2px solid var(--line); }
-.admin-head h2 { font-family: var(--display); text-transform: uppercase; font-weight: 900; font-size: 38px; line-height: 1; }
-.admin-grid { display: grid; grid-template-columns: 360px 1fr; gap: 30px; align-items: start; }
-.admin-card { border: 1px solid var(--line); border-radius: 3px; padding: 21px; background: var(--paper-2); }
-.admin-card h3, .admin-list-title { font-family: var(--display); text-transform: uppercase; font-weight: 800; font-size: 24px; line-height: 1; margin-bottom: 15px; }
-.admin-form { display: flex; flex-direction: column; gap: 12px; }
+/* ---------- PANEL ----------
+   Mismo vidrio que la tienda. La pagina lleva manchas de color de fondo
+   porque un vidrio sobre blanco liso no dobla nada y se ve plastico. */
+.admin-page {
+  position: relative; isolation: isolate; overflow-x: hidden;
+  min-height: 100dvh; padding: 40px 0 60px; color: var(--ink);
+  padding-top: calc(40px + env(safe-area-inset-top));
+  background: linear-gradient(165deg, #EFF1F6 0%, #E3E7EF 100%);
+}
+.admin-page::before {
+  content: ""; position: fixed; inset: -20%; z-index: -1; pointer-events: none;
+  background:
+    radial-gradient(34% 30% at 16% 12%, rgba(27, 42, 82, 0.22), transparent 70%),
+    radial-gradient(28% 26% at 84% 18%, rgba(194, 87, 13, 0.14), transparent 72%),
+    radial-gradient(40% 34% at 70% 88%, rgba(70, 110, 210, 0.20), transparent 72%),
+    radial-gradient(26% 24% at 24% 82%, rgba(255, 255, 255, 0.9), transparent 72%);
+  filter: blur(10px);
+  animation: nadan 34s ease-in-out infinite alternate;
+}
+@media (prefers-reduced-motion: reduce) { .admin-page::before { animation: none; } }
+
+.admin-head {
+  display: flex; justify-content: space-between; align-items: center; gap: 16px;
+  margin-bottom: 22px; padding: 16px 20px; border-radius: 22px;
+  background: var(--vidrio-luz), rgba(255, 255, 255, 0.55);
+  backdrop-filter: saturate(200%) blur(26px);
+  -webkit-backdrop-filter: saturate(200%) blur(26px);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.9),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.45),
+    0 10px 30px rgba(10, 10, 10, 0.10);
+}
+.admin-head h2 { font-family: var(--display); text-transform: uppercase; font-weight: 900; font-size: 32px; line-height: 1; }
+.admin-grid { display: grid; grid-template-columns: minmax(0, 380px) minmax(0, 1fr); gap: 22px; align-items: start; }
+
+.admin-card {
+  border: none; border-radius: 24px; padding: 22px;
+  background: var(--vidrio-luz), rgba(255, 255, 255, 0.52);
+  backdrop-filter: saturate(200%) blur(26px);
+  -webkit-backdrop-filter: saturate(200%) blur(26px);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.9),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.42),
+    0 10px 30px rgba(10, 10, 10, 0.09);
+}
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .admin-head, .admin-card { background: rgba(255, 255, 255, 0.95); }
+}
+.admin-card h3, .admin-list-title { font-family: var(--display); text-transform: uppercase; font-weight: 800; font-size: 23px; line-height: 1; margin-bottom: 15px; }
+
+.admin-form { display: flex; flex-direction: column; gap: 11px; }
 .admin-form input, .admin-form select, .admin-form textarea {
-  width: 100%; padding: 11px 12px; font-size: 13.5px; font-family: var(--body);
-  border: 1.5px solid var(--line); border-radius: 2px; background: var(--paper); color: var(--ink);
+  width: 100%; padding: 13px 15px; font-size: 16px; font-family: var(--body);
+  border: none; border-radius: 14px; color: var(--ink);
+  background: rgba(255, 255, 255, 0.72);
+  box-shadow: inset 0 0 0 1px rgba(10, 10, 10, 0.09), inset 0 1px 0 rgba(255, 255, 255, 0.9);
+  transition: box-shadow .2s, background .2s;
 }
 .admin-form input::placeholder, .admin-form textarea::placeholder { color: var(--muted); }
-.admin-form input:focus, .admin-form select:focus, .admin-form textarea:focus { outline: none; border-color: var(--navy); }
+.admin-form input:focus, .admin-form select:focus, .admin-form textarea:focus {
+  outline: none; background: #fff;
+  box-shadow: inset 0 0 0 2px var(--navy);
+}
 .admin-form label { font-size: 10.5px; font-weight: 700; letter-spacing: 0.13em; text-transform: uppercase; color: var(--muted); }
 .admin-form .hint { font-size: 11.5px; color: var(--muted); margin-top: -5px; }
 .admin-form .hint-ok { color: var(--navy); font-weight: 600; }
 .admin-form .hint-mal { color: var(--red); font-weight: 600; }
 /* Los dos campos de oferta, juntos: se ve que son la misma cuenta */
 .oferta-campos { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr); gap: 8px; }
-.admin-list { display: flex; flex-direction: column; gap: 9px; }
-.admin-item { display: flex; align-items: center; gap: 13px; padding: 11px 14px; background: var(--paper); border: 1px solid var(--line); border-radius: 3px; }
-.admin-item img, .admin-item .thumb {
-  width: 58px; height: 46px; object-fit: cover; background: var(--paper-2); border-radius: 2px;
-  display: flex; align-items: center; justify-content: center; flex-shrink: 0; overflow: hidden; color: var(--muted);
+.admin-list { display: flex; flex-direction: column; gap: 10px; }
+.admin-item {
+  display: flex; align-items: center; gap: 13px; padding: 12px 14px;
+  border: none; border-radius: 18px;
+  background: var(--vidrio-luz), rgba(255, 255, 255, 0.55);
+  backdrop-filter: saturate(180%) blur(18px);
+  -webkit-backdrop-filter: saturate(180%) blur(18px);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.9),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.4),
+    0 4px 14px rgba(10, 10, 10, 0.07);
+  transition: transform .3s var(--resorte), box-shadow .25s ease;
 }
-.admin-item .thumb .art { width: 92%; }
+.admin-item:hover { transform: translateY(-2px); box-shadow: inset 0 1px 0 rgba(255,255,255,.9), inset 0 0 0 1px rgba(255,255,255,.5), 0 8px 22px rgba(10,10,10,.11); }
+.admin-item.editando { box-shadow: inset 0 0 0 2px var(--navy), 0 8px 22px rgba(27, 42, 82, 0.18); }
+/* La miniatura ahora enseña la foto de verdad, no un icono generico */
+.admin-item img, .admin-item .thumb {
+  width: 62px; height: 62px; object-fit: cover; border-radius: 14px;
+  background: #fff; overflow: hidden; flex-shrink: 0; color: var(--muted);
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: inset 0 0 0 1px rgba(10, 10, 10, 0.08);
+}
+.admin-item .thumb img { width: 100%; height: 100%; object-fit: cover; border-radius: 0; box-shadow: none; }
+.admin-item .thumb .art { width: 88%; }
 .admin-item .info { flex: 1; min-width: 0; }
 .admin-item .info h4 { font-family: var(--display); text-transform: uppercase; font-weight: 800; font-size: 19px; line-height: 1; margin-bottom: 3px; }
 .admin-item .info span { font-size: 12px; color: var(--muted); }
 .admin-item .del {
-  background: none; border: 1.5px solid var(--line); border-radius: 2px; color: var(--muted);
-  padding: 8px 10px; cursor: pointer; transition: border-color .2s, color .2s; display: flex; align-items: center; flex-shrink: 0;
+  background: rgba(255, 255, 255, 0.7); border: none; border-radius: 999px; color: var(--muted);
+  padding: 9px 11px; cursor: pointer; display: flex; align-items: center; flex-shrink: 0;
+  box-shadow: inset 0 0 0 1px rgba(10, 10, 10, 0.1);
+  transition: color .2s, box-shadow .2s, transform .25s var(--resorte);
 }
-.admin-item .del:hover { border-color: var(--red); color: var(--red); }
-.admin-status { font-size: 13px; padding: 10px 12px; border-radius: 2px; border: 1.5px solid var(--line); color: var(--muted); background: var(--paper-2); }
-.admin-status.error { border-color: var(--red); color: var(--red); background: #FDF2F1; }
-.admin-status.ok { border-color: var(--navy); color: var(--navy); background: var(--navy-wash); }
+.admin-item .del:active { transform: scale(0.92); }
+.admin-item .del:hover { color: var(--red); box-shadow: inset 0 0 0 1.5px var(--red); }
+.admin-status {
+  font-size: 13.5px; font-weight: 600; padding: 13px 16px; border-radius: 16px;
+  color: var(--muted); background: rgba(255, 255, 255, 0.7);
+  box-shadow: inset 0 0 0 1px rgba(10, 10, 10, 0.08);
+}
+.admin-status.error { color: var(--red); background: rgba(253, 242, 241, 0.85); box-shadow: inset 0 0 0 1.5px rgba(179, 38, 30, 0.35); }
+.admin-status.ok { color: var(--navy); background: rgba(238, 241, 247, 0.85); box-shadow: inset 0 0 0 1.5px rgba(27, 42, 82, 0.28); }
 
 /* ---------- ENTRADA AL PANEL ----------
    La tarjeta es de vidrio, y para que se vea vidrio necesita algo variado
@@ -981,12 +1054,14 @@ button { font-family: var(--body); }
 .admin-item.editando { border-color: var(--navy); background: var(--navy-wash); }
 .admin-item .orden { display: flex; flex-direction: column; gap: 3px; flex-shrink: 0; }
 .admin-item .orden button {
-  width: 26px; height: 22px; border: 1.5px solid var(--line); background: var(--paper);
-  border-radius: 2px; cursor: pointer; color: var(--muted);
-  display: flex; align-items: center; justify-content: center; padding: 0;
-  transition: border-color .2s, color .2s;
+  width: 34px; height: 30px; display: flex; align-items: center; justify-content: center;
+  border: none; border-radius: 999px; cursor: pointer; color: var(--muted);
+  background: rgba(255, 255, 255, 0.75);
+  box-shadow: inset 0 0 0 1px rgba(10, 10, 10, 0.09);
+  transition: color .2s, box-shadow .2s, transform .25s var(--resorte);
 }
-.admin-item .orden button:hover:not(:disabled) { border-color: var(--navy); color: var(--navy); }
+.admin-item .orden button:active:not(:disabled) { transform: scale(0.9); }
+.admin-item .orden button:hover:not(:disabled) { color: var(--navy); box-shadow: inset 0 0 0 1.5px var(--navy); }
 .admin-item .orden button:disabled { opacity: 0.35; cursor: not-allowed; }
 .admin-item .del.editar:hover { border-color: var(--navy); color: var(--navy); }
 
@@ -1000,15 +1075,13 @@ button { font-family: var(--body); }
 .switch input:checked::after { transform: translateX(16px); background: #fff; }
 .switch span { font-size: 10.5px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); }
 .switch.on span { color: var(--red); }
+/* El rojo en la tienda significa "agotado". Un par destacado no es una
+   advertencia, asi que ese interruptor va en navy. */
+.switch-destacado input:checked { background: var(--navy); border-color: var(--navy); }
+.switch-destacado.on span { color: var(--navy); }
 
 @media (max-width: 900px) {
   .ficha-grid { grid-template-columns: minmax(0, 1fr); gap: 24px; }
-}
-@media (max-width: 680px) {
-  .admin-item { flex-wrap: wrap; }
-  .admin-item .info { flex-basis: 100%; order: 3; }
-  .switch { order: 4; }
-  .mini { width: 60px; height: 60px; }
 }
 
 /* ---------- PANEL EN CELULAR: pestañas ---------- */
@@ -1031,22 +1104,32 @@ button { font-family: var(--body); }
   .admin-tabs {
     display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px;
     position: sticky; top: 0; z-index: 20;
-    background: var(--vidrio-luz), var(--vidrio); padding: 10px 0 12px; margin-bottom: 4px;
-    backdrop-filter: var(--vidrio-blur);
-    -webkit-backdrop-filter: var(--vidrio-blur);
+    background: transparent; padding: 10px 0 12px; margin-bottom: 4px;
   }
   @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
     .admin-tabs { background: var(--paper); }
   }
   .admin-tabs button {
     font-family: var(--display); text-transform: uppercase; font-weight: 800;
-    font-size: 17px; letter-spacing: 0.03em;
-    padding: 13px 10px; border-radius: 2px; cursor: pointer;
-    background: var(--paper); color: var(--muted);
-    border: 1.5px solid var(--line);
-    transition: background .2s, color .2s, border-color .2s;
+    font-size: 16px; letter-spacing: 0.03em; min-height: 52px;
+    padding: 12px 8px; border-radius: 999px; cursor: pointer; border: none;
+    color: var(--muted);
+    background: var(--vidrio-luz), rgba(255, 255, 255, 0.55);
+    backdrop-filter: saturate(180%) blur(18px);
+    -webkit-backdrop-filter: saturate(180%) blur(18px);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.9),
+      inset 0 0 0 1px rgba(255, 255, 255, 0.42),
+      0 4px 14px rgba(10, 10, 10, 0.07);
+    transition: color .2s, background .25s ease, transform .28s var(--resorte);
   }
-  .admin-tabs button.on { background: var(--navy); color: #fff; border-color: var(--navy); }
+  .admin-tabs button:active { transform: scale(0.96); }
+  /* La pestaña abierta se rellena de navy, igual que el boton del carrito */
+  .admin-tabs button.on {
+    color: #fff;
+    background: linear-gradient(180deg, rgba(255,255,255,.22), rgba(255,255,255,0) 58%), var(--navy);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.3), 0 6px 18px rgba(27, 42, 82, 0.28);
+  }
 
   .admin-grid.tab-catalogo .col-form { display: none; }
   /* la pestaña ya dice "Mi catálogo", el título repetía */
@@ -1060,13 +1143,24 @@ button { font-family: var(--body); }
   .admin-head { margin-bottom: 8px; padding-bottom: 12px; }
   .admin-head h2 { font-size: 28px; }
 
-  /* Filas mas altas y botones que si se pueden tocar con el dedo */
-  .admin-item { padding: 13px 12px; gap: 10px; align-items: flex-start; }
+  /* Filas mas altas y botones que si se pueden tocar con el dedo.
+     flex-wrap es lo que hace que la tarjeta se arme en varios renglones en vez
+     de una sola linea que se sale de la pantalla. */
+  .admin-item { padding: 13px 12px; gap: 10px; align-items: flex-start; flex-wrap: wrap; }
+  .admin-item .info { flex-basis: 100%; order: 3; }
   .admin-item .thumb { width: 46px; height: 46px; }
   .admin-item .info h4 { font-size: 17px; }
   .admin-item .info span { font-size: 11.5px; line-height: 1.45; display: block; }
-  .admin-item .acciones { flex-basis: 100%; order: 5; justify-content: space-between; padding-top: 4px; }
-  .admin-item .orden { flex-direction: row; gap: 6px; order: 6; }
+  /* Los dos interruptores comparten renglon, cada uno con su mitad. En una
+     sola linea con los botones, "DESTACADO" se salia de la tarjeta y quedaba
+     cortado. Los botones se van al renglon de abajo, juntos. */
+  .admin-item .acciones {
+    flex-basis: 100%; order: 5; padding-top: 4px;
+    display: grid; grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px; align-items: center;
+  }
+  .admin-item .acciones .del { grid-row: 2; justify-self: start; }
+  .admin-item .orden { flex-direction: row; gap: 8px; order: 6; }
   .admin-item .orden button { width: 46px; min-height: 44px; }
   .admin-item .del { padding: 10px 16px; min-height: 44px; }
   .switch input { width: 44px; height: 26px; border-radius: 13px; }
@@ -1553,3 +1647,37 @@ button { font-family: var(--body); }
 .pedido-acciones { display: flex; flex-wrap: wrap; gap: 7px; margin-top: 10px; }
 .pedido-acciones .btn-ghost { font-size: 12.5px; padding: 8px 13px; min-height: 38px; }
 .pedido-cancelar { color: var(--red); }
+
+/* ---------- BOTONES DEL PANEL, EN VIDRIO ---------- */
+.admin-page .btn-ghost, .admin-page .btn-primary {
+  border-radius: 999px; min-height: 46px; border: none;
+  transition: transform .28s var(--resorte), background .2s, box-shadow .2s;
+}
+.admin-page .btn-ghost {
+  background: var(--vidrio-luz), rgba(255, 255, 255, 0.6);
+  backdrop-filter: saturate(180%) blur(16px);
+  -webkit-backdrop-filter: saturate(180%) blur(16px);
+  color: var(--ink);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.9),
+    inset 0 0 0 1px rgba(10, 10, 10, 0.09),
+    0 3px 10px rgba(10, 10, 10, 0.07);
+}
+.admin-page .btn-ghost:hover { background: #fff; }
+.admin-page .btn-ghost:active, .admin-page .btn-primary:active { transform: scale(0.97); }
+.admin-page .btn-primary {
+  background: linear-gradient(180deg, rgba(255,255,255,.22), rgba(255,255,255,0) 58%), var(--navy);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.3), 0 6px 18px rgba(27, 42, 82, 0.26);
+}
+
+/* Las secciones que se abren y cierran, tambien de vidrio */
+.admin-card.plegable > summary {
+  border-radius: 14px; padding: 12px 14px; margin: -4px -4px 0;
+  cursor: pointer; list-style: none;
+  transition: background .2s;
+}
+.admin-card.plegable > summary:hover { background: rgba(255, 255, 255, 0.5); }
+.admin-card.plegable > summary::-webkit-details-marker { display: none; }
+
+/* La tira de fotos del formulario */
+.foto-chip { border-radius: 14px; overflow: hidden; box-shadow: inset 0 0 0 1px rgba(10,10,10,.09); }
