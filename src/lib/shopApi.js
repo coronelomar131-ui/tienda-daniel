@@ -51,14 +51,67 @@ export async function fetchProduct(id) {
 }
 
 // Galeria de un par, en el orden en que el dueno la subio.
-export async function fetchPhotos(productId) {
-    const { data, error } = await conLimite(supabase
-        .from('product_photos')
-        .select('id, data, position')
-        .eq('product_id', productId)
-        .order('position', { ascending: true }));
-    if (error) throw new Error(mensajeDeError(error));
-    return data || [];
+// Las fotos se piden UNA vez por par y se juntan en un solo viaje.
+//
+// Antes cada componente pedia por su cuenta: la tarjeta, la banda de vidrio y
+// la cinta del fondo terminaban pidiendo la MISMA foto por separado. Con 12
+// pares eran 19 peticiones y 3.4 MB, casi todo repetido.
+const cacheFotos = new Map();     // id -> promesa con sus fotos
+let enCola = new Map();           // id -> [quienes esperan]
+let vaciadoProgramado = false;
+
+// Al recargar el catalogo (por ejemplo, si el dueño acaba de editar un par)
+// hay que soltar lo guardado o seguiriamos enseñando las fotos viejas.
+export function olvidarFotos() {
+    cacheFotos.clear();
+}
+
+async function vaciarCola() {
+    const lote = enCola;
+    enCola = new Map();
+    vaciadoProgramado = false;
+    const ids = [...lote.keys()];
+
+    try {
+        const { data, error } = await conLimite(supabase
+            .from('product_photos')
+            .select('id, product_id, data, position')
+            .in('product_id', ids)
+            .order('position', { ascending: true }), LIMITE_FOTOS);
+        if (error) throw new Error(mensajeDeError(error));
+
+        const porPar = new Map();
+        for (const f of data || []) {
+            if (!porPar.has(f.product_id)) porPar.set(f.product_id, []);
+            porPar.get(f.product_id).push(f);
+        }
+        for (const [id, esperando] of lote) {
+            const fotos = porPar.get(id) || [];
+            esperando.forEach(e => e.listo(fotos));
+        }
+    } catch (err) {
+        for (const [id, esperando] of lote) {
+            cacheFotos.delete(id);       // que se pueda reintentar
+            esperando.forEach(e => e.falla(err));
+        }
+    }
+}
+
+export function fetchPhotos(productId) {
+    if (cacheFotos.has(productId)) return cacheFotos.get(productId);
+
+    const promesa = new Promise((listo, falla) => {
+        if (!enCola.has(productId)) enCola.set(productId, []);
+        enCola.get(productId).push({ listo, falla });
+        if (!vaciadoProgramado) {
+            vaciadoProgramado = true;
+            // Un respiro para que lo que se pida en el mismo momento viaje junto.
+            setTimeout(vaciarCola, 24);
+        }
+    });
+
+    cacheFotos.set(productId, promesa);
+    return promesa;
 }
 
 const rpc = async (fn, args, ms = LIMITE * 3) => {

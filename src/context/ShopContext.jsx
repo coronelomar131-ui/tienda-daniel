@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { ShopContext } from './shop-context';
-import { fetchProducts } from '../lib/shopApi';
+import { fetchProducts, olvidarFotos } from '../lib/shopApi';
 import { sampleProducts } from '../data/sampleProducts';
 import { useRefrescarAlVolver } from '../lib/alVolver';
 
@@ -31,6 +31,7 @@ export const ShopProvider = ({ children }) => {
     // todos tus clientes al instante.
     const reload = useCallback(async () => {
         setLoading(true);
+        olvidarFotos();   // si el dueño acaba de cambiar una foto, que se vea la nueva
         try {
             setProducts(await fetchProducts());
             setLoadError(null);

@@ -8,7 +8,7 @@ import { useEnPantalla } from '../lib/useEnPantalla';
 // en cada cambio parpadearia y seria una llamada a la base cada pocos
 // segundos por cada banda.
 const FotoRotativa = ({ pares = [], intervalo = 4200, desfase = 0 }) => {
-    const [fotos, caja] = useFotos(pares);
+    const [fotos, caja] = useFotos(pares, 4);
     const [mirilla, visible] = useEnPantalla();
     // Se guarda cual sale ademas de cual entra: son las dos unicas que se
     // animan. Las demas esperan abajo sin transicion, para que no se vea
@@ -38,7 +38,7 @@ const FotoRotativa = ({ pares = [], intervalo = 4200, desfase = 0 }) => {
             <span ref={mirilla} className="mirilla" aria-hidden="true" />
             {fotos.length === 0 ? <SneakerArt /> : fotos.map((src, n) => (
                 <img key={n} src={src} alt="" aria-hidden="true"
-                     className={`rotativa-foto${clase(n)}`} />
+                     className={`rotativa-foto${clase(n)}`} loading="lazy" decoding="async" />
             ))}
         </span>
     );
