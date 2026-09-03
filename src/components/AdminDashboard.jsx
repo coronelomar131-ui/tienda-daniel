@@ -1,10 +1,11 @@
-import React, { useState, useContext, useEffect, useMemo } from 'react';
+import React, { useCallback, useState, useContext, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Trash2, Plus, Pencil, ChevronUp, ChevronDown, X, Image as ImageIcon } from 'lucide-react';
 import { ShopContext } from '../context/shop-context';
 import {
     adminAddProduct, adminUpdateProduct, adminDeleteProduct,
     adminSetStatus, adminSetDestacado, adminMoveProduct, adminAddPhotos, adminDeletePhoto,
+    adminCaras, adminCrearUsuario, adminQuitarUsuario,
     adminSetPassword, fetchPhotos,
 } from '../lib/shopApi';
 import { comprimirImagen } from '../lib/image';
@@ -16,6 +17,7 @@ import Pedidos from './Pedidos';
 import { leerTallas, escribirTallas } from '../lib/tallas';
 import { verDescuento, pesos, antesDesdePct, pctDesdeAntes } from '../lib/descuento';
 import { CATEGORIAS } from '../lib/categorias';
+import { comprimirAvatar } from '../lib/avatar';
 
 const VACIO = { brand: '', name: '', price: '', priceBefore: '', pct: '', categoria: 'calzado', sizes: '', status: '', desc: '', mlLink: '', videoUrl: '' };
 
@@ -26,6 +28,38 @@ const AdminDashboard = () => {
 
     const [form, setForm] = useState(VACIO);
     // Lo que se entendió del campo de tallas, para enseñárselo mientras escribe.
+    // Gente que puede entrar al panel
+    const [gente, setGente] = useState([]);
+    const [nuevoNombre, setNuevoNombre] = useState('');
+    const [nuevaClave, setNuevaClave] = useState('');
+    const [nuevaFoto, setNuevaFoto] = useState('');
+
+    const cargarGente = useCallback(() => {
+        adminCaras().then(g => setGente(g || [])).catch(() => setGente([]));
+    }, []);
+    useEffect(() => { cargarGente(); }, [cargarGente]);
+
+    const elegirFoto = async (e) => {
+        const f = e.target.files?.[0];
+        if (!f) return;
+        try { setNuevaFoto(await comprimirAvatar(f)); }
+        catch (err) { setAviso({ tipo: 'error', texto: err.message }); }
+    };
+
+    const darDeAlta = (e) => {
+        e.preventDefault();
+        correr(async () => {
+            await adminCrearUsuario(pass, nuevoNombre, nuevaFoto, nuevaClave);
+            setNuevoNombre(''); setNuevaClave(''); setNuevaFoto('');
+            cargarGente();
+        }, 'Ya puede entrar.');
+    };
+
+    const quitarDelPanel = (u) => {
+        if (!window.confirm(`¿Quitar a ${u.nombre} del panel? Ya no va a poder entrar.`)) return;
+        correr(async () => { await adminQuitarUsuario(pass, u.id); cargarGente(); }, 'Quitado.');
+    };
+
     const tallasLeidas = useMemo(() => leerTallas(form.sizes), [form.sizes]);
     // El descuento que va a ver el cliente, calculado igual que en la tienda.
     const ofertaPrevia = useMemo(
@@ -429,6 +463,48 @@ const AdminDashboard = () => {
                                         disabled={!!subiendoVideo} style={{ marginTop: '6px' }} />
                                 </label>
                             )}
+                        </details>
+
+                        <details className="admin-card plegable" style={{ marginTop: '18px' }}>
+                            <summary>Quién puede entrar ({gente.length})</summary>
+
+                            {gente.length > 0 && (
+                                <div className="gente-lista">
+                                    {gente.map(u => (
+                                        <div className="gente-fila" key={u.id}>
+                                            <span className="cara-foto">
+                                                {u.foto ? <img src={u.foto} alt="" />
+                                                        : <span className="cara-iniciales">{(u.nombre || '?')[0].toUpperCase()}</span>}
+                                            </span>
+                                            <strong>{u.nombre}</strong>
+                                            <button className="del" onClick={() => quitarDelPanel(u)}
+                                                    aria-label={`Quitar a ${u.nombre}`}>
+                                                <Trash2 size={16} />
+                                            </button>
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+
+                            <form onSubmit={darDeAlta} className="admin-form" style={{ marginTop: '14px' }}>
+                                <div className="alta-foto">
+                                    <label className="cara-foto alta-foto-boton">
+                                        {nuevaFoto ? <img src={nuevaFoto} alt="" />
+                                                   : <span className="cara-iniciales">+</span>}
+                                        <input type="file" accept="image/*" onChange={elegirFoto} hidden />
+                                    </label>
+                                    <p className="hint">Su foto (opcional). Sale en la pantalla de entrada.</p>
+                                </div>
+                                <input type="text" placeholder="Nombre" value={nuevoNombre}
+                                    onChange={(e) => setNuevoNombre(e.target.value)} />
+                                <input type="password" placeholder="Su clave (mínimo 6)" value={nuevaClave}
+                                    onChange={(e) => setNuevaClave(e.target.value)} autoComplete="new-password" />
+                                <button type="submit" className="btn-ghost" disabled={ocupado}>Dar de alta</button>
+                                <p className="hint">
+                                    Cada quien entra con su propia clave. La tuya de dueño sigue
+                                    funcionando aunque quites a todos.
+                                </p>
+                            </form>
                         </details>
 
                         <details className="admin-card plegable" style={{ marginTop: '18px' }}>

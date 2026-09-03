@@ -134,6 +134,14 @@ export const adminSetHeroVideo = (pass, url) => rpc('admin_set_hero_video', { pa
 export const adminIsClaimed   = () => rpc('admin_is_claimed', {}, LIMITE);
 export const adminClaim       = (pass) => rpc('admin_claim', { new_pass: pass });
 export const adminLogin       = (pass) => rpc('admin_login', { pass });
+// --- Gente que puede entrar al panel ---
+export const adminCaras        = () => rpc('admin_caras', {}, LIMITE);
+export const adminEntrar       = (id, pass) => rpc('admin_entrar', { p_id: id, pass });
+export const adminQuien        = (pass) => rpc('admin_quien', { pass });
+export const adminCrearUsuario = (pass, nombre, foto, clave) =>
+    rpc('admin_crear_usuario', { pass, p_nombre: nombre, p_foto: foto || null, p_clave: clave }, LIMITE_FOTOS);
+export const adminQuitarUsuario = (pass, id) => rpc('admin_quitar_usuario', { pass, p_id: id });
+
 export const adminSetPassword = (oldPass, newPass) =>
     rpc('admin_set_password', { old_pass: oldPass, new_pass: newPass });
 
