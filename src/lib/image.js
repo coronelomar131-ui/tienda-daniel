@@ -1,11 +1,16 @@
 // Achica y comprime la foto antes de guardarla: las fotos de celular pesan
 // varios MB y asi bajan a ~150 KB sin que se note en pantalla.
-// 900px y calidad 0.72. Las fotos salian de 100 a 220 KB cada una, y en la
-// tienda se ven a 400px de ancho como mucho: se estaba mandando el triple de
-// pixeles de los que caben en pantalla. Ademas se guardan en base64, que pesa
-// otro 33% mas que el archivo original.
-const MAX_LADO = 900;
-const CALIDAD = 0.72;
+// 1200px y calidad 0.82.
+//
+// Se habian bajado a 900/0.72 cuando las fotos vivian DENTRO de la base en
+// texto base64: ahi cada kilobyte se pagaba caro porque se volvia a bajar
+// completo en cada visita, sin poder guardarse en cache.
+//
+// Ya no es el caso: ahora van a la bodega de archivos, se sirven por la red de
+// entrega y el navegador las guarda. Bajarle a la calidad dejo de tener
+// sentido, y en unos tenis la calidad es la venta.
+const MAX_LADO = 1200;
+const CALIDAD = 0.82;
 
 export function comprimirImagen(file) {
     return new Promise((resolve, reject) => {

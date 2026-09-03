@@ -833,7 +833,7 @@ button { font-family: var(--body); }
   text-align: center; line-height: 1.2; letter-spacing: 0;
   text-transform: none;
 }
-.cara-otro .cara-foto { background: rgba(255, 255, 255, 0.6); }
+.login-otra { display: block; margin: 16px auto 0; color: var(--muted); }
 
 /* Ya elegida, arriba del campo de la clave */
 .cara-elegida {

@@ -40,10 +40,13 @@ const AdminLogin = () => {
             if (claimed === false) {
                 if (pass !== pass2) throw new Error('Las dos claves no son iguales');
                 await adminClaim(pass);
-            } else if (quien) {
+            } else if (quien?.id) {
+                // Alguien de la lista: se revisa contra SU clave.
                 const ok = await adminEntrar(quien.id, pass);
                 if (!ok) throw new Error('Esa no es la clave de ' + quien.nombre);
             } else {
+                // Sin id: es el dueño entrando por la salida de emergencia, y
+                // esa va contra la clave maestra, no contra la de un empleado.
                 const ok = await adminLogin(pass);
                 if (!ok) throw new Error('Clave incorrecta');
             }
@@ -82,6 +85,7 @@ const AdminLogin = () => {
                         Reintentar
                     </button>
                 ) : eligiendo ? (
+                    <>
                     <div className="caras">
                         {caras.map(c => (
                             <button key={c.id} className="cara" onClick={() => { setQuien(c); setError(''); }}>
@@ -93,11 +97,16 @@ const AdminLogin = () => {
                                 <span className="cara-nombre">{c.nombre}</span>
                             </button>
                         ))}
-                        <button className="cara cara-otro" onClick={() => setQuien({ id: null, nombre: 'el dueño' })}>
-                            <span className="cara-foto"><span className="cara-iniciales">·</span></span>
-                            <span className="cara-nombre">Soy el dueño</span>
-                        </button>
                     </div>
+                    {/* Salida de emergencia. La clave de dueño sigue sirviendo,
+                        pero sin una puerta en pantalla no habria como usarla: si
+                        da de alta gente y se le olvida crearse a si mismo, se
+                        queda fuera de su propia tienda. */}
+                    <button type="button" className="link-btn login-otra"
+                            onClick={() => setQuien({ id: null, nombre: 'el dueño' })}>
+                        No estoy en la lista
+                    </button>
+                    </>
                 ) : (
                     <form onSubmit={entrar}>
                         {quien && quien.id && (
