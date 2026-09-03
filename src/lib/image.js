@@ -28,7 +28,12 @@ export function comprimirImagen(file) {
                 ctx.fillRect(0, 0, w, h);
                 ctx.drawImage(img, 0, 0, w, h);
 
-                resolve(canvas.toDataURL('image/jpeg', CALIDAD));
+                // Se devuelve el archivo, no texto base64: se sube a la
+                // bodega tal cual y pesa 33% menos que su version en texto.
+                canvas.toBlob(
+                    (blob) => blob ? resolve(blob) : reject(new Error('No se pudo procesar la foto')),
+                    'image/jpeg', CALIDAD
+                );
             };
             img.src = reader.result;
         };

@@ -18,6 +18,7 @@ import { leerTallas, escribirTallas } from '../lib/tallas';
 import { verDescuento, pesos, antesDesdePct, pctDesdeAntes } from '../lib/descuento';
 import { CATEGORIAS } from '../lib/categorias';
 import { comprimirAvatar } from '../lib/avatar';
+import { subirFotos } from '../lib/fotoUpload';
 
 const VACIO = { brand: '', name: '', price: '', priceBefore: '', pct: '', categoria: 'calzado', sizes: '', status: '', desc: '', mlLink: '', videoUrl: '' };
 
@@ -91,7 +92,8 @@ const AdminDashboard = () => {
         priceBefore: f.pct === '' ? f.priceBefore : (antesDesdePct(valor, f.pct) ?? ''),
     }));
     const [editandoId, setEditandoId] = useState(null);   // null = alta nueva
-    const [fotosNuevas, setFotosNuevas] = useState([]);   // data URLs por subir
+    // Archivos comprimidos que esperan a subirse, con su vista previa local
+    const [fotosNuevas, setFotosNuevas] = useState([]);   // [{blob, previa}]
     const [galeria, setGaleria] = useState([]);           // fotos ya guardadas del par en edicion
 
     const [aviso, setAviso] = useState(null);
@@ -170,8 +172,11 @@ const AdminDashboard = () => {
     const limpiar = () => {
         setForm(VACIO);
         setEditandoId(null);
-        setFotosNuevas([]);
+        // Se sueltan las vistas previas: cada una reserva memoria hasta que se
+        // le avisa al navegador que ya no se ocupa.
+        setFotosNuevas(lista => { lista.forEach(f => URL.revokeObjectURL(f.previa)); return []; });
         setGaleria([]);
+        setSubiendoVideo('');
     };
 
     const correr = async (accion, exito) => {
@@ -194,7 +199,9 @@ const AdminDashboard = () => {
         setAviso(null);
         try {
             const comprimidas = await Promise.all(files.map(comprimirImagen));
-            setFotosNuevas(prev => [...prev, ...comprimidas]);
+            setFotosNuevas(prev => [...prev, ...comprimidas.map(blob => ({
+                blob, previa: URL.createObjectURL(blob),
+            }))]);
         } catch (err) {
             setAviso({ tipo: 'error', texto: err.message });
         }
@@ -240,13 +247,16 @@ const AdminDashboard = () => {
         if (editandoId) {
             await correr(async () => {
                 await adminUpdateProduct(pass, editandoId, datos);
-                if (fotosNuevas.length) await adminAddPhotos(pass, editandoId, fotosNuevas);
+                if (fotosNuevas.length) {
+                    const urls = await subirFotos(pass, fotosNuevas.map(f => f.blob), setSubiendoVideo);
+                    await adminAddPhotos(pass, editandoId, urls);
+                }
             }, 'Cambios guardados.');
         } else {
-            await correr(
-                () => adminAddProduct(pass, { ...datos, photos: fotosNuevas }),
-                'Listo, ya está en tu tienda.'
-            );
+            await correr(async () => {
+                const urls = await subirFotos(pass, fotosNuevas.map(f => f.blob), setSubiendoVideo);
+                return adminAddProduct(pass, { ...datos, photos: urls });
+            }, 'Listo, ya está en tu tienda.');
         }
         limpiar();
         setTab('catalogo');
@@ -417,11 +427,14 @@ const AdminDashboard = () => {
                                                 </button>
                                             </div>
                                         ))}
-                                        {fotosNuevas.map((d, i) => (
+                                        {fotosNuevas.map((f, i) => (
                                             <div className="foto-chip nueva" key={`n${i}`}>
-                                                <img src={d} alt="" />
+                                                <img src={f.previa} alt="" />
                                                 <button type="button"
-                                                    onClick={() => setFotosNuevas(f => f.filter((_, j) => j !== i))}
+                                                    onClick={() => setFotosNuevas(lista => {
+                                                        URL.revokeObjectURL(lista[i]?.previa);
+                                                        return lista.filter((_, j) => j !== i);
+                                                    })}
                                                     aria-label="Quitar foto">
                                                     <X size={12} />
                                                 </button>

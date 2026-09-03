@@ -75,7 +75,7 @@ async function vaciarCola() {
     try {
         const { data, error } = await conLimite(supabase
             .from('product_photos')
-            .select('id, product_id, data, position')
+            .select('id, product_id, url, data, position')
             .in('product_id', ids)
             .order('position', { ascending: true }), LIMITE_FOTOS);
         if (error) throw new Error(mensajeDeError(error));
@@ -83,7 +83,9 @@ async function vaciarCola() {
         const porPar = new Map();
         for (const f of data || []) {
             if (!porPar.has(f.product_id)) porPar.set(f.product_id, []);
-            porPar.get(f.product_id).push(f);
+            // url es la foto en la bodega; data es el base64 de las que ya
+            // estaban subidas antes. Se prefiere la bodega.
+            porPar.get(f.product_id).push({ ...f, data: f.url || f.data });
         }
         for (const [id, esperando] of lote) {
             const fotos = porPar.get(id) || [];
