@@ -1,7 +1,7 @@
 import React, { useContext, useEffect, useState } from 'react';
 import { ShopContext } from '../context/shop-context';
 import { waLink } from '../lib/whatsapp';
-import { fetchAnticipo, crearPedido, datosPago } from '../lib/pagos';
+import { fetchAnticipo, crearPedido, datosPago, crearPago, pagosTarjetaListos } from '../lib/pagos';
 import { useBloquearScroll } from '../lib/bloquearScroll';
 
 const WhatsAppIcon = () => (
@@ -30,6 +30,10 @@ const CartDrawer = ({ open, onClose }) => {
     const [cuenta, setCuenta] = useState(null);
     const [anticipo, setAnticipo] = useState(false);
     const [pct, setPct] = useState(0);
+    // El cobro con tarjeta solo se ofrece si el servidor ya trae el token de
+    // Mercado Pago cargado. Ver pagosTarjetaListos en lib/pagos.js.
+    const [tarjetaLista, setTarjetaLista] = useState(false);
+    const [yendoATarjeta, setYendoATarjeta] = useState(false);
 
     useBloquearScroll(open);
 
@@ -37,6 +41,7 @@ const CartDrawer = ({ open, onClose }) => {
         if (!open) return;
         fetchAnticipo().then(setPct).catch(() => setPct(0));
         datosPago().then(setCuenta).catch(() => setCuenta(null));
+        pagosTarjetaListos().then(setTarjetaLista).catch(() => setTarjetaLista(false));
     }, [open]);
 
     if (!open) return null;
@@ -63,12 +68,26 @@ const CartDrawer = ({ open, onClose }) => {
     // Guardar el pedido con folio. Antes el pedido solo existia en el chat de
     // WhatsApp: si el mensaje se perdia entre otras conversaciones, se perdia
     // la venta y no quedaba de que agarrarse.
-    const hacerPedido = async (e) => {
-        e.preventDefault();
+    // El aviso rojo se quitaba hasta que volvias a darle al boton, asi que se
+    // quedaba ahi diciendo "falta tu telefono" cuando ya lo habias escrito.
+    const cambiar = (campo) => (e) => {
+        const valor = e.target.value;
+        setDatos(d => ({ ...d, [campo]: valor }));
+        if (error) setError(null);
+    };
+
+    // Los dos caminos de pago piden lo mismo, asi que la revision es una sola.
+    const faltanDatos = () => {
         if (!datos.nombre.trim() || !datos.telefono.trim()) {
             setError('Necesitamos tu nombre y teléfono');
-            return;
+            return true;
         }
+        return false;
+    };
+
+    const hacerPedido = async (e) => {
+        e.preventDefault();
+        if (faltanDatos()) return;
         setEnviando(true);
         setError(null);
         try {
@@ -90,10 +109,22 @@ const CartDrawer = ({ open, onClose }) => {
         (cuenta?.clabe ? '\n\nYa hice la transferencia, aquí va mi comprobante:' : '\n\n¿Cómo le hago para pagar?')
     );
 
-    // El cobro con tarjeta (crearPago, en lib/pagos.js) sigue armado pero no se
-    // ofrece: no hay token de Mercado Pago cargado, asi que enseñar el boton
-    // seria mandar al cliente a una pantalla que truena. Cuando se active, aqui
-    // vuelve el boton.
+    // Cobro con tarjeta. El carrito NO se vacia aqui: si el cliente se arrepiente
+    // en la pantalla de Mercado Pago y le da para atras, tiene que encontrar sus
+    // pares donde los dejo. Quien lo vacia es /pago/:id cuando el pago ya quedo.
+    const pagarConTarjeta = async () => {
+        if (faltanDatos()) return;
+        setYendoATarjeta(true);
+        setError(null);
+        try {
+            const r = await crearPago({ cart, ...datos, anticipo: anticipo && conAnticipo });
+            window.location.href = r.pagar_en;
+        } catch (err) {
+            setError(err.message);
+            setYendoATarjeta(false);
+        }
+    };
+
     const conAnticipo = pct > 0 && pct < 100;
 
     return (
@@ -157,20 +188,20 @@ const CartDrawer = ({ open, onClose }) => {
                                 Para mandarte tu pedido necesitamos saber a quién y a dónde.
                             </p>
                             <input type="text" placeholder="Tu nombre" value={datos.nombre}
-                                onChange={(e) => setDatos(d => ({ ...d, nombre: e.target.value }))}
+                                onChange={cambiar('nombre')}
                                 autoComplete="name" />
                             <input type="tel" placeholder="Tu WhatsApp" value={datos.telefono}
-                                onChange={(e) => setDatos(d => ({ ...d, telefono: e.target.value }))}
+                                onChange={cambiar('telefono')}
                                 autoComplete="tel" />
                             <input type="text" placeholder="Dirección de entrega" value={datos.direccion}
-                                onChange={(e) => setDatos(d => ({ ...d, direccion: e.target.value }))}
+                                onChange={cambiar('direccion')}
                                 autoComplete="street-address" />
                             <input type="email" placeholder="Tu correo (opcional)" value={datos.email}
-                                onChange={(e) => setDatos(d => ({ ...d, email: e.target.value }))}
+                                onChange={cambiar('email')}
                                 autoComplete="email" />
                             <textarea placeholder="¿Algo que debamos saber? (opcional)" rows="2"
                                 value={datos.nota}
-                                onChange={(e) => setDatos(d => ({ ...d, nota: e.target.value }))} />
+                                onChange={cambiar('nota')} />
 
                             {conAnticipo && (
                                 <label className="pago-anticipo">
@@ -257,10 +288,23 @@ const CartDrawer = ({ open, onClose }) => {
 
                         {pagando ? (
                             <>
-                                <button type="submit" form="form-pago" className="cart-wa" disabled={enviando}>
-                                    {enviando ? 'Guardando…' : 'Hacer mi pedido'}
+                                {tarjetaLista && (
+                                    <button type="button" className="cart-wa cart-tarjeta"
+                                        onClick={pagarConTarjeta}
+                                        disabled={enviando || yendoATarjeta}>
+                                        {yendoATarjeta ? 'Abriendo el pago…' : 'Pagar con tarjeta'}
+                                    </button>
+                                )}
+                                <button type="submit" form="form-pago"
+                                    className={tarjetaLista ? 'cart-volver cart-transfer' : 'cart-wa'}
+                                    disabled={enviando || yendoATarjeta}>
+                                    {enviando
+                                        ? 'Guardando…'
+                                        : tarjetaLista ? 'O pagar por transferencia' : 'Hacer mi pedido'}
                                 </button>
-                                <button className="cart-volver" onClick={() => { setPagando(false); setError(null); }}>
+                                <button className="cart-volver" type="button"
+                                    onClick={() => { setPagando(false); setError(null); }}
+                                    disabled={yendoATarjeta}>
                                     Volver al carrito
                                 </button>
                             </>

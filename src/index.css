@@ -1969,3 +1969,20 @@ html:has(.admin-page), body:has(.admin-page) { background: #08090C; }
 .admin-page .pedido-estado.ok     { background: rgba(52, 199, 89, 0.16);  color: #6FE39A; }
 .admin-page .pedido-estado.espera { background: rgba(255, 196, 107, 0.15); color: #FFC46B; }
 .admin-page .pedido-estado.falla  { background: rgba(255, 107, 96, 0.15);  color: #FF8078; }
+
+/* ---------- PAGAR CON TARJETA ----------
+   El boton de tarjeta solo aparece cuando el servidor ya trae cargado el token
+   de Mercado Pago. Cuando esta, la transferencia baja a segunda opcion pero se
+   deja bien visible: no cobra comision y hay clientes que la prefieren. */
+.cart-transfer {
+  margin-top: 10px; padding: 13px;
+  border: 1.5px solid var(--line); border-radius: 2px;
+  color: var(--ink); font-family: var(--display); font-weight: 800;
+  font-size: 15px; letter-spacing: 0.03em; text-transform: uppercase;
+  background: rgba(255, 255, 255, 0.5);
+  transition: border-color .2s, background .2s;
+}
+.cart-transfer:hover:not(:disabled) { border-color: var(--ink); background: #fff; }
+.cart-wa:disabled, .cart-transfer:disabled, .cart-volver:disabled {
+  opacity: 0.55; cursor: not-allowed;
+}
