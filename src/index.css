@@ -1839,8 +1839,21 @@ button { font-family: var(--body); }
 .barra-admin .pest:active { transform: scale(0.95); }
 @media (prefers-reduced-motion: reduce) { .barra-admin .pest { transition: none; } }
 
-/* En pantalla grande el panel cabe en dos columnas y la barra estorba */
-@media (min-width: 1041px) { .barra-admin { display: none; } }
+/* En pantalla grande el panel cabe en dos columnas, asi que la barra no tiene
+   que flotar sobre el pulgar. PERO no se puede esconder: "Pedidos" es una
+   seccion aparte y esta barra es el UNICO modo de llegar. Escondiendola, en la
+   computadora los pedidos quedaban inalcanzables. Aqui se queda, pero como una
+   fila de pestañas normal arriba del panel. */
+@media (min-width: 1041px) {
+  .barra-admin {
+    position: static; transform: none;
+    width: fit-content; margin: 0 0 18px; box-shadow: none;
+    background: rgba(255, 255, 255, 0.05);
+    box-shadow: inset 0 0 0 1px var(--canto);
+  }
+  /* Hay lugar de sobra: se leen todas, no solo la abierta */
+  .barra-admin .pest span { display: inline; }
+}
 
 /* Sin esto, al rebotar el scroll en el celular se asoma el blanco del body
    por debajo del panel oscuro y se ve como si la pagina se rompiera. */
@@ -1986,3 +1999,24 @@ html:has(.admin-page), body:has(.admin-page) { background: #08090C; }
 .cart-wa:disabled, .cart-transfer:disabled, .cart-volver:disabled {
   opacity: 0.55; cursor: not-allowed;
 }
+
+/* ---------- LOS AJUSTES NO SE ESCONDEN EN "AÑADIR" ----------
+   "Video de portada", "Quién puede entrar" y "Cambiar mi clave" viven en la
+   misma columna que la ficha de alta. En el celular esa columna se esconde
+   cuando estas en Catálogo, asi que desde el telefono solo se llegaba a esos
+   tres entrando a "Añadir" — que es la pestaña para publicar un par, no para
+   configurar. Aqui se separan: la ficha de alta sigue solo en "Añadir", y los
+   ajustes se quedan en "Catálogo", que es donde uno los busca. */
+@media (max-width: 1040px) {
+  .admin-grid.tab-catalogo .col-form { display: block; }
+  /* de la columna, en Catálogo solo se ven los plegables */
+  .admin-grid.tab-catalogo .col-form > .admin-card:not(.plegable) { display: none; }
+  /* y en Añadir, solo la ficha de alta */
+  .admin-grid.tab-nuevo .col-form > details.plegable { display: none; }
+}
+
+/* El atributo hidden lo pierde cualquier regla que ponga display. Al panel le
+   pasaba: .admin-grid tiene display:grid, asi que en la pestaña de Pedidos
+   seguian dibujandose el catalogo y la ficha de alta (1,637px) debajo de los
+   pedidos, aunque React ya los habia marcado como escondidos. */
+[hidden] { display: none !important; }
