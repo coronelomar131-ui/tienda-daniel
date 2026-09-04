@@ -2020,3 +2020,252 @@ html:has(.admin-page), body:has(.admin-page) { background: #08090C; }
    seguian dibujandose el catalogo y la ficha de alta (1,637px) debajo de los
    pedidos, aunque React ya los habia marcado como escondidos. */
 [hidden] { display: none !important; }
+
+/* =========================================================
+   PANEL: LA BODEGA
+   Una regla, y de ella sale todo lo demas:
+
+     EL VIDRIO ES LA APP        lo que flota — la barra de arriba, la de
+                                abajo, la ficha de alta. Translucido, con
+                                blur, se mueve con lo que pasa detras.
+
+     EL CARTON ES LA MERCANCIA  cada par y cada pedido. Opaco, mate, sin
+                                blur, con un canto de color que dice por
+                                que ese par es especial.
+
+   Antes TODO era vidrio: nada se veia mas importante que lo demas y la
+   pantalla quedaba como sopa translucida. Separar los dos materiales es lo
+   que conserva el Liquid Glass y ademas le da un para que.
+
+   El color solo sale del estado de la mercancia: naranja = oferta, rojo =
+   agotado, hueso = destacado. Nada mas lleva color saturado, para que
+   cuando aparezca signifique algo.
+   ========================================================= */
+.admin-page {
+  /* Oscuro CALIDO, no el negro azulado de tablero. Esto es una bodega con
+     cajas de carton, no un panel de finanzas. */
+  --bodega:   #15110E;
+  --carton:   #241C16;
+  --carton-2: #2E241B;
+  --hueso:    #EDE4D6;
+  --tinta:    #EDE4D6;
+  --tenue:    #A2948A;
+  --canto:    rgba(237, 228, 214, 0.14);
+  --carta:    rgba(237, 228, 214, 0.055);
+
+  color: var(--hueso);
+  background: var(--bodega);
+}
+html:has(.admin-page), body:has(.admin-page) { background: #15110E; }
+
+/* La luz de la bodega: un foco tibio arriba y la penumbra abajo. Sustituye a
+   las manchas azules y naranjas, que eran decoracion sin motivo. */
+.admin-page::before {
+  background:
+    radial-gradient(70% 42% at 50% -6%, rgba(255, 214, 160, 0.16), transparent 68%),
+    radial-gradient(50% 30% at 88% 8%, rgba(194, 87, 13, 0.10), transparent 72%);
+  filter: blur(10px);
+}
+
+/* ---------- EL VIDRIO: SOLO LO QUE FLOTA ---------- */
+.admin-page .admin-head,
+.admin-page .admin-card {
+  background:
+    linear-gradient(147deg, rgba(255, 245, 232, 0.11) 0%, rgba(255, 245, 232, 0.03) 44%, rgba(255, 245, 232, 0) 70%),
+    var(--carta);
+  backdrop-filter: saturate(165%) blur(24px);
+  -webkit-backdrop-filter: saturate(165%) blur(24px);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 245, 232, 0.16),
+    inset 0 0 0 1px var(--canto),
+    0 14px 40px rgba(0, 0, 0, 0.55);
+}
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .admin-page .admin-head, .admin-page .admin-card { background: #241C16; }
+}
+
+/* ---------- EL CARTON: LA MERCANCIA ---------- */
+/* Opaco a proposito. Un par no es interfaz: es una caja en el estante. */
+.admin-page .admin-item,
+.admin-page .pedido {
+  position: relative;
+  background: var(--carton);
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  border: none;
+  border-radius: 4px 14px 14px 4px;   /* el canto recto es el lomo de la caja */
+  box-shadow: 0 1px 0 rgba(255, 245, 232, 0.05) inset, 0 6px 16px rgba(0, 0, 0, 0.38);
+  overflow: hidden;
+}
+.admin-page .admin-item:hover { background: var(--carton-2); transform: none; box-shadow: 0 6px 16px rgba(0,0,0,.38); }
+
+/* El canto de color: por que este par no es uno cualquiera. Sin estado, sin
+   canto — asi el color no se gasta en los que no tienen nada especial. */
+.admin-page .admin-item::before,
+.admin-page .pedido::before {
+  content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 4px;
+  background: transparent;
+}
+.admin-page .admin-item.canto-oferta::before    { background: var(--naranja); }
+.admin-page .admin-item.canto-agotado::before   { background: #8E2F27; }
+.admin-page .admin-item.canto-destacado::before { background: var(--hueso); }
+.admin-page .admin-item.editando {
+  background: var(--carton-2);
+  box-shadow: inset 0 0 0 1.5px rgba(237, 228, 214, 0.55), 0 6px 16px rgba(0,0,0,.38);
+}
+.admin-page .admin-item.editando::before { background: var(--hueso); }
+
+/* ---------- EL NOMBRE DEL PAR ---------- */
+/* Big Shoulders es una condensada de letrero: aguanta "Nike Unisex Dunk High
+   Black White" sin partirse en cuatro renglones, que es justo el problema de
+   los nombres largos. En minuscula: las mayusculas gritadas eran uno de los
+   tics mas marcados que traia este panel. */
+.admin-page .admin-item .info h4 {
+  font-family: var(--display);
+  text-transform: none;
+  font-weight: 700;
+  letter-spacing: 0.005em;
+  color: var(--hueso);
+}
+.admin-page .admin-item .info .precio-fila {
+  display: flex; align-items: baseline; gap: 8px;
+  font-family: var(--display); font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  margin-top: 1px;
+}
+.admin-page .admin-item .info .precio-fila b { font-size: 17px; color: var(--hueso); }
+.admin-page .admin-item .info .precio-fila s { font-size: 13px; color: var(--tenue); text-decoration-thickness: 1px; }
+
+/* Las tallas, como las pegatinas del canto de la caja. Es el mismo lenguaje
+   que el selector de tallas de la tienda, para que panel y tienda se lean igual. */
+.admin-page .admin-item .tallas-mini {
+  display: flex; flex-wrap: wrap; gap: 4px; margin-top: 6px;
+}
+.admin-page .admin-item .tallas-mini span {
+  font-family: var(--body); font-size: 11px; font-weight: 600;
+  line-height: 1; padding: 4px 7px; border-radius: 999px;
+  color: #2A211A; background: #C8B8A4;
+  font-variant-numeric: tabular-nums;
+}
+/* Lo unico que se avisa es lo que le FALTA al par. Si esta completo no sale
+   ninguna linea: no hay que leer datos para enterarse de que no pasa nada. */
+.admin-page .admin-item .le-falta {
+  margin-top: 6px; font-size: 11.5px; font-weight: 600;
+  color: #E0A07A;
+}
+
+/* ---------- LA LINEA DE PENDIENTES ---------- */
+/* Reemplaza las dos tarjetas de "En el catálogo: 19". Aquella era una cifra
+   que ya te sabes; esta dice lo unico que cambia de un dia para otro. */
+.admin-page .pendiente {
+  display: block; width: 100%; text-align: left; cursor: pointer;
+  margin-bottom: 16px; padding: 14px 18px;
+  border: none; border-radius: 4px 16px 16px 4px;
+  background: var(--carton);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.38);
+  position: relative; overflow: hidden;
+  transition: background .18s;
+}
+.admin-page .pendiente::before {
+  content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 4px;
+  background: var(--naranja);
+}
+.admin-page .pendiente:hover { background: var(--carton-2); }
+.admin-page .pendiente strong {
+  display: block; font-family: var(--display); font-weight: 700;
+  font-size: 20px; line-height: 1.1; color: var(--hueso);
+}
+.admin-page .pendiente span {
+  display: block; margin-top: 2px; font-size: 12.5px; color: var(--tenue);
+}
+
+/* ---------- LOS INTERRUPTORES, SIN GRITAR ---------- */
+.admin-page .switch span {
+  text-transform: none; letter-spacing: 0; font-weight: 600; color: var(--tenue);
+}
+.admin-page .switch.on span { color: var(--hueso); }
+.admin-page .cifra span,
+.admin-page .anticipo-ajuste,
+.admin-page .pedido-estado {
+  text-transform: none; letter-spacing: 0.01em;
+}
+
+/* ---------- PEDIDOS: TAMBIEN SON PAPEL ---------- */
+.admin-page .pedido.ok::before     { background: #4E9E6A; }
+.admin-page .pedido.espera::before { background: var(--naranja); }
+.admin-page .pedido.falla::before  { background: #8E2F27; }
+.admin-page .pedido-num,
+.admin-page .pedido-arriba strong { font-family: var(--display); color: var(--hueso); }
+.admin-page .cifra {
+  background: var(--carton); backdrop-filter: none; -webkit-backdrop-filter: none;
+  border-radius: 4px 14px 14px 4px;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.38);
+}
+.admin-page .cifra strong { font-family: var(--display); color: var(--hueso); }
+
+/* ---------- LA BARRA DE ABAJO SIGUE SIENDO VIDRIO ---------- */
+.admin-page ~ .barra-admin, .barra-admin {
+  background: rgba(38, 30, 23, 0.68);
+}
+.barra-admin .pest.on { background: var(--hueso); color: #1B1510; }
+
+/* El formulario, sobre vidrio */
+.admin-page .admin-form input,
+.admin-page .admin-form select,
+.admin-page .admin-form textarea {
+  background: rgba(255, 245, 232, 0.06);
+  color: var(--hueso);
+  box-shadow: inset 0 0 0 1px var(--canto);
+}
+.admin-page .admin-form input::placeholder,
+.admin-page .admin-form textarea::placeholder { color: #8A7C71; }
+.admin-page .admin-form select option { background: #241C16; color: var(--hueso); }
+.admin-page .btn-primary { background: var(--hueso); color: #1B1510; }
+.admin-page .btn-primary:hover { background: #FFF6E9; }
+
+/* ---------- LOS TITULOS, EN MINUSCULA ----------
+   Las mayusculas gritadas en cada titulo son de los tics mas marcados de una
+   pantalla hecha con plantilla, y este panel las tenia por todos lados. Big
+   Shoulders tiene bastante caracter sin necesidad de gritar. */
+.admin-page .admin-head h2 { text-transform: none; font-weight: 800; letter-spacing: 0.002em; }
+.admin-page .admin-card h3,
+.admin-page .admin-list-title,
+.admin-page .admin-card.plegable > summary { text-transform: none; font-weight: 700; }
+
+/* ---------- PRIMERO EL TRABAJO, DESPUES LOS AJUSTES ----------
+   Al hacer visibles los ajustes en Catálogo quedaron ARRIBA del catalogo y se
+   comian la primera pantalla. El catalogo es lo de todos los dias; el video de
+   portada y las claves se tocan una vez al mes. Van hasta abajo. */
+@media (max-width: 1040px) {
+  .admin-page .admin-grid.tab-catalogo { display: flex; flex-direction: column; }
+  .admin-page .admin-grid.tab-catalogo .col-lista { order: 1; }
+  .admin-page .admin-grid.tab-catalogo .col-form  { order: 2; margin-top: 26px; }
+}
+
+/* Las fichas plegadas: una linea, no un bloque de 100px por decir un titulo */
+.admin-page .admin-card.plegable > summary {
+  font-size: 17px; padding: 13px 16px;
+}
+.admin-page .admin-card.plegable:not([open]) { background: var(--carta); backdrop-filter: none; -webkit-backdrop-filter: none; }
+
+/* El aviso de las flechas pertenece a la lista, no flota suelto entre bloques */
+.admin-page .col-lista > .hint {
+  margin: 0 0 10px; padding-left: 2px;
+  font-size: 12.5px; color: var(--tenue); max-width: 46ch;
+}
+
+/* Los botones tampoco gritan. Big Shoulders en mayusculas a 19px era medio
+   letrero de taller; en minuscula se lee igual de fuerte y menos agresivo. */
+.admin-page .btn-ghost,
+.admin-page .btn-primary,
+.admin-page .cart-wa { text-transform: none; letter-spacing: 0.005em; }
+.admin-page .btn-ghost { border-color: var(--canto); color: var(--hueso); border-radius: 999px; }
+.admin-page .btn-ghost:hover { border-color: rgba(237,228,214,.45); color: #FFF6E9; transform: none; }
+
+/* En una sola columna los ajustes tienen que llegar a la orilla igual que las
+   etiquetas, y el hueco entre el catalogo y ellos no necesita ser un abismo. */
+@media (max-width: 1040px) {
+  .admin-page .admin-grid.tab-catalogo .col-form { width: 100%; margin-top: 22px; }
+  .admin-page .admin-grid.tab-catalogo .col-form > details.plegable { margin-top: 10px; }
+  .admin-page .admin-grid.tab-catalogo .col-form > details.plegable:first-of-type { margin-top: 0; }
+}

@@ -11,6 +11,7 @@ import {
 import { comprimirImagen } from '../lib/image';
 import { subirVideo, LIMITE_MB } from '../lib/videoUpload';
 import { fetchHeroVideo, adminSetHeroVideo } from '../lib/shopApi';
+import { adminOrdersResumen } from '../lib/pagos';
 import { leerSesion, guardarSesion, cerrarSesion } from '../lib/adminSession';
 import SneakerArt from './SneakerArt';
 import Pedidos from './Pedidos';
@@ -108,11 +109,25 @@ const AdminDashboard = () => {
     const [heroVideo, setHeroVideo] = useState('');
     const [heroCargado, setHeroCargado] = useState(false);
 
+    // Lo unico que de verdad urge saber al abrir: si hay dinero esperando.
+    const [porCobrar, setPorCobrar] = useState(null);
+    useEffect(() => {
+        let vivo = true;
+        adminOrdersResumen(pass)
+            .then(r => { if (vivo) setPorCobrar(r); })
+            .catch(() => { /* si falla, la linea enseña solo el catalogo */ });
+        return () => { vivo = false; };
+    }, [pass]);
+
     const [claveActual, setClaveActual] = useState('');
     const [claveNueva, setClaveNueva] = useState('');
 
     const marcasConocidas = useMemo(
         () => [...new Set(products.map(p => p.brand).filter(Boolean))].sort(),
+        [products]
+    );
+    const agotados = useMemo(
+        () => products.filter(p => p.status === 'agotado').length,
         [products]
     );
 
@@ -317,19 +332,37 @@ const AdminDashboard = () => {
                     celular grande, había que estirar la mano para cambiar de
                     pantalla. La pestaña abierta se rellena y enseña su nombre;
                     las otras se quedan en puro icono, como en las apps. */}
-                {/* Resumen de un vistazo, como la cartera de la referencia */}
-                <div className="cartera">
-                    <div className="carta">
-                        <span>En el catálogo</span>
-                        <strong>{products.length}</strong>
-                        <small>{products.filter(p => p.status === 'agotado').length} agotados</small>
-                    </div>
-                    <div className="carta">
-                        <span>Con oferta</span>
-                        <strong>{products.filter(p => p.priceBefore).length}</strong>
-                        <small>{products.filter(p => p.destacado).length} destacados</small>
-                    </div>
-                </div>
+                {/* Antes aqui iban dos tarjetas con "En el catálogo: 19" y "Con
+                    oferta: 2". Eso ya lo sabes de memoria; era numero bonito, no
+                    informacion. Esto dice lo unico que cambia de un dia a otro y
+                    que si te hace levantarte a hacer algo. */}
+                <button type="button" className="pendiente"
+                        onClick={() => setTab('pedidos')}
+                        aria-label="Ir a pedidos">
+                    {porCobrar?.pendientes > 0 ? (
+                        <>
+                            <strong>
+                                {porCobrar.pendientes === 1
+                                    ? 'Un pedido espera confirmación'
+                                    : `${porCobrar.pendientes} pedidos esperan confirmación`}
+                            </strong>
+                            <span>
+                                {porCobrar.pendientes === 1
+                                    ? 'Ábrelo para marcar si ya te pagó'
+                                    : 'Ábrelos para marcar quién ya te pagó'}
+                            </span>
+                        </>
+                    ) : (
+                        <>
+                            <strong>Nada pendiente por cobrar</strong>
+                            <span>
+                                {agotados > 0
+                                    ? `${products.length} pares en la vitrina, ${agotados} agotados`
+                                    : `${products.length} pares en la vitrina`}
+                            </span>
+                        </>
+                    )}
+                </button>
 
                 <nav className="barra-admin" aria-label="Secciones del panel">
                     <button className={`pest ${tab === 'catalogo' ? 'on' : ''}`}
@@ -565,7 +598,12 @@ const AdminDashboard = () => {
 
                         <div className="admin-list">
                             {products.map((p, i) => (
-                                <div className={`admin-item${editandoId === p.id ? ' editando' : ''}`} key={p.id}>
+                                <div key={p.id}
+                                     className={'admin-item'
+                                        + (p.status === 'agotado' ? ' canto-agotado'
+                                           : p.priceBefore ? ' canto-oferta'
+                                           : p.destacado ? ' canto-destacado' : '')
+                                        + (editandoId === p.id ? ' editando' : '')}>
                                     <div className="orden">
                                         <button onClick={() => correr(() => adminMoveProduct(pass, p.id, true))}
                                             disabled={i === 0 || ocupado} aria-label="Subir">
@@ -581,12 +619,25 @@ const AdminDashboard = () => {
 
                                     <div className="info">
                                         <h4>{p.brand} {p.name}</h4>
-                                        <span>
-                                            ${p.price.toLocaleString('es-MX')} MXN
-                                            {p.sizes.length ? ` · Tallas ${p.sizes.join(', ')}` : ' · Sin tallas'}
-                                            {p.photoCount ? ` · ${p.photoCount} foto${p.photoCount > 1 ? 's' : ''}` : ' · sin fotos'}
-                                            {p.videoUrl ? ' · con video' : ''}
-                                        </span>
+                                        <p className="precio-fila">
+                                            <b>${p.price.toLocaleString('es-MX')}</b>
+                                            {p.priceBefore && <s>${p.priceBefore.toLocaleString('es-MX')}</s>}
+                                        </p>
+                                        {p.sizes.length > 0 && (
+                                            <p className="tallas-mini">
+                                                {p.sizes.map(t => <span key={t}>{t}</span>)}
+                                            </p>
+                                        )}
+                                        {/* Solo se avisa lo que le FALTA al par. Cuando todo
+                                            esta bien no aparece nada: no hay que leer una
+                                            linea de datos para enterarse de que no pasa nada. */}
+                                        {(!p.sizes.length || !p.photoCount) && (
+                                            <p className="le-falta">
+                                                {!p.photoCount && 'Sin fotos'}
+                                                {!p.photoCount && !p.sizes.length && ' y sin tallas'}
+                                                {p.photoCount && !p.sizes.length ? 'Sin tallas' : ''}
+                                            </p>
+                                        )}
                                     </div>
 
                                     <div className="acciones">
