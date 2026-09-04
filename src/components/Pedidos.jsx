@@ -7,6 +7,9 @@ const pesos = (n) => '$' + Number(n || 0).toLocaleString('es-MX');
 
 const ETIQUETA = {
     pagado: { texto: 'Pagado', clase: 'ok' },
+    // Faltaba 'enviado': como abajo hay un "|| ETIQUETA.pendiente" de respaldo,
+    // un pedido ya mandado se enseñaba como "Pendiente".
+    enviado: { texto: 'Enviado', clase: 'ok' },
     pendiente: { texto: 'Pendiente', clase: 'espera' },
     rechazado: { texto: 'Rechazado', clase: 'falla' },
     cancelado: { texto: 'Cancelado', clase: 'falla' },
