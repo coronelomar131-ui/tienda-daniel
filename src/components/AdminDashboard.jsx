@@ -336,7 +336,8 @@ const AdminDashboard = () => {
                     oferta: 2". Eso ya lo sabes de memoria; era numero bonito, no
                     informacion. Esto dice lo unico que cambia de un dia a otro y
                     que si te hace levantarte a hacer algo. */}
-                <button type="button" className="pendiente"
+                <button type="button"
+                        className={`pendiente${porCobrar?.pendientes > 0 ? ' urge' : ''}`}
                         onClick={() => setTab('pedidos')}
                         aria-label="Ir a pedidos">
                     {porCobrar?.pendientes > 0 ? (

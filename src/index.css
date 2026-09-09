@@ -2168,8 +2168,11 @@ html:has(.admin-page), body:has(.admin-page) { background: #15110E; }
 }
 .admin-page .pendiente::before {
   content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 4px;
-  background: var(--naranja);
+  background: var(--canto);
 }
+/* El naranja quiere decir "esto necesita que hagas algo". Cuando no hay nada
+   pendiente el canto se apaga: si no, el color mentiria y dejaria de servir. */
+.admin-page .pendiente.urge::before { background: var(--naranja); }
 .admin-page .pendiente:hover { background: var(--carton-2); }
 .admin-page .pendiente strong {
   display: block; font-family: var(--display); font-weight: 700;
