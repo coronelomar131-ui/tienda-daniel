@@ -2273,118 +2273,228 @@ html:has(.admin-page), body:has(.admin-page) { background: #15110E; }
   .admin-page .admin-grid.tab-catalogo .col-form > details.plegable:first-of-type { margin-top: 0; }
 }
 
-/* ---------- ENTRAR CON FACE ID ----------
-   Es el camino mas rapido, asi que va arriba y se ve como el boton principal.
-   La raya de "o con tu clave" deja claro que son dos caminos, no dos pasos. */
-.btn-cara {
-  display: flex; align-items: center; justify-content: center; gap: 10px;
-  width: 100%; padding: 15px; cursor: pointer;
-  border: none; border-radius: 999px;
-  background: var(--ink); color: var(--paper);
-  font-family: var(--display); font-weight: 700; font-size: 18px;
-  letter-spacing: 0.01em;
-  transition: transform .16s var(--resorte), background .2s;
+/* ======================= ENTRAR CON FACE ID =======================
+
+   Una sola idea sostiene las tres pantallas donde aparece: EL MARCO. Las
+   cuatro esquinas son el dibujo que el propio Face ID usa para decir "te
+   estoy mirando". Aqui el boton no LLEVA ese dibujo: el boton ES el marco.
+   La misma escuadra vuelve, mas chica, en el aviso del panel y en cada
+   aparato de la lista, para que se lea como una sola cosa aunque este
+   repartida entre la pantalla de entrada (clara) y el panel (oscuro).
+
+   El color del Face ID es LUZ, no naranja. Un sensor de cara te alumbra; eso
+   es lo que hace. El naranja se queda para lo que vende (ofertas, el boton de
+   activar), que es donde ya vivia. Asi la funcion tiene voz propia sin
+   inventar una paleta nueva.                                              */
+
+/* El marco: ocho franjas que forman cuatro escuadras, en un solo pseudo. */
+.marco-cara::before {
+  content: '';
+  position: absolute;
+  inset: var(--marco-dentro, 7px);
+  pointer-events: none;
+  border-radius: 3px;
+  background:
+    linear-gradient(var(--marco-tinta), var(--marco-tinta)) 0    0    / 15px 2px no-repeat,
+    linear-gradient(var(--marco-tinta), var(--marco-tinta)) 0    0    / 2px 15px no-repeat,
+    linear-gradient(var(--marco-tinta), var(--marco-tinta)) 100% 0    / 15px 2px no-repeat,
+    linear-gradient(var(--marco-tinta), var(--marco-tinta)) 100% 0    / 2px 15px no-repeat,
+    linear-gradient(var(--marco-tinta), var(--marco-tinta)) 0    100% / 15px 2px no-repeat,
+    linear-gradient(var(--marco-tinta), var(--marco-tinta)) 0    100% / 2px 15px no-repeat,
+    linear-gradient(var(--marco-tinta), var(--marco-tinta)) 100% 100% / 15px 2px no-repeat,
+    linear-gradient(var(--marco-tinta), var(--marco-tinta)) 100% 100% / 2px 15px no-repeat;
+  transition: inset .34s cubic-bezier(.34, 1.4, .5, 1), opacity .2s;
 }
-.btn-cara svg { width: 22px; height: 22px; }
-.btn-cara:active:not(:disabled) { transform: scale(0.97); }
-.btn-cara:disabled { opacity: 0.6; cursor: wait; }
+
+/* ---------- 1. La puerta: el boton de la pantalla de entrada ----------
+   Es el camino mas rapido, asi que va arriba y manda. La raya de "o con tu
+   clave" deja claro que son dos caminos, no dos pasos. */
+.btn-cara {
+  position: relative;
+  display: flex; align-items: center; justify-content: center; gap: 11px;
+  width: 100%; padding: 17px 14px; cursor: pointer;
+  border: none; border-radius: 20px;
+  background: var(--ink); color: var(--paper);
+  font-family: var(--display); text-transform: uppercase;
+  font-weight: 800; font-size: 17.5px; letter-spacing: 0.02em;
+  white-space: nowrap;
+  --marco-tinta: rgba(255, 246, 232, 0.42);
+  --marco-dentro: 7px;
+  transition: transform .16s var(--resorte), box-shadow .25s;
+  box-shadow: 0 10px 26px rgba(10, 10, 10, 0.18);
+}
+.btn-cara svg { width: 25px; height: 25px; opacity: 0.95; flex: 0 0 auto; }
+.btn-cara:hover:not(:disabled) { box-shadow: 0 14px 32px rgba(10, 10, 10, 0.26); }
+.btn-cara:active:not(:disabled) { transform: scale(0.985); }
+.btn-cara:focus-visible { outline: 3px solid var(--ink); outline-offset: 3px; }
+
+/* El unico momento con movimiento de toda la funcion: al tocar, las cuatro
+   esquinas se cierran hacia adentro una vez, como cuando el telefono te
+   escanea. Responde a algo que hizo la persona; no se mueve solo. */
+.btn-cara:disabled { cursor: wait; }
+.btn-cara:disabled { --marco-dentro: 13px; --marco-tinta: rgba(255, 246, 232, 0.85); }
+.btn-cara.mirando svg { animation: latido-cara 1.1s ease-in-out infinite; }
+@keyframes latido-cara {
+  0%, 100% { opacity: 0.35; }
+  50%      { opacity: 1; }
+}
 
 .o-bien {
-  display: flex; align-items: center; gap: 12px;
-  margin: 16px 0 4px; color: var(--muted); font-size: 12.5px;
+  display: flex; align-items: center; gap: 14px;
+  margin: 18px 0 6px; color: var(--muted); font-size: 12.5px;
 }
 .o-bien::before, .o-bien::after {
   content: ''; flex: 1; height: 1px; background: var(--line);
 }
 
-/* ---- La ficha del Face ID no se esconde ----
-   Las fichas plegables viven al final de la columna del formulario, o sea
-   debajo de TODOS los pares publicados, y en la pestaña de "Añadir par" se
-   ocultan por completo. Para dar de alta el Face ID eso era imposible de
-   encontrar: hay que bajarse 19 pares y adivinar en que pestaña. Esta se
-   queda visible en las dos pestañas y arriba de las demas. */
+/* ---------- 2. El aviso del panel, solo la primera vez ----------
+   Las fichas plegables viven al final de la columna, o sea debajo de TODOS
+   los pares publicados, y en la pestaña de "Añadir par" se ocultan. Dar de
+   alta el Face ID ahi era imposible de encontrar. Este aviso se ve sin bajar
+   nada y desaparece solo en cuanto hay un aparato dado de alta. */
+.admin-page .aviso-cara {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 16px;
+  margin: 18px 0 4px;
+  padding: 16px 18px;
+  border-radius: 22px;
+  border: 1px solid rgba(255, 240, 220, 0.16);
+  background:
+    radial-gradient(120% 150% at 8% 0%, rgba(255, 232, 198, 0.14), transparent 62%),
+    linear-gradient(150deg, rgba(255,255,255,0.09), rgba(255,255,255,0.015) 46%),
+    rgba(46, 36, 27, 0.55);
+  backdrop-filter: saturate(155%) blur(16px);
+  -webkit-backdrop-filter: saturate(155%) blur(16px);
+  box-shadow: inset 0 1px 0 rgba(255, 245, 230, 0.14),
+              inset 0 -1px 0 rgba(0, 0, 0, 0.26),
+              0 14px 32px rgba(0, 0, 0, 0.32);
+}
+
+/* La escuadra otra vez, ahora enmarcando la carita. */
+.admin-page .cara-glifo {
+  position: relative;
+  width: 46px; height: 46px;
+  display: grid; place-items: center;
+  flex: 0 0 auto;
+  --marco-tinta: rgba(255, 236, 206, 0.5);
+  --marco-dentro: 0px;
+  color: rgba(255, 241, 222, 0.92);
+}
+.admin-page .cara-glifo svg { width: 25px; height: 25px; }
+.admin-page .cara-glifo::after {
+  content: '';
+  position: absolute; inset: -6px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(255, 226, 186, 0.16), transparent 70%);
+  pointer-events: none;
+}
+
+.admin-page .aviso-cara-texto { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
+.admin-page .aviso-cara strong {
+  font-family: var(--display); text-transform: uppercase;
+  font-weight: 800; font-size: 1.12rem; letter-spacing: 0.015em;
+  color: var(--hueso, #EDE4D6); line-height: 1.05;
+}
+.admin-page .aviso-cara span {
+  font-size: 0.8rem; line-height: 1.4;
+  color: rgba(237, 228, 214, 0.62);
+}
+.admin-page .aviso-cara button {
+  grid-column: 3;
+  padding: 12px 22px;
+  border-radius: 999px;
+  border: none;
+  background: var(--naranja, #C2570D);
+  color: #FFF6EC;
+  font-family: var(--display); text-transform: uppercase;
+  font-weight: 800; font-size: 0.98rem; letter-spacing: 0.03em;
+  cursor: pointer;
+  transition: transform .15s var(--resorte), filter .2s;
+}
+.admin-page .aviso-cara button:hover:not(:disabled) { filter: brightness(1.1); }
+.admin-page .aviso-cara button:active:not(:disabled) { transform: scale(0.97); }
+.admin-page .aviso-cara button:disabled { opacity: 0.5; cursor: wait; }
+
+@media (max-width: 460px) {
+  .admin-page .aviso-cara { grid-template-columns: auto 1fr; gap: 13px 14px; }
+  .admin-page .aviso-cara button { grid-column: 1 / -1; width: 100%; }
+}
+
+/* ---------- 3. La ficha y los aparatos dados de alta ---------- */
 .admin-grid.tab-nuevo .col-form > details.plegable.ficha-cara { display: block; }
 .admin-page .col-form > details.ficha-cara { margin-top: 0; }
 
-/* Mientras no haya ningun aparato dado de alta, que se note que esta ahi. */
-.admin-page details.ficha-cara:not(.lista) {
-  border-color: rgba(232, 134, 58, 0.55);
-  box-shadow: 0 0 0 1px rgba(232, 134, 58, 0.18),
-              0 10px 30px rgba(0, 0, 0, 0.28);
-}
+/* Un punto de luz mientras no hay ninguno; verde en cuanto lo hay. */
 .admin-page details.ficha-cara > summary::before {
   content: '';
   display: inline-block;
-  width: 8px; height: 8px;
-  margin-right: 8px;
+  width: 7px; height: 7px;
+  margin-right: 9px;
   border-radius: 50%;
-  background: #E8863A;
+  background: rgba(255, 226, 186, 0.9);
+  box-shadow: 0 0 8px rgba(255, 226, 186, 0.55);
   vertical-align: 1px;
 }
-.admin-page details.ficha-cara.lista > summary::before { background: #4E9A5F; }
+.admin-page details.ficha-cara.lista > summary::before {
+  background: #4E9A5F; box-shadow: 0 0 8px rgba(78, 154, 95, 0.5);
+}
 
-/* ---- Aviso de arriba para activar el Face ID (solo la primera vez) ---- */
-.admin-page .aviso-cara {
-  display: flex;
+/* Cada aparato: la escuadra chica, su nombre, y cuando se dio de alta y se
+   uso por ultima vez. El panel ya traia esos datos y no los enseñaba. */
+.admin-page .aparato {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
   align-items: center;
-  gap: 14px;
-  margin: 16px 0 4px;
-  padding: 14px 16px;
-  border-radius: 18px;
-  border: 1px solid rgba(232, 134, 58, 0.42);
-  background:
-    linear-gradient(135deg, rgba(255,255,255,0.10), rgba(255,255,255,0.02) 42%),
-    rgba(232, 134, 58, 0.10);
-  backdrop-filter: saturate(150%) blur(14px);
-  -webkit-backdrop-filter: saturate(150%) blur(14px);
-  box-shadow: inset 0 1px 0 rgba(255,255,255,0.16),
-              inset 0 -1px 0 rgba(0,0,0,0.22),
-              0 12px 28px rgba(0,0,0,0.28);
+  gap: 12px;
+  padding: 11px 0;
+  border-bottom: 1px solid rgba(237, 228, 214, 0.09);
 }
-.admin-page .aviso-cara > div { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
-.admin-page .aviso-cara strong { font-size: 0.95rem; color: var(--hueso, #EDE4D6); }
-.admin-page .aviso-cara span {
-  font-size: 0.78rem;
-  line-height: 1.35;
-  color: rgba(237, 228, 214, 0.66);
+.admin-page .aparato:last-of-type { border-bottom: none; }
+.admin-page .aparato-marco {
+  position: relative;
+  width: 26px; height: 26px;
+  --marco-tinta: rgba(255, 236, 206, 0.4);
+  --marco-dentro: 0px;
 }
-.admin-page .aviso-cara button {
-  margin-left: auto;
-  flex: 0 0 auto;
-  padding: 10px 18px;
-  border-radius: 999px;
-  border: 1px solid rgba(232, 134, 58, 0.5);
-  background: rgba(232, 134, 58, 0.92);
-  color: #1B1209;
-  font: inherit;
-  font-weight: 700;
-  font-size: 0.85rem;
-  letter-spacing: 0.02em;
-  cursor: pointer;
+.admin-page .aparato-marco::before { border-radius: 2px; }
+.admin-page .aparato-marco::before {
+  background-size: 9px 2px, 2px 9px, 9px 2px, 2px 9px,
+                   9px 2px, 2px 9px, 9px 2px, 2px 9px;
 }
-.admin-page .aviso-cara button:disabled { opacity: 0.55; cursor: default; }
+.admin-page .aparato-datos { display: flex; flex-direction: column; gap: 1px; min-width: 0; }
+.admin-page .aparato-datos b {
+  font-weight: 600; font-size: 0.94rem; color: var(--hueso, #EDE4D6);
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.admin-page .aparato-datos small {
+  font-size: 0.74rem; color: rgba(237, 228, 214, 0.5);
+  font-variant-numeric: tabular-nums;
+}
+.admin-page .aparato .link-mal { flex: 0 0 auto; }
 
-@media (max-width: 420px) {
-  .admin-page .aviso-cara { flex-direction: column; align-items: stretch; gap: 10px; }
-  .admin-page .aviso-cara button { margin-left: 0; width: 100%; }
-}
-
-/* El resultado del Face ID, pegado al boton que se acaba de tocar. */
+/* ---------- El recado, pegado al boton que se acaba de tocar ---------- */
 .admin-page .recado-cara {
-  margin: 10px 0 0;
-  padding: 9px 12px;
-  border-radius: 12px;
-  font-size: 0.82rem;
-  line-height: 1.4;
+  margin: 12px 0 0;
+  padding: 10px 13px;
+  border-radius: 13px;
+  font-size: 0.83rem;
+  line-height: 1.45;
 }
 .admin-page .recado-cara.ok {
-  color: #BFE3C6;
-  background: rgba(78, 154, 95, 0.16);
-  border: 1px solid rgba(78, 154, 95, 0.38);
+  color: #C3E5C9;
+  background: rgba(78, 154, 95, 0.15);
+  border: 1px solid rgba(78, 154, 95, 0.34);
 }
 .admin-page .recado-cara.error {
-  color: #F2C7A8;
-  background: rgba(200, 84, 51, 0.16);
-  border: 1px solid rgba(200, 84, 51, 0.42);
+  color: #F4CDB2;
+  background: rgba(200, 84, 51, 0.15);
+  border: 1px solid rgba(200, 84, 51, 0.4);
 }
-.admin-page .aviso-cara .recado-cara { width: 100%; }
+.admin-page .aviso-cara .recado-cara { grid-column: 1 / -1; margin-top: 2px; }
+
+@media (prefers-reduced-motion: reduce) {
+  .marco-cara::before { transition: none; }
+  .btn-cara.mirando svg { animation: none; opacity: 1; }
+}

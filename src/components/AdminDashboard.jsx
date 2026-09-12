@@ -13,6 +13,7 @@ import { subirVideo, LIMITE_MB } from '../lib/videoUpload';
 import { fetchHeroVideo, adminSetHeroVideo, adminCerrarSesion,
          adminPasskeys, adminQuitarPasskey } from '../lib/shopApi';
 import { hayFaceId, darDeAltaFaceId, precalentarAlta } from '../lib/passkey';
+import { CaraIcono } from './AdminLogin';
 import { adminOrdersResumen } from '../lib/pagos';
 import { leerSesion, guardarSesion, cerrarSesion } from '../lib/adminSession';
 import SneakerArt from './SneakerArt';
@@ -155,6 +156,20 @@ const AdminDashboard = () => {
         hayFaceId().then(setPuedeFaceId).catch(() => setPuedeFaceId(false));
     }, []);
     useEffect(() => { if (pass) cargarFaceId(); }, [pass, cargarFaceId]);
+
+    // "12 sep", "hace 2 h", "ahorita". Lo suficiente para reconocer un aparato
+    // en una lista de dos o tres, sin poner una fecha larga que nadie lee.
+    const cuando = (iso) => {
+        if (!iso) return null;
+        const d = new Date(iso);
+        if (Number.isNaN(d.getTime())) return null;
+        const min = Math.floor((Date.now() - d.getTime()) / 60000);
+        if (min < 2) return 'ahorita';
+        if (min < 60) return `hace ${min} min`;
+        if (min < 1440) return `hace ${Math.floor(min / 60)} h`;
+        if (min < 10080) return `hace ${Math.floor(min / 1440)} días`;
+        return d.toLocaleDateString('es-MX', { day: 'numeric', month: 'short' });
+    };
 
     const nombreDelAparato = () =>
         (/iPhone|iPad/.test(navigator.userAgent) ? 'Mi iPhone'
@@ -458,12 +473,13 @@ const AdminDashboard = () => {
                     se va solo en cuanto queda dado de alta. */}
                 {puedeFaceId !== null && misFaceId.length === 0 && (
                     <div className="aviso-cara">
-                        <div>
-                            <strong>Entra con Face ID</strong>
-                            <span>Sin escribir tu clave la próxima vez. Se hace una sola vez.</span>
+                        <span className="cara-glifo marco-cara"><CaraIcono /></span>
+                        <div className="aviso-cara-texto">
+                            <strong>Entra con tu cara</strong>
+                            <span>Se hace una sola vez y ya no tecleas la clave.</span>
                         </div>
                         <button type="button" onClick={altaFaceId} disabled={dandoAlta}>
-                            {dandoAlta ? 'Esperando…' : 'Activar'}
+                            {dandoAlta ? 'Mirándote' : 'Activar'}
                         </button>
                         {avisoCara && (
                             <p className={`recado-cara ${avisoCara.tipo}`}>{avisoCara.texto}</p>
@@ -629,14 +645,22 @@ const AdminDashboard = () => {
                             <summary>Entrar con Face ID ({misFaceId.length})</summary>
                             <div className="admin-form">
                                 <p className="hint">
-                                    Da de alta este aparato y la próxima vez entras con tu cara
-                                    o tu huella, sin escribir la clave. La llave se queda guardada
-                                    en el aparato: aquí solo se guarda la parte pública, que no
-                                    sirve para entrar.
+                                    La llave se queda dentro de tu teléfono y solo la abre tu
+                                    cara. Aquí nada más vive la mitad pública, que no sirve para
+                                    entrar: si alguien se robara la base, no encontraría con qué.
                                 </p>
                                 {misFaceId.map(k => (
-                                    <div className="gente-fila" key={k.id}>
-                                        <span>{k.nombre}</span>
+                                    <div className="aparato" key={k.id}>
+                                        <span className="aparato-marco marco-cara" />
+                                        <span className="aparato-datos">
+                                            <b>{k.nombre}</b>
+                                            <small>
+                                                {k.usado
+                                                    ? `Se usó ${cuando(k.usado)}`
+                                                    : 'Todavía no lo usas'}
+                                                {cuando(k.creado) && ` · alta ${cuando(k.creado)}`}
+                                            </small>
+                                        </span>
                                         <button type="button" className="link-btn link-mal"
                                                 onClick={() => quitarFaceId(k.id)}>Quitar</button>
                                     </div>
@@ -651,7 +675,7 @@ const AdminDashboard = () => {
                                 )}
                                 <button type="button" className="btn-ghost" onClick={altaFaceId}
                                         disabled={dandoAlta}>
-                                    {dandoAlta ? 'Esperando…' : 'Dar de alta este aparato'}
+                                    {dandoAlta ? 'Mirándote…' : 'Dar de alta este aparato'}
                                 </button>
                                 {avisoCara && (
                                     <p className={`recado-cara ${avisoCara.tipo}`}>{avisoCara.texto}</p>

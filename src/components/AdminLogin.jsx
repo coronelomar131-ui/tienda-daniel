@@ -4,13 +4,13 @@ import { adminIsClaimed, adminClaim, adminLogin, adminCaras, adminEntrar } from 
 import { guardarSesion } from '../lib/adminSession';
 import { hayAlgunaDadaDeAlta, entrarConFaceId, precalentarEntrada } from '../lib/passkey';
 
-// El simbolo de Face ID: el marco de la camara con una carita. Se dibuja aqui
-// en vez de traer una libreria de iconos completa por un solo simbolo.
-const HuellaIcono = () => (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"
+// Solo la cara. El marco de las cuatro esquinas lo dibuja el boton con CSS,
+// asi que aqui seria dibujarlo dos veces.
+export const CaraIcono = () => (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4"
          strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-        <path d="M4 8V6a2 2 0 0 1 2-2h2M16 4h2a2 2 0 0 1 2 2v2M20 16v2a2 2 0 0 1-2 2h-2M8 20H6a2 2 0 0 1-2-2v-2" />
-        <path d="M9 10v1M15 10v1M9.5 15.5a3.5 3.5 0 0 0 5 0" />
+        <path d="M8 9.5v2M16 9.5v2" />
+        <path d="M7.8 15.4a5.6 5.6 0 0 0 8.4 0" />
     </svg>
 );
 
@@ -142,10 +142,11 @@ const AdminLogin = () => {
 
                 {conFaceId && !primeraVez && (
                     <>
-                        <button type="button" className="btn-cara" onClick={entrarConCara}
-                                disabled={usandoFaceId}>
-                            <HuellaIcono />
-                            {usandoFaceId ? 'Esperando…' : 'Entrar con Face ID'}
+                        <button type="button"
+                                className={`btn-cara marco-cara ${usandoFaceId ? 'mirando' : ''}`}
+                                onClick={entrarConCara} disabled={usandoFaceId}>
+                            <CaraIcono />
+                            {usandoFaceId ? 'Mirándote' : 'Entrar con Face ID'}
                         </button>
                         <div className="o-bien"><span>o con tu clave</span></div>
                     </>
