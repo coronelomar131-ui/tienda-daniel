@@ -22,3 +22,20 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Secretos y llaves. El .gitignore que traia Vite solo cubria logs, node_modules
+# y dist: comprobado con git check-ignore, un .env se subia sin avisar al primer
+# "git add .". Hoy no hay ninguno de estos archivos; esto es para que siga asi.
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.p12
+*.pfx
+credentials.json
+service-account*.json
+id_rsa
+id_ed25519
+.npmrc
+.pypirc
