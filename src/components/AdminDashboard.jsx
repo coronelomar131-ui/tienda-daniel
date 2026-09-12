@@ -12,7 +12,7 @@ import { comprimirImagen } from '../lib/image';
 import { subirVideo, LIMITE_MB } from '../lib/videoUpload';
 import { fetchHeroVideo, adminSetHeroVideo, adminCerrarSesion,
          adminPasskeys, adminQuitarPasskey } from '../lib/shopApi';
-import { hayFaceId, darDeAltaFaceId } from '../lib/passkey';
+import { hayFaceId, darDeAltaFaceId, precalentarAlta } from '../lib/passkey';
 import { adminOrdersResumen } from '../lib/pagos';
 import { leerSesion, guardarSesion, cerrarSesion } from '../lib/adminSession';
 import SneakerArt from './SneakerArt';
@@ -122,7 +122,7 @@ const AdminDashboard = () => {
     }, [pass]);
 
     // --- Face ID ---
-    const [puedeFaceId, setPuedeFaceId] = useState(false);
+    const [puedeFaceId, setPuedeFaceId] = useState(null);   // null = todavia no sabemos
     const [misFaceId, setMisFaceId] = useState([]);
     const [dandoAlta, setDandoAlta] = useState(false);
 
@@ -135,19 +135,25 @@ const AdminDashboard = () => {
     }, []);
     useEffect(() => { if (pass) cargarFaceId(); }, [pass, cargarFaceId]);
 
+    const nombreDelAparato = () =>
+        (/iPhone|iPad/.test(navigator.userAgent) ? 'Mi iPhone'
+         : /Android/.test(navigator.userAgent) ? 'Mi celular'
+         : 'Mi computadora');
+
     const altaFaceId = async () => {
         setAviso(null);
         setDandoAlta(true);
         try {
-            await darDeAltaFaceId(pass, navigator.platform || 'Mi teléfono');
+            await darDeAltaFaceId(pass, nombreDelAparato());
             cargarFaceId();
             setAviso({ tipo: 'ok', texto: 'Listo. La próxima vez entras con Face ID.' });
         } catch (err) {
-            if (err?.name !== 'NotAllowedError') {
-                setAviso({ tipo: 'error', texto: err?.message || 'No se pudo dar de alta' });
-            }
+            setAviso({ tipo: 'error', texto: err?.name === 'NotAllowedError'
+                ? 'Se canceló, o el aparato no dejó. Vuelve a intentar.'
+                : (err?.message || 'No se pudo dar de alta') });
         } finally {
             setDandoAlta(false);
+            precalentarAlta(pass, nombreDelAparato());   // dejarlo listo por si repite
         }
     };
 
@@ -630,8 +636,10 @@ const AdminDashboard = () => {
                             </form>
                         </details>
 
-                        {puedeFaceId && (
-                        <details className="admin-card plegable" style={{ marginTop: '18px' }}>
+                        <details className="admin-card plegable" style={{ marginTop: '18px' }}
+                                 onToggle={(e) => {
+                                     if (e.currentTarget.open) precalentarAlta(pass, nombreDelAparato());
+                                 }}>
                             <summary>Entrar con Face ID ({misFaceId.length})</summary>
                             <div className="admin-form">
                                 <p className="hint">
@@ -647,13 +655,20 @@ const AdminDashboard = () => {
                                                 onClick={() => quitarFaceId(k.id)}>Quitar</button>
                                     </div>
                                 ))}
+                                {puedeFaceId === false && (
+                                    <p className="hint" style={{ color: 'var(--naranja, #E8863A)' }}>
+                                        Este aparato dice que no tiene Face ID disponible para la web.
+                                        Pasa cuando abres la página dentro de otra app (Instagram,
+                                        TikTok, WhatsApp) o en una ventana privada. Ábrela en Safari
+                                        directo y vuelve a entrar. Aun así puedes intentarlo:
+                                    </p>
+                                )}
                                 <button type="button" className="btn-ghost" onClick={altaFaceId}
                                         disabled={dandoAlta}>
                                     {dandoAlta ? 'Esperando…' : 'Dar de alta este aparato'}
                                 </button>
                             </div>
                         </details>
-                        )}
 
                         <details className="admin-card plegable" style={{ marginTop: '18px' }}>
                             <summary>Cambiar mi clave</summary>

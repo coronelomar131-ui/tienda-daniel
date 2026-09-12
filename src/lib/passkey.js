@@ -38,6 +38,49 @@ const llamar = async (cuerpo) => {
     return data;
 };
 
+// Safari solo deja abrir el Face ID dentro de los ~5 segundos siguientes al
+// toque de la persona. Si primero vamos al servidor por el codigo de un solo
+// uso, se acaba ese permiso —y una funcion que lleva rato dormida tarda varios
+// segundos en despertar— y Safari contesta "cancelado" sin enseñar nada.
+// Por eso el codigo se pide ANTES, mientras nadie ha picado todavia, y al picar
+// ya lo tenemos en la mano.
+const guardaCodigos = (pedir) => {
+    let guardado = null;      // { opciones, cuando }
+    let enVuelo = null;
+    const FRESCO = 80 * 1000; // el servidor los tira a los 2 minutos
+
+    const refrescar = (arg) => {
+        if (enVuelo) return enVuelo;
+        enVuelo = pedir(arg)
+            .then((o) => { guardado = { opciones: o, cuando: Date.now() }; return o; })
+            .catch(() => null)
+            .finally(() => { enVuelo = null; });
+        return enVuelo;
+    };
+
+    return {
+        precalentar: refrescar,
+        // OJO: esto tiene que ser SINCRONO. En cuanto metamos un await aqui,
+        // Safari da por perdido el permiso del toque.
+        tomar() {
+            if (!guardado || Date.now() - guardado.cuando > FRESCO) return null;
+            const o = guardado.opciones;
+            guardado = null;
+            return o;
+        },
+        olvidar() { guardado = null; },
+    };
+};
+
+const codigosEntrar = guardaCodigos(async () =>
+    (await llamar({ accion: 'opciones-entrar' })).opciones);
+
+const codigosAlta = guardaCodigos(async ({ pass, nombre }) =>
+    (await llamar({ accion: 'opciones-alta', pass, nombre })).opciones);
+
+export const precalentarEntrada = () => codigosEntrar.precalentar();
+export const precalentarAlta = (pass, nombre) => codigosAlta.precalentar({ pass, nombre });
+
 // ¿Este aparato tiene Face ID, Touch ID o huella disponible para la web?
 export async function hayFaceId() {
     try {
@@ -64,7 +107,10 @@ export async function hayAlgunaDadaDeAlta() {
 // Dar de alta este aparato. Hay que estar ya dentro del panel: la passkey se
 // agrega a una sesion que ya se probo con la clave.
 export async function darDeAltaFaceId(pass, nombre) {
-    const { opciones } = await llamar({ accion: 'opciones-alta', pass, nombre });
+    // Si ya lo traiamos precalentado, esto no espera nada y Safari alcanza a
+    // abrir el Face ID con el permiso del toque todavia vivo.
+    const opciones = codigosAlta.tomar()
+        || (await llamar({ accion: 'opciones-alta', pass, nombre })).opciones;
 
     const credencial = await navigator.credentials.create({
         publicKey: {
@@ -100,7 +146,8 @@ export async function darDeAltaFaceId(pass, nombre) {
 
 // Entrar. Devuelve el token de la sesion, igual que el login con clave.
 export async function entrarConFaceId() {
-    const { opciones } = await llamar({ accion: 'opciones-entrar' });
+    const opciones = codigosEntrar.tomar()
+        || (await llamar({ accion: 'opciones-entrar' })).opciones;
 
     const credencial = await navigator.credentials.get({
         publicKey: {

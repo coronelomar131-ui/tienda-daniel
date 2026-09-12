@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { adminIsClaimed, adminClaim, adminLogin, adminCaras, adminEntrar } from '../lib/shopApi';
 import { guardarSesion } from '../lib/adminSession';
-import { hayFaceId, hayAlgunaDadaDeAlta, entrarConFaceId } from '../lib/passkey';
+import { hayAlgunaDadaDeAlta, entrarConFaceId, precalentarEntrada } from '../lib/passkey';
 
 // El simbolo de Face ID: el marco de la camara con una carita. Se dibuja aqui
 // en vez de traer una libreria de iconos completa por un solo simbolo.
@@ -27,17 +27,26 @@ const AdminLogin = () => {
     const [error, setError] = useState('');
     const [busy, setBusy] = useState(false);
     const [sinConexion, setSinConexion] = useState(false);
-    // El boton de Face ID solo sale si el aparato lo tiene Y si ya hay alguna
-    // huella dada de alta. Ofrecerlo sin nada registrado seria mandar a la
-    // gente a una pantalla que no puede terminar.
+    // El boton sale si el navegador conoce la API Y si ya hay alguna huella dada
+    // de alta. Antes tambien le preguntabamos al aparato si tenia Face ID, y si
+    // contestaba que no —cosa que pasa por razones raras— el boton desaparecia
+    // sin decir nada y no habia forma de saber por que. Vale mas ofrecerlo y
+    // avisar si falla, que esconderlo en silencio.
     const [conFaceId, setConFaceId] = useState(false);
     const [usandoFaceId, setUsandoFaceId] = useState(false);
     const navigate = useNavigate();
 
     useEffect(() => {
         let vivo = true;
-        Promise.all([hayFaceId(), hayAlgunaDadaDeAlta()])
-            .then(([puede, hay]) => { if (vivo) setConFaceId(puede && hay); })
+        if (!window.PublicKeyCredential) return;
+        hayAlgunaDadaDeAlta()
+            .then((hay) => {
+                if (!vivo || !hay) return;
+                setConFaceId(true);
+                // Pedimos el codigo de un solo uso YA, para que al picar el boton
+                // no haya que esperar al servidor: Safari no perdona esa espera.
+                precalentarEntrada();
+            })
             .catch(() => { /* si falla, simplemente no se ofrece */ });
         return () => { vivo = false; };
     }, []);
@@ -61,6 +70,7 @@ const AdminLogin = () => {
             setError(m);
         } finally {
             setUsandoFaceId(false);
+            precalentarEntrada();   // dejar listo el siguiente intento
         }
     };
 
