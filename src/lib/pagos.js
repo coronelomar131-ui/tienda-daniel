@@ -1,4 +1,4 @@
-import { supabase, mensajeDeError } from './supabase';
+import { supabase, mensajeDeError, mensajeParaCliente } from './supabase';
 
 // Manda el carrito a cobrar. Ojo con lo que NO viaja: los precios.
 // Solo se manda qué par y qué talla; el servidor pone el precio desde la
@@ -39,7 +39,7 @@ export async function pagosTarjetaListos() {
 
 export async function estadoOrden(id) {
     const { data, error } = await supabase.rpc('orden_estado', { p_id: id });
-    if (error) throw new Error(mensajeDeError(error));
+    if (error) throw new Error(mensajeParaCliente(error));
     return Array.isArray(data) ? data[0] : data;
 }
 
@@ -83,7 +83,7 @@ export async function crearPedido({ cart, nombre, telefono, direccion, email, no
         p_nota: nota || null,
         p_anticipo: !!anticipo,
     });
-    if (error) throw new Error(mensajeDeError(error));
+    if (error) throw new Error(mensajeParaCliente(error));
     const fila = Array.isArray(data) ? data[0] : data;
     if (!fila) throw new Error('No se pudo guardar el pedido');
     return {

@@ -113,13 +113,30 @@ const AdminDashboard = () => {
 
     // Lo unico que de verdad urge saber al abrir: si hay dinero esperando.
     const [porCobrar, setPorCobrar] = useState(null);
+    // Antes el panel se pintaba entero con solo tener algo escrito en la
+    // memoria del navegador: metias cualquier texto a mano y salia. Los datos
+    // no se veian (cada peticion revisa el token en el servidor), pero la
+    // pantalla si, y eso es una puerta abierta esperando a que algun dia se le
+    // cuelgue algo delicado. Esta misma llamada ya preguntaba al servidor;
+    // ahora ademas decide si se pinta o no.
+    const [sesion, setSesion] = useState('revisando');   // revisando | vale | no
     useEffect(() => {
         let vivo = true;
+        if (!pass) { setSesion('no'); return; }
         adminOrdersResumen(pass)
-            .then(r => { if (vivo) setPorCobrar(r); })
-            .catch(() => { /* si falla, la linea enseña solo el catalogo */ });
+            .then(r => { if (vivo) { setPorCobrar(r); setSesion('vale'); } })
+            .catch((err) => {
+                if (!vivo) return;
+                // Sin internet no se echa a nadie: solo cuando el servidor
+                // dice que el token no vale.
+                setSesion(/conexión|conexion/i.test(err?.message || '') ? 'vale' : 'no');
+            });
         return () => { vivo = false; };
     }, [pass]);
+
+    useEffect(() => {
+        if (sesion === 'no') { cerrarSesion(); navigate('/admin'); }
+    }, [sesion, navigate]);
 
     // --- Face ID ---
     const [puedeFaceId, setPuedeFaceId] = useState(null);   // null = todavia no sabemos
@@ -361,7 +378,12 @@ const AdminDashboard = () => {
             // persona (por si alguien le robo el token) y devuelve una nueva,
             // para que a quien la cambio no lo saque su propio cambio.
             const token = await adminSetPassword(claveActual, claveNueva);
-            if (token) guardarSesion(token);
+            // El servidor devuelve null cuando la clave actual no es la buena.
+            // Antes reventaba, pero así no podía anotar el intento fallido (el
+            // error deshace todo lo de la misma llamada) y el freno por
+            // intentos nunca entraba.
+            if (!token) throw new Error('La clave actual no es correcta');
+            guardarSesion(token);
             setClaveActual(''); setClaveNueva('');
             setAviso({ tipo: 'ok', texto: 'Clave cambiada.' });
         } catch (err) {
@@ -369,7 +391,7 @@ const AdminDashboard = () => {
         }
     };
 
-    if (!pass) return null;
+    if (!pass || sesion !== 'vale') return null;   // nada se pinta sin el visto bueno del servidor
 
     const total = fotosNuevas.length + galeria.length;
 

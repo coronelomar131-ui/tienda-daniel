@@ -1,4 +1,4 @@
-import { supabase, mensajeDeError } from './supabase';
+import { supabase, mensajeDeError, mensajeParaCliente, urlSegura } from './supabase';
 
 // La base guarda los campos con nombres tipo ml_link; la app los usa en camelCase.
 const toApp = (row) => ({
@@ -10,7 +10,7 @@ const toApp = (row) => ({
     priceBefore: row.price_before == null ? null : Number(row.price_before),
     sizes: (row.sizes || []).map(Number),
     status: row.status || '',
-    mlLink: row.ml_link || '',
+    mlLink: urlSegura(row.ml_link),
     videoUrl: row.video_url || '',
     photoCount: row.photo_count || 0,
     sortOrder: row.sort_order || 0,
@@ -36,7 +36,7 @@ export async function fetchProducts() {
         .from('products')
         .select(CAMPOS)
         .order('sort_order', { ascending: false }));
-    if (error) throw new Error(mensajeDeError(error));
+    if (error) throw new Error(mensajeParaCliente(error));
     return (data || []).map(toApp);
 }
 
@@ -46,7 +46,7 @@ export async function fetchProduct(id) {
         .select(CAMPOS)
         .eq('id', id)
         .maybeSingle());
-    if (error) throw new Error(mensajeDeError(error));
+    if (error) throw new Error(mensajeParaCliente(error));
     return data ? toApp(data) : null;
 }
 

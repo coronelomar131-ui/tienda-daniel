@@ -33,12 +33,14 @@ const responder = (cuerpo: unknown, status = 200) =>
 // De donde se acepta que venga la peticion. El navegador mete el origen real
 // dentro de lo que se firma, asi que esto NO se puede falsificar desde el
 // cliente: si no esta en la lista, la firma no cuadra y se rechaza.
-const ORIGENES = [
-  "https://tienda-daniel-pearl.vercel.app",
-  "http://localhost:4250",
-  "http://localhost:4260",
-  "http://localhost:5173",
-];
+// La lista sale de una variable de entorno (ORIGENES_PERMITIDOS, separados por
+// comas). Antes traía localhost aquí escrito: una passkey dada de alta en
+// localhost queda amarrada al "dominio" localhost, y cualquier página corriendo
+// en localhost de esa computadora podía pedirse una sesión de admin DE LA
+// TIENDA DE VERDAD. En producción la lista es un solo dominio.
+const ORIGENES = (Deno.env.get("ORIGENES_PERMITIDOS") ??
+  "https://tienda-daniel-pearl.vercel.app")
+  .split(",").map((o) => o.trim().replace(/\/$/, "")).filter(Boolean);
 
 const rpIdDe = (origen: string) => new URL(origen).hostname;
 
@@ -145,6 +147,7 @@ Deno.serve(async (req: Request) => {
         p_llave: btoa(String.fromCharCode(...cred.publicKey)),
         p_contador: cred.counter ?? 0,
         p_nombre: (cuerpo.nombre || "").slice(0, 60),
+        p_rp_id: rpID,
       });
       if (error) return responder({ error: "Esa llave ya estaba dada de alta" }, 409);
 
@@ -176,9 +179,10 @@ Deno.serve(async (req: Request) => {
       const resp = cuerpo.respuesta as { id?: string };
       const { data: guardada } = await admin.rpc("passkey_buscar", {
         p_credential_id: resp?.id || "",
+        p_rp_id: rpID,
       });
       const pk = Array.isArray(guardada) ? guardada[0] : guardada;
-      if (!pk) return responder({ error: "Esa huella no está dada de alta" }, 401);
+      if (!pk) return responder({ error: "No se pudo verificar la huella" }, 401);
 
       const llave = Uint8Array.from(atob(pk.llave_publica), (c) => c.charCodeAt(0));
 
