@@ -2368,3 +2368,23 @@ html:has(.admin-page), body:has(.admin-page) { background: #15110E; }
   .admin-page .aviso-cara { flex-direction: column; align-items: stretch; gap: 10px; }
   .admin-page .aviso-cara button { margin-left: 0; width: 100%; }
 }
+
+/* El resultado del Face ID, pegado al boton que se acaba de tocar. */
+.admin-page .recado-cara {
+  margin: 10px 0 0;
+  padding: 9px 12px;
+  border-radius: 12px;
+  font-size: 0.82rem;
+  line-height: 1.4;
+}
+.admin-page .recado-cara.ok {
+  color: #BFE3C6;
+  background: rgba(78, 154, 95, 0.16);
+  border: 1px solid rgba(78, 154, 95, 0.38);
+}
+.admin-page .recado-cara.error {
+  color: #F2C7A8;
+  background: rgba(200, 84, 51, 0.16);
+  border: 1px solid rgba(200, 84, 51, 0.42);
+}
+.admin-page .aviso-cara .recado-cara { width: 100%; }

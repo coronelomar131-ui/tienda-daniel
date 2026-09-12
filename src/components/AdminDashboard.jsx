@@ -125,6 +125,10 @@ const AdminDashboard = () => {
     const [puedeFaceId, setPuedeFaceId] = useState(null);   // null = todavia no sabemos
     const [misFaceId, setMisFaceId] = useState([]);
     const [dandoAlta, setDandoAlta] = useState(false);
+    // El aviso general se pinta hasta arriba del panel. Cuando estas abajo, en
+    // la ficha, no lo ves nunca: le picas, falla, y parece que no paso nada.
+    // Este se pinta junto al boton que acabas de tocar.
+    const [avisoCara, setAvisoCara] = useState(null);
 
     const cargarFaceId = useCallback(() => {
         adminPasskeys(pass).then(l => setMisFaceId(l || [])).catch(() => setMisFaceId([]));
@@ -142,15 +146,19 @@ const AdminDashboard = () => {
 
     const altaFaceId = async () => {
         setAviso(null);
+        setAvisoCara(null);
         setDandoAlta(true);
         try {
             await darDeAltaFaceId(pass, nombreDelAparato());
             cargarFaceId();
             setAviso({ tipo: 'ok', texto: 'Listo. La próxima vez entras con Face ID.' });
+            setAvisoCara({ tipo: 'ok', texto: 'Listo. La próxima vez entras con Face ID.' });
         } catch (err) {
-            setAviso({ tipo: 'error', texto: err?.name === 'NotAllowedError'
+            const texto = err?.name === 'NotAllowedError'
                 ? 'Se canceló, o el aparato no dejó. Vuelve a intentar.'
-                : (err?.message || 'No se pudo dar de alta') });
+                : (err?.message || 'No se pudo dar de alta');
+            setAviso({ tipo: 'error', texto });
+            setAvisoCara({ tipo: 'error', texto });
         } finally {
             setDandoAlta(false);
             precalentarAlta(pass, nombreDelAparato());   // dejarlo listo por si repite
@@ -435,6 +443,9 @@ const AdminDashboard = () => {
                         <button type="button" onClick={altaFaceId} disabled={dandoAlta}>
                             {dandoAlta ? 'Esperando…' : 'Activar'}
                         </button>
+                        {avisoCara && (
+                            <p className={`recado-cara ${avisoCara.tipo}`}>{avisoCara.texto}</p>
+                        )}
                     </div>
                 )}
 
@@ -620,6 +631,9 @@ const AdminDashboard = () => {
                                         disabled={dandoAlta}>
                                     {dandoAlta ? 'Esperando…' : 'Dar de alta este aparato'}
                                 </button>
+                                {avisoCara && (
+                                    <p className={`recado-cara ${avisoCara.tipo}`}>{avisoCara.texto}</p>
+                                )}
                             </div>
                         </details>
 
