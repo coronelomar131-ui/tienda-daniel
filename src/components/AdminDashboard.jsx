@@ -422,6 +422,22 @@ const AdminDashboard = () => {
                     )}
                 </button>
 
+                {/* Dar de alta el Face ID se hace UNA vez. Tenerlo hasta el fondo
+                    de la columna, debajo de todos los pares, era imposible de
+                    encontrar en un celular. Aqui arriba se ve el primer dia y
+                    se va solo en cuanto queda dado de alta. */}
+                {puedeFaceId !== null && misFaceId.length === 0 && (
+                    <div className="aviso-cara">
+                        <div>
+                            <strong>Entra con Face ID</strong>
+                            <span>Sin escribir tu clave la próxima vez. Se hace una sola vez.</span>
+                        </div>
+                        <button type="button" onClick={altaFaceId} disabled={dandoAlta}>
+                            {dandoAlta ? 'Esperando…' : 'Activar'}
+                        </button>
+                    </div>
+                )}
+
                 <nav className="barra-admin" aria-label="Secciones del panel">
                     <button className={`pest ${tab === 'catalogo' ? 'on' : ''}`}
                             onClick={() => setTab('catalogo')} aria-current={tab === 'catalogo'}>
@@ -571,6 +587,42 @@ const AdminDashboard = () => {
                             </form>
                         </div>
 
+
+                        <details className={`admin-card plegable ficha-cara ${misFaceId.length ? 'lista' : ''}`} open={misFaceId.length === 0}
+                                 style={{ marginTop: 0 }}
+                                 onToggle={(e) => {
+                                     if (e.currentTarget.open) precalentarAlta(pass, nombreDelAparato());
+                                 }}>
+                            <summary>Entrar con Face ID ({misFaceId.length})</summary>
+                            <div className="admin-form">
+                                <p className="hint">
+                                    Da de alta este aparato y la próxima vez entras con tu cara
+                                    o tu huella, sin escribir la clave. La llave se queda guardada
+                                    en el aparato: aquí solo se guarda la parte pública, que no
+                                    sirve para entrar.
+                                </p>
+                                {misFaceId.map(k => (
+                                    <div className="gente-fila" key={k.id}>
+                                        <span>{k.nombre}</span>
+                                        <button type="button" className="link-btn link-mal"
+                                                onClick={() => quitarFaceId(k.id)}>Quitar</button>
+                                    </div>
+                                ))}
+                                {puedeFaceId === false && (
+                                    <p className="hint" style={{ color: 'var(--naranja, #E8863A)' }}>
+                                        Este aparato dice que no tiene Face ID disponible para la web.
+                                        Pasa cuando abres la página dentro de otra app (Instagram,
+                                        TikTok, WhatsApp) o en una ventana privada. Ábrela en Safari
+                                        directo y vuelve a entrar. Aun así puedes intentarlo:
+                                    </p>
+                                )}
+                                <button type="button" className="btn-ghost" onClick={altaFaceId}
+                                        disabled={dandoAlta}>
+                                    {dandoAlta ? 'Esperando…' : 'Dar de alta este aparato'}
+                                </button>
+                            </div>
+                        </details>
+
                         <details className="admin-card plegable" style={{ marginTop: '18px' }}>
                             <summary>Video de portada</summary>
                             <p className="hint" style={{ marginTop: 0 }}>
@@ -635,41 +687,6 @@ const AdminDashboard = () => {
                                 </p>
                             </form>
                         </details>
-
-                        <details className="admin-card plegable" style={{ marginTop: '18px' }}
-                                 onToggle={(e) => {
-                                     if (e.currentTarget.open) precalentarAlta(pass, nombreDelAparato());
-                                 }}>
-                            <summary>Entrar con Face ID ({misFaceId.length})</summary>
-                            <div className="admin-form">
-                                <p className="hint">
-                                    Da de alta este aparato y la próxima vez entras con tu cara
-                                    o tu huella, sin escribir la clave. La llave se queda guardada
-                                    en el aparato: aquí solo se guarda la parte pública, que no
-                                    sirve para entrar.
-                                </p>
-                                {misFaceId.map(k => (
-                                    <div className="gente-fila" key={k.id}>
-                                        <span>{k.nombre}</span>
-                                        <button type="button" className="link-btn link-mal"
-                                                onClick={() => quitarFaceId(k.id)}>Quitar</button>
-                                    </div>
-                                ))}
-                                {puedeFaceId === false && (
-                                    <p className="hint" style={{ color: 'var(--naranja, #E8863A)' }}>
-                                        Este aparato dice que no tiene Face ID disponible para la web.
-                                        Pasa cuando abres la página dentro de otra app (Instagram,
-                                        TikTok, WhatsApp) o en una ventana privada. Ábrela en Safari
-                                        directo y vuelve a entrar. Aun así puedes intentarlo:
-                                    </p>
-                                )}
-                                <button type="button" className="btn-ghost" onClick={altaFaceId}
-                                        disabled={dandoAlta}>
-                                    {dandoAlta ? 'Esperando…' : 'Dar de alta este aparato'}
-                                </button>
-                            </div>
-                        </details>
-
                         <details className="admin-card plegable" style={{ marginTop: '18px' }}>
                             <summary>Cambiar mi clave</summary>
                             <form onSubmit={cambiarClave} className="admin-form">
