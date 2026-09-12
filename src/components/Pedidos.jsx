@@ -86,30 +86,38 @@ const Pedidos = ({ pass }) => {
         }
     };
 
+    // Lo que falta por cobrar sale de los pedidos que ya estan en pantalla.
+    const porCobrar = pedidos
+        .filter(o => o.estado === 'pendiente')
+        .reduce((suma, o) => suma + Number(o.monto_cobrado || o.total || 0), 0);
+    const sinConfirmar = pedidos.filter(o => o.estado === 'pendiente').length;
+
     return (
         <div className="pedidos">
-            <div className="pedidos-cifras">
-                <div className="cifra">
-                    <span>Cobrado este mes</span>
-                    <strong>{pesos(resumen.cobrado_mes)}</strong>
-                </div>
-                <div className="cifra">
-                    <span>Cobrado en total</span>
-                    <strong>{pesos(resumen.cobrado_total)}</strong>
-                </div>
-                <div className="cifra">
-                    <span>Pedidos pagados</span>
-                    <strong>{resumen.pagados ?? 0}</strong>
-                </div>
-                <div className="cifra">
-                    <span>Sin confirmar</span>
-                    <strong>{resumen.pendientes ?? 0}</strong>
-                </div>
+            {/* Aqui habia cuatro recuadros con cuatro numeros. Dos decian lo
+                mismo ("cobrado este mes" y "cobrado en total" son iguales
+                mientras solo lleves un mes) y los otros dos eran conteos que
+                ya se ven contando los renglones de abajo. Cuatro recuadros
+                para dos datos.
+
+                Lo unico que te hace levantarte a hacer algo es cuanto te
+                deben. Esa cifra manda; lo demas se lee como una frase. */}
+            <div className="tablero">
+                <p className="tablero-cifra">
+                    <b>{pesos(porCobrar)}</b>
+                    <span>{porCobrar > 0 ? 'te deben' : 'nadie te debe'}</span>
+                </p>
+                <p className="tablero-nota">
+                    {sinConfirmar > 0
+                        ? `${sinConfirmar} ${sinConfirmar === 1 ? 'pedido' : 'pedidos'} sin confirmar. `
+                        : 'Todo confirmado. '}
+                    Llevas {pesos(resumen.cobrado_mes)} cobrados este mes.
+                </p>
             </div>
 
             <div className="pedidos-barra">
                 <label className="anticipo-ajuste">
-                    Apartado con anticipo
+                    <span>Los clientes pueden apartar con</span>
                     <select value={pct} onChange={(e) => guardarPct(Number(e.target.value))} disabled={guardandoPct}>
                         <option value={0}>Apagado (pago completo)</option>
                         <option value={30}>30% para apartar</option>
