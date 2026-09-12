@@ -1,4 +1,4 @@
-import { supabase, mensajeDeError, mensajeParaCliente, urlSegura } from './supabase';
+import { supabase, mensajeParaCliente, urlSegura, errorDe } from './supabase';
 
 // La base guarda los campos con nombres tipo ml_link; la app los usa en camelCase.
 const toApp = (row) => ({
@@ -36,7 +36,7 @@ export async function fetchProducts() {
         .from('products')
         .select(CAMPOS)
         .order('sort_order', { ascending: false }));
-    if (error) throw new Error(mensajeParaCliente(error));
+    if (error) throw errorDe(error, mensajeParaCliente(error));
     return (data || []).map(toApp);
 }
 
@@ -46,7 +46,7 @@ export async function fetchProduct(id) {
         .select(CAMPOS)
         .eq('id', id)
         .maybeSingle());
-    if (error) throw new Error(mensajeParaCliente(error));
+    if (error) throw errorDe(error, mensajeParaCliente(error));
     return data ? toApp(data) : null;
 }
 
@@ -78,7 +78,7 @@ async function vaciarCola() {
             .select('id, product_id, url, data, position')
             .in('product_id', ids)
             .order('position', { ascending: true }), LIMITE_FOTOS);
-        if (error) throw new Error(mensajeDeError(error));
+        if (error) throw errorDe(error);
 
         const porPar = new Map();
         for (const f of data || []) {
@@ -118,7 +118,7 @@ export function fetchPhotos(productId) {
 
 const rpc = async (fn, args, ms = LIMITE * 3) => {
     const { data, error } = await conLimite(supabase.rpc(fn, args), ms);
-    if (error) throw new Error(mensajeDeError(error));
+    if (error) throw errorDe(error);
     return data;
 };
 
@@ -127,7 +127,7 @@ export async function fetchHeroVideo() {
         .from('site_settings')
         .select('hero_video_url')
         .maybeSingle());
-    if (error) throw new Error(mensajeDeError(error));
+    if (error) throw errorDe(error);
     return data?.hero_video_url || '';
 }
 
@@ -183,7 +183,7 @@ export const fetchTopVendidos = async (limite = 6) => {
     const { data, error } = await conLimite(
         supabase.rpc('top_vendidos', { p_limite: limite })
     );
-    if (error) throw new Error(mensajeDeError(error));
+    if (error) throw errorDe(error);
     return (data || []).map(toApp);
 };
 

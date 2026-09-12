@@ -36,12 +36,28 @@ export const supabase = createClient(SUPABASE_URL, SUPABASE_KEY, {
 
 const SIN_RED = /abort|timeout|failed to fetch|network|load failed/i;
 
+// ¿El error fue porque no hubo red, o porque el servidor dijo que no?
+// Distinguirlo importa: la puerta del panel se abre "a lo bueno" cuando no hay
+// señal, para no sacar al dueño cada vez que se le cae el internet. Pero eso
+// estaba decidiendose comparando el TEXTO en español del aviso, y un texto es
+// para leerse, no para tomar decisiones de seguridad: el dia que se cambie esa
+// frase, la puerta cambia de comportamiento sin que nadie se entere. Esta
+// marca viaja pegada al error y no depende de como se escriba el mensaje.
+export const esFallaDeRed = (err) => err?.sinRed === true;
+
 // Para el panel: aqui si conviene el mensaje crudo de la base, porque quien lo
 // lee es el dueño y le sirve para saber que paso.
 export const mensajeDeError = (err) => {
     const texto = err?.message || '';
     if (SIN_RED.test(texto)) return 'No hay conexión con la tienda';
     return texto || 'Algo salió mal';
+};
+
+// Todo error que sale de una llamada nace ya con la marca puesta.
+export const errorDe = (err, mensaje) => {
+    const e = new Error(mensaje ?? mensajeDeError(err));
+    if (SIN_RED.test(err?.message || '')) e.sinRed = true;
+    return e;
 };
 
 // Para el cliente: NUNCA el mensaje crudo. Postgres suelta nombres de tablas,

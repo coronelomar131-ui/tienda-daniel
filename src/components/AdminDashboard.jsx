@@ -16,6 +16,7 @@ import { hayFaceId, darDeAltaFaceId, precalentarAlta } from '../lib/passkey';
 import { CaraIcono } from './AdminLogin';
 import { adminOrdersResumen } from '../lib/pagos';
 import { leerSesion, guardarSesion, cerrarSesion } from '../lib/adminSession';
+import { esFallaDeRed } from '../lib/supabase';
 import SneakerArt from './SneakerArt';
 import PantallaCarga from './PantallaCarga';
 import Pedidos from './Pedidos';
@@ -121,7 +122,12 @@ const AdminDashboard = () => {
     // pantalla si, y eso es una puerta abierta esperando a que algun dia se le
     // cuelgue algo delicado. Esta misma llamada ya preguntaba al servidor;
     // ahora ademas decide si se pinta o no.
-    const [sesion, setSesion] = useState('revisando');   // revisando | vale | no
+    const [sesion, setSesion] = useState('revisando');   // revisando | vale | sinred | no
+    const [reintento, setReintento] = useState(0);
+    const revisarSesion = useCallback(() => {
+        setSesion('revisando');
+        setReintento(n => n + 1);
+    }, []);
     useEffect(() => {
         let vivo = true;
         if (!pass) { setSesion('no'); return; }
@@ -129,12 +135,20 @@ const AdminDashboard = () => {
             .then(r => { if (vivo) { setPorCobrar(r); setSesion('vale'); } })
             .catch((err) => {
                 if (!vivo) return;
-                // Sin internet no se echa a nadie: solo cuando el servidor
-                // dice que el token no vale.
-                setSesion(/conexión|conexion/i.test(err?.message || '') ? 'vale' : 'no');
+                // Sin internet no se echa a nadie: solo cuando el SERVIDOR dice
+                // que el token no vale. Antes eso se decidia comparando el texto
+                // en español del aviso, y un texto es para leerse, no para
+                // decidir quien entra: el dia que se cambiara esa frase, la
+                // puerta cambiaba de comportamiento sin que nadie se enterara.
+                // Ahora el error trae la marca pegada desde que nace.
+                //
+                // Y sin señal ya no se pinta el panel entero —que de todos modos
+                // saldria vacio, porque todo viene del servidor— sino un aviso
+                // que dice que pasa y deja reintentar.
+                setSesion(esFallaDeRed(err) ? 'sinred' : 'no');
             });
         return () => { vivo = false; };
-    }, [pass]);
+    }, [pass, reintento]);
 
     useEffect(() => {
         if (sesion === 'no') { cerrarSesion(); navigate('/admin'); }
@@ -412,6 +426,7 @@ const AdminDashboard = () => {
     // a la pantalla de la clave, asi que aqui no se pinta nada.
     if (!pass) return null;
     if (sesion === 'revisando') return <PantallaCarga />;
+    if (sesion === 'sinred') return <PantallaCarga sinRed onReintentar={revisarSesion} />;
     if (sesion !== 'vale') return null;
 
     const total = fotosNuevas.length + galeria.length;

@@ -1,4 +1,4 @@
-import { supabase, mensajeDeError, mensajeParaCliente } from './supabase';
+import { supabase, mensajeParaCliente, errorDe } from './supabase';
 
 // Manda el carrito a cobrar. Ojo con lo que NO viaja: los precios.
 // Solo se manda qué par y qué talla; el servidor pone el precio desde la
@@ -39,7 +39,7 @@ export async function pagosTarjetaListos() {
 
 export async function estadoOrden(id) {
     const { data, error } = await supabase.rpc('orden_estado', { p_id: id });
-    if (error) throw new Error(mensajeParaCliente(error));
+    if (error) throw errorDe(error, mensajeParaCliente(error));
     return Array.isArray(data) ? data[0] : data;
 }
 
@@ -50,19 +50,19 @@ export async function fetchAnticipo() {
 
 export const adminOrders = async (pass, limite = 50) => {
     const { data, error } = await supabase.rpc('admin_orders', { pass, p_limite: limite });
-    if (error) throw new Error(mensajeDeError(error));
+    if (error) throw errorDe(error);
     return data || [];
 };
 
 export const adminOrdersResumen = async (pass) => {
     const { data, error } = await supabase.rpc('admin_orders_resumen', { pass });
-    if (error) throw new Error(mensajeDeError(error));
+    if (error) throw errorDe(error);
     return data || {};
 };
 
 export const adminSetAnticipo = async (pass, pct) => {
     const { error } = await supabase.rpc('admin_set_anticipo', { pass, p_pct: pct });
-    if (error) throw new Error(mensajeDeError(error));
+    if (error) throw errorDe(error);
     return true;
 };
 
@@ -83,7 +83,7 @@ export async function crearPedido({ cart, nombre, telefono, direccion, email, no
         p_nota: nota || null,
         p_anticipo: !!anticipo,
     });
-    if (error) throw new Error(mensajeParaCliente(error));
+    if (error) throw errorDe(error, mensajeParaCliente(error));
     const fila = Array.isArray(data) ? data[0] : data;
     if (!fila) throw new Error('No se pudo guardar el pedido');
     return {
@@ -102,8 +102,8 @@ export async function datosPago() {
 
 export const adminEstadoPedido = (pass, id, estado) =>
     supabase.rpc('admin_estado_pedido', { pass, p_id: id, p_estado: estado })
-        .then(({ error }) => { if (error) throw new Error(mensajeDeError(error)); return true; });
+        .then(({ error }) => { if (error) throw errorDe(error); return true; });
 
 export const adminSetDatosPago = (pass, clabe, banco, titular) =>
     supabase.rpc('admin_set_datos_pago', { pass, p_clabe: clabe, p_banco: banco, p_titular: titular })
-        .then(({ error }) => { if (error) throw new Error(mensajeDeError(error)); return true; });
+        .then(({ error }) => { if (error) throw errorDe(error); return true; });

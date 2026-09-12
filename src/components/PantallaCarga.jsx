@@ -25,17 +25,34 @@ const Renglon = () => (
     </div>
 );
 
-const PantallaCarga = ({ texto = 'Abriendo tu bodega' }) => (
+// La misma pantalla sirve para las dos esperas: mientras carga, y cuando no
+// hay señal. Antes, sin señal se pintaba el panel completo "por si acaso", y
+// salia vacio de todos modos porque todo viene del servidor: parecia que la
+// tienda se habia quedado sin nada. Mejor decir lo que pasa.
+const PantallaCarga = ({ texto = 'Abriendo tu bodega', sinRed = false, onReintentar }) => (
     <div className="admin-page carga-pagina" role="status" aria-live="polite">
         <div className="wrap">
-            <div className="carga-luz" aria-hidden="true" />
+            {!sinRed && <div className="carga-luz" aria-hidden="true" />}
 
             <div className="carga-cabecera">
                 <span className="carga-marca">Prothe Shop</span>
                 <span className="carga-boton" />
             </div>
 
-            <p className="carga-texto">{texto}</p>
+            {sinRed ? (
+                <div className="carga-sinred">
+                    <p className="carga-titulo">No hay conexión</p>
+                    <p className="carga-detalle">
+                        Tu panel vive en el servidor, así que sin señal no hay nada que
+                        enseñarte. Revisa tus datos o tu wifi y vuelve a intentar.
+                    </p>
+                    <button type="button" className="btn-ghost" onClick={onReintentar}>
+                        Reintentar
+                    </button>
+                </div>
+            ) : (
+                <p className="carga-texto">{texto}</p>
+            )}
 
             <div className="carga-repisa" aria-hidden="true">
                 <Renglon />
