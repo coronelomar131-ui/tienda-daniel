@@ -1,6 +1,6 @@
 import React, { useCallback, useState, useContext, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Trash2, Plus, Pencil, ChevronUp, ChevronDown, X, Package, Receipt } from 'lucide-react';
+import { Trash2, Plus, Pencil, ChevronUp, ChevronDown, X, Package, Receipt, Store } from 'lucide-react';
 import { ShopContext } from '../context/shop-context';
 import {
     adminAddProduct, adminUpdateProduct, adminDeleteProduct,
@@ -17,6 +17,7 @@ import { CaraIcono } from './AdminLogin';
 import { adminOrdersResumen } from '../lib/pagos';
 import { leerSesion, guardarSesion, cerrarSesion } from '../lib/adminSession';
 import SneakerArt from './SneakerArt';
+import PantallaCarga from './PantallaCarga';
 import Pedidos from './Pedidos';
 import { leerTallas, escribirTallas } from '../lib/tallas';
 import { verDescuento, pesos, antesDesdePct, pctDesdeAntes } from '../lib/descuento';
@@ -406,7 +407,12 @@ const AdminDashboard = () => {
         }
     };
 
-    if (!pass || sesion !== 'vale') return null;   // nada se pinta sin el visto bueno del servidor
+    // Mientras el servidor confirma la sesion se enseña el esqueleto del panel,
+    // no una pantalla negra. Si la sesion no vale, el efecto de arriba ya mando
+    // a la pantalla de la clave, asi que aqui no se pinta nada.
+    if (!pass) return null;
+    if (sesion === 'revisando') return <PantallaCarga />;
+    if (sesion !== 'vale') return null;
 
     const total = fotosNuevas.length + galeria.length;
 
@@ -471,7 +477,7 @@ const AdminDashboard = () => {
                     de la columna, debajo de todos los pares, era imposible de
                     encontrar en un celular. Aqui arriba se ve el primer dia y
                     se va solo en cuanto queda dado de alta. */}
-                {puedeFaceId !== null && misFaceId.length === 0 && (
+                {puedeFaceId !== null && misFaceId.length === 0 && tab !== 'tienda' && (
                     <div className="aviso-cara">
                         <span className="cara-glifo marco-cara"><CaraIcono /></span>
                         <div className="aviso-cara-texto">
@@ -502,21 +508,168 @@ const AdminDashboard = () => {
                             onClick={() => setTab('pedidos')} aria-current={tab === 'pedidos'}>
                         <Receipt size={19} />
                         <span>Pedidos</span>
+                        {porCobrar?.pendientes > 0 && <i className="pinta" aria-hidden="true" />}
+                    </button>
+                    <button className={`pest ${tab === 'tienda' ? 'on' : ''}`}
+                            onClick={() => setTab('tienda')} aria-current={tab === 'tienda'}>
+                        <Store size={19} />
+                        <span>Tienda</span>
                     </button>
                 </nav>
 
                 {tab === 'pedidos' && <Pedidos pass={pass} />}
 
-                <div className={`admin-grid tab-${tab}`} hidden={tab === 'pedidos'}>
+                {/* CADA COSA EN SU SECCION. Estos cuatro bloques vivian tirados
+                    al final de la columna del catalogo: para llegarles habia que
+                    bajarse todos los pares publicados y adivinar en que pestaña
+                    estaban. No es que estuvieran mal hechos, es que no estaban en
+                    ningun lado. Ahora tienen su propia pantalla. */}
+                {tab === 'tienda' && (
+                    <section className="seccion" aria-label="Ajustes de la tienda">
+                        <header className="seccion-cab">
+                            <h3>Tu tienda</h3>
+                            <p>Cómo entras, quién más puede entrar y qué se ve en la portada.</p>
+                        </header>
+                        <div className="seccion-bloques">
+                        <details className={`admin-card plegable ficha-cara ${misFaceId.length ? 'lista' : ''}`} open={misFaceId.length === 0}
+                             
+                                 onToggle={(e) => {
+                                     if (e.currentTarget.open) precalentarAlta(pass, nombreDelAparato());
+                                 }}>
+                            <summary>Entrar con Face ID ({misFaceId.length})</summary>
+                            <div className="admin-form">
+                                <p className="hint">
+                                    La llave se queda dentro de tu teléfono y solo la abre tu
+                                    cara. Aquí nada más vive la mitad pública, que no sirve para
+                                    entrar: si alguien se robara la base, no encontraría con qué.
+                                </p>
+                                {misFaceId.map(k => (
+                                    <div className="aparato" key={k.id}>
+                                        <span className="aparato-marco marco-cara" />
+                                        <span className="aparato-datos">
+                                            <b>{k.nombre}</b>
+                                            <small>
+                                                {k.usado
+                                                    ? `Se usó ${cuando(k.usado)}`
+                                                    : 'Todavía no lo usas'}
+                                                {cuando(k.creado) && ` · alta ${cuando(k.creado)}`}
+                                            </small>
+                                        </span>
+                                        <button type="button" className="link-btn link-mal"
+                                                onClick={() => quitarFaceId(k.id)}>Quitar</button>
+                                    </div>
+                                ))}
+                                {puedeFaceId === false && (
+                                    <p className="hint" style={{ color: 'var(--naranja, #E8863A)' }}>
+                                        Este aparato dice que no tiene Face ID disponible para la web.
+                                        Pasa cuando abres la página dentro de otra app (Instagram,
+                                        TikTok, WhatsApp) o en una ventana privada. Ábrela en Safari
+                                        directo y vuelve a entrar. Aun así puedes intentarlo:
+                                    </p>
+                                )}
+                                <button type="button" className="btn-ghost" onClick={altaFaceId}
+                                        disabled={dandoAlta}>
+                                    {dandoAlta ? 'Mirándote…' : 'Dar de alta este aparato'}
+                                </button>
+                                {avisoCara && (
+                                    <p className={`recado-cara ${avisoCara.tipo}`}>{avisoCara.texto}</p>
+                                )}
+                            </div>
+                        </details>
+
+                        <details className="admin-card plegable" >
+                            <summary>Video de portada</summary>
+                            <p className="hint" >
+                                Se reproduce solo, en bucle y sin sonido, atrás del título de tu
+                                tienda. Es lo que más la hace ver viva. Máximo {LIMITE_MB} MB.
+                            </p>
+                            {heroCargado && heroVideo ? (
+                                <>
+                                    <video className="hero-previo" src={heroVideo} muted loop playsInline autoPlay />
+                                    <button type="button" className="btn-ghost" style={{ marginTop: '10px' }}
+                                        onClick={quitarVideoPortada} disabled={ocupado}>
+                                        Quitar video de portada
+                                    </button>
+                                </>
+                            ) : (
+                                <label>
+                                    Subir video de portada
+                                    <input type="file" accept="video/*" onChange={elegirVideoPortada}
+                                        disabled={!!subiendoVideo} style={{ marginTop: '6px' }} />
+                                </label>
+                            )}
+                        </details>
+
+                        <details className="admin-card plegable" >
+                            <summary>Quién puede entrar ({gente.length})</summary>
+
+                            {gente.length > 0 && (
+                                <div className="gente-lista">
+                                    {gente.map(u => (
+                                        <div className="gente-fila" key={u.id}>
+                                            <span className="cara-foto">
+                                                {u.foto ? <img src={u.foto} alt="" />
+                                                        : <span className="cara-iniciales">{(u.nombre || '?')[0].toUpperCase()}</span>}
+                                            </span>
+                                            <strong>{u.nombre}</strong>
+                                            <button className="del" onClick={() => quitarDelPanel(u)}
+                                                    aria-label={`Quitar a ${u.nombre}`}>
+                                                <Trash2 size={16} />
+                                            </button>
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+
+                            <form onSubmit={darDeAlta} className="admin-form" style={{ marginTop: '14px' }}>
+                                <div className="alta-foto">
+                                    <label className="cara-foto alta-foto-boton">
+                                        {nuevaFoto ? <img src={nuevaFoto} alt="" />
+                                                   : <span className="cara-iniciales">+</span>}
+                                        <input type="file" accept="image/*" onChange={elegirFoto} hidden />
+                                    </label>
+                                    <p className="hint">Su foto (opcional). Sale en la pantalla de entrada.</p>
+                                </div>
+                                <input type="text" placeholder="Nombre" value={nuevoNombre}
+                                    onChange={(e) => setNuevoNombre(e.target.value)} />
+                                <input type="password" placeholder="Su clave (mínimo 6)" value={nuevaClave}
+                                    onChange={(e) => setNuevaClave(e.target.value)} autoComplete="new-password" />
+                                <button type="submit" className="btn-ghost" disabled={ocupado}>Dar de alta</button>
+                                <p className="hint">
+                                    Cada quien entra con su propia clave. La tuya de dueño sigue
+                                    funcionando aunque quites a todos.
+                                </p>
+                            </form>
+                        </details>
+                        <details className="admin-card plegable" >
+                            <summary>Cambiar mi clave</summary>
+                            <form onSubmit={cambiarClave} className="admin-form">
+                                <input type="password" placeholder="Clave actual" value={claveActual}
+                                    onChange={(e) => setClaveActual(e.target.value)} autoComplete="current-password" />
+                                <input type="password" placeholder="Clave nueva (mínimo 6)" value={claveNueva}
+                                    onChange={(e) => setClaveNueva(e.target.value)} autoComplete="new-password" />
+                                <button type="submit" className="btn-ghost">Cambiar clave</button>
+                            </form>
+                        </details>
+                        </div>
+                    </section>
+                )}
+
+                <div className={`admin-grid tab-${tab}`}
+                     hidden={tab === 'pedidos' || tab === 'tienda'}>
                     <div className="col-form">
                         <div className="admin-card">
-                            <h3>
-                                {editandoId
-                                    ? <><Pencil size={16} style={{ verticalAlign: '-3px' }} /> Editando par</>
-                                    : <><Plus size={16} style={{ verticalAlign: '-3px' }} /> Añadir par</>}
-                            </h3>
+                            <header className="seccion-cab seccion-cab-forma">
+                                <h3>{editandoId ? 'Editando par' : 'Añadir par'}</h3>
+                                <p>{editandoId
+                                    ? 'Los cambios se ven en la tienda en cuanto guardas.'
+                                    : 'Marca, modelo y precio es lo mínimo. Lo demás lo puedes dejar en blanco.'}</p>
+                            </header>
 
                             <form onSubmit={guardar} className="admin-form">
+
+                                <fieldset className="grupo">
+                                <legend>El par</legend>
                                 <input type="text" placeholder="Marca (Nike, Jordan, Adidas...)"
                                     value={form.brand} onChange={set('brand')} list="marcas-existentes" />
                                 <datalist id="marcas-existentes">
@@ -524,6 +677,18 @@ const AdminDashboard = () => {
                                 </datalist>
 
                                 <input type="text" placeholder="Modelo (Air Max 90...)" value={form.name} onChange={set('name')} />
+                                {/* La categoria dice QUE es el par, no cuanto cuesta: va con la
+                                    marca y el modelo, no revuelta entre el precio y las tallas. */}
+                                <select value={form.categoria} onChange={set('categoria')}>
+                                    {CATEGORIAS.map(c => (
+                                        <option key={c.llave} value={c.llave}>{c.texto}</option>
+                                    ))}
+                                </select>
+                                <p className="hint">La banda de una categoría solo sale si tiene algo adentro.</p>
+                                </fieldset>
+
+                                <fieldset className="grupo">
+                                <legend>Precio</legend>
                                 <input type="number" placeholder="Precio (MXN)" value={form.price} onChange={(e) => escribirPrecio(e.target.value)} min="0" />
 
                                 <div className="oferta-campos">
@@ -544,15 +709,10 @@ const AdminDashboard = () => {
                                     <p className="hint hint-mal">Pon un porcentaje entre 1 y 99, o un precio anterior mayor al de ahora.</p>
                                 )}
 
-                                {/* La categoria decide en que banda sale. Si nada mas
-                                    vendes tenis, dejalo en Calzado. */}
-                                <select value={form.categoria} onChange={set('categoria')}>
-                                    {CATEGORIAS.map(c => (
-                                        <option key={c.llave} value={c.llave}>{c.texto}</option>
-                                    ))}
-                                </select>
-                                <p className="hint">La banda de una categoría solo sale si tiene algo adentro.</p>
+                                </fieldset>
 
+                                <fieldset className="grupo">
+                                <legend>Tallas y etiqueta</legend>
                                 <input type="text" placeholder="Tallas MX: 25, 26, 27.5" value={form.sizes} onChange={set('sizes')} />
                                 {/* Se le enseña lo que se entendio ANTES de guardar: antes un par
                                     se guardaba sin tallas y el dueño se enteraba hasta ver la tienda. */}
@@ -570,6 +730,10 @@ const AdminDashboard = () => {
                                     <option value="agotado">Etiqueta: AGOTADO</option>
                                 </select>
 
+                                </fieldset>
+
+                                <fieldset className="grupo">
+                                <legend>Fotos, video y descripción</legend>
                                 <textarea placeholder="Descripción corta" value={form.desc} onChange={set('desc')} rows={3} />
                                 <input type="text" placeholder="Link de Mercado Libre (opcional)" value={form.mlLink} onChange={set('mlLink')} />
 
@@ -623,6 +787,7 @@ const AdminDashboard = () => {
                                         ))}
                                     </div>
                                 )}
+                                </fieldset>
 
                                 <button type="submit" className="btn-primary" disabled={ocupado}>
                                     {ocupado ? 'Guardando…' : editandoId ? 'Guardar cambios' : 'Publicar par'}
@@ -636,134 +801,13 @@ const AdminDashboard = () => {
                             </form>
                         </div>
 
-
-                        <details className={`admin-card plegable ficha-cara ${misFaceId.length ? 'lista' : ''}`} open={misFaceId.length === 0}
-                                 style={{ marginTop: 0 }}
-                                 onToggle={(e) => {
-                                     if (e.currentTarget.open) precalentarAlta(pass, nombreDelAparato());
-                                 }}>
-                            <summary>Entrar con Face ID ({misFaceId.length})</summary>
-                            <div className="admin-form">
-                                <p className="hint">
-                                    La llave se queda dentro de tu teléfono y solo la abre tu
-                                    cara. Aquí nada más vive la mitad pública, que no sirve para
-                                    entrar: si alguien se robara la base, no encontraría con qué.
-                                </p>
-                                {misFaceId.map(k => (
-                                    <div className="aparato" key={k.id}>
-                                        <span className="aparato-marco marco-cara" />
-                                        <span className="aparato-datos">
-                                            <b>{k.nombre}</b>
-                                            <small>
-                                                {k.usado
-                                                    ? `Se usó ${cuando(k.usado)}`
-                                                    : 'Todavía no lo usas'}
-                                                {cuando(k.creado) && ` · alta ${cuando(k.creado)}`}
-                                            </small>
-                                        </span>
-                                        <button type="button" className="link-btn link-mal"
-                                                onClick={() => quitarFaceId(k.id)}>Quitar</button>
-                                    </div>
-                                ))}
-                                {puedeFaceId === false && (
-                                    <p className="hint" style={{ color: 'var(--naranja, #E8863A)' }}>
-                                        Este aparato dice que no tiene Face ID disponible para la web.
-                                        Pasa cuando abres la página dentro de otra app (Instagram,
-                                        TikTok, WhatsApp) o en una ventana privada. Ábrela en Safari
-                                        directo y vuelve a entrar. Aun así puedes intentarlo:
-                                    </p>
-                                )}
-                                <button type="button" className="btn-ghost" onClick={altaFaceId}
-                                        disabled={dandoAlta}>
-                                    {dandoAlta ? 'Mirándote…' : 'Dar de alta este aparato'}
-                                </button>
-                                {avisoCara && (
-                                    <p className={`recado-cara ${avisoCara.tipo}`}>{avisoCara.texto}</p>
-                                )}
-                            </div>
-                        </details>
-
-                        <details className="admin-card plegable" style={{ marginTop: '18px' }}>
-                            <summary>Video de portada</summary>
-                            <p className="hint" style={{ marginTop: 0 }}>
-                                Se reproduce solo, en bucle y sin sonido, atrás del título de tu
-                                tienda. Es lo que más la hace ver viva. Máximo {LIMITE_MB} MB.
-                            </p>
-                            {heroCargado && heroVideo ? (
-                                <>
-                                    <video className="hero-previo" src={heroVideo} muted loop playsInline autoPlay />
-                                    <button type="button" className="btn-ghost" style={{ marginTop: '10px' }}
-                                        onClick={quitarVideoPortada} disabled={ocupado}>
-                                        Quitar video de portada
-                                    </button>
-                                </>
-                            ) : (
-                                <label>
-                                    Subir video de portada
-                                    <input type="file" accept="video/*" onChange={elegirVideoPortada}
-                                        disabled={!!subiendoVideo} style={{ marginTop: '6px' }} />
-                                </label>
-                            )}
-                        </details>
-
-                        <details className="admin-card plegable" style={{ marginTop: '18px' }}>
-                            <summary>Quién puede entrar ({gente.length})</summary>
-
-                            {gente.length > 0 && (
-                                <div className="gente-lista">
-                                    {gente.map(u => (
-                                        <div className="gente-fila" key={u.id}>
-                                            <span className="cara-foto">
-                                                {u.foto ? <img src={u.foto} alt="" />
-                                                        : <span className="cara-iniciales">{(u.nombre || '?')[0].toUpperCase()}</span>}
-                                            </span>
-                                            <strong>{u.nombre}</strong>
-                                            <button className="del" onClick={() => quitarDelPanel(u)}
-                                                    aria-label={`Quitar a ${u.nombre}`}>
-                                                <Trash2 size={16} />
-                                            </button>
-                                        </div>
-                                    ))}
-                                </div>
-                            )}
-
-                            <form onSubmit={darDeAlta} className="admin-form" style={{ marginTop: '14px' }}>
-                                <div className="alta-foto">
-                                    <label className="cara-foto alta-foto-boton">
-                                        {nuevaFoto ? <img src={nuevaFoto} alt="" />
-                                                   : <span className="cara-iniciales">+</span>}
-                                        <input type="file" accept="image/*" onChange={elegirFoto} hidden />
-                                    </label>
-                                    <p className="hint">Su foto (opcional). Sale en la pantalla de entrada.</p>
-                                </div>
-                                <input type="text" placeholder="Nombre" value={nuevoNombre}
-                                    onChange={(e) => setNuevoNombre(e.target.value)} />
-                                <input type="password" placeholder="Su clave (mínimo 6)" value={nuevaClave}
-                                    onChange={(e) => setNuevaClave(e.target.value)} autoComplete="new-password" />
-                                <button type="submit" className="btn-ghost" disabled={ocupado}>Dar de alta</button>
-                                <p className="hint">
-                                    Cada quien entra con su propia clave. La tuya de dueño sigue
-                                    funcionando aunque quites a todos.
-                                </p>
-                            </form>
-                        </details>
-                        <details className="admin-card plegable" style={{ marginTop: '18px' }}>
-                            <summary>Cambiar mi clave</summary>
-                            <form onSubmit={cambiarClave} className="admin-form">
-                                <input type="password" placeholder="Clave actual" value={claveActual}
-                                    onChange={(e) => setClaveActual(e.target.value)} autoComplete="current-password" />
-                                <input type="password" placeholder="Clave nueva (mínimo 6)" value={claveNueva}
-                                    onChange={(e) => setClaveNueva(e.target.value)} autoComplete="new-password" />
-                                <button type="submit" className="btn-ghost">Cambiar clave</button>
-                            </form>
-                        </details>
                     </div>
 
                     <div className="col-lista">
-                        <h3 className="admin-list-title">Catálogo ({products.length})</h3>
-                        <p className="hint" style={{ marginBottom: '14px' }}>
-                            El de hasta arriba es el primero que ven tus clientes. Usa las flechas para acomodarlos.
-                        </p>
+                        <header className="seccion-cab">
+                            <h3>Catálogo <em>{products.length}</em></h3>
+                            <p>El de hasta arriba es el primero que ven tus clientes. Usa las flechas para acomodarlos.</p>
+                        </header>
 
                         <div className="admin-list">
                             {products.map((p, i) => (

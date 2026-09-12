@@ -2718,3 +2718,232 @@ html:has(.admin-page), body:has(.admin-page) { background: #15110E; }
   .admin-page .wrap { padding-bottom: 40px; }
   .admin-page .admin-item { padding-left: 16px; }
 }
+
+/* =================================================================
+   LA PANTALLA DE CARGA — la linterna sobre los estantes
+
+   Antes, mientras el servidor confirmaba la sesion, no se pintaba
+   nada: negro. En una red lenta eso parece que la tienda se murio.
+
+   No es una ruedita girando. Es el esqueleto de lo que esta por
+   llegar, del mismo tamaño y en el mismo sitio, para que la pantalla
+   no salte cuando cargue. Y encima pasa UNA luz de arriba abajo: la
+   linterna cruzando los estantes de una bodega a oscuras, que es
+   justo lo que esta pasando.                                      */
+.carga-pagina { min-height: 100dvh; overflow: hidden; }
+.carga-pagina .wrap {
+  position: relative;
+  padding-top: calc(env(safe-area-inset-top) + 26px);
+}
+
+.carga-luz {
+  position: absolute;
+  left: -30%; right: -30%; top: -40%;
+  height: 55%;
+  pointer-events: none;
+  background: radial-gradient(50% 60% at 50% 50%,
+              rgba(255, 226, 186, 0.16), rgba(255, 226, 186, 0.05) 45%, transparent 72%);
+  animation: linterna 2.8s ease-in-out infinite;
+}
+@keyframes linterna {
+  0%   { transform: translateY(0);    opacity: 0; }
+  18%  { opacity: 1; }
+  82%  { opacity: 1; }
+  100% { transform: translateY(230%); opacity: 0; }
+}
+
+.carga-cabecera {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 16px;
+  padding: 15px 16px 15px 20px;
+  border-radius: 20px;
+  border: 1px solid rgba(237, 228, 214, 0.1);
+  background: rgba(46, 36, 27, 0.45);
+}
+.carga-marca {
+  font-family: var(--display); text-transform: uppercase;
+  font-weight: 900; font-size: 19px; letter-spacing: 0.055em;
+  color: rgba(237, 228, 214, 0.5);
+}
+.carga-boton {
+  width: 74px; height: 36px; border-radius: 999px;
+  background: rgba(237, 228, 214, 0.07);
+}
+
+.carga-texto {
+  margin: 26px 0 18px;
+  font-size: 0.9rem;
+  color: rgba(237, 228, 214, 0.42);
+}
+/* Los tres puntos se escriben solos, para que se note que sigue vivo
+   aunque la luz se apague por preferencia del telefono. */
+.carga-texto::after {
+  content: '';
+  animation: puntitos 1.4s steps(4, end) infinite;
+}
+@keyframes puntitos {
+  0%   { content: ''; }
+  25%  { content: '.'; }
+  50%  { content: '..'; }
+  75%  { content: '...'; }
+}
+
+.carga-repisa { display: flex; flex-direction: column; }
+.carga-renglon {
+  display: flex; align-items: center; gap: 14px;
+  padding: 16px 4px 16px 14px;
+  border-bottom: 1px solid rgba(237, 228, 214, 0.07);
+}
+.carga-foto {
+  width: 54px; height: 54px; border-radius: 14px; flex: 0 0 auto;
+  background: rgba(237, 228, 214, 0.06);
+}
+.carga-lineas { display: flex; flex-direction: column; gap: 9px; flex: 1; min-width: 0; }
+.carga-linea { height: 11px; border-radius: 5px; background: rgba(237, 228, 214, 0.06); }
+.carga-linea.larga { width: 62%; }
+.carga-linea.corta { width: 34%; height: 9px; background: rgba(237, 228, 214, 0.045); }
+
+/* Cada renglon entra un pelin despues que el anterior: se lee como una
+   lista que se esta llenando, no como tres cajas que aparecieron. */
+.carga-renglon:nth-child(2) .carga-linea { opacity: 0.75; }
+.carga-renglon:nth-child(3) .carga-linea { opacity: 0.5; }
+
+@media (prefers-reduced-motion: reduce) {
+  .carga-luz { animation: none; opacity: 0.5; transform: translateY(60%); }
+  .carga-texto::after { animation: none; content: '…'; }
+}
+
+/* =================================================================
+   CADA COSA EN SU SECCION
+
+   La cabecera de seccion dice DONDE estas y QUE se hace aqui. Antes
+   habia un titulo suelto y, debajo, una frase de ayuda en gris con
+   otro tamaño y otro margen, como si fueran dos cosas distintas.   */
+.admin-page .seccion-cab { margin: 2px 0 16px; }
+.admin-page .seccion-cab h3 {
+  font-family: var(--display); text-transform: uppercase;
+  font-weight: 900; font-size: 28px; line-height: 1;
+  letter-spacing: 0.012em;
+  color: var(--hueso, #EDE4D6);
+  margin: 0 0 6px;
+  display: flex; align-items: baseline; gap: 10px;
+}
+/* El conteo va pegado al nombre, no dentro de un parentesis: es un
+   dato de la seccion, no parte de como se llama. */
+.admin-page .seccion-cab h3 em {
+  font-style: normal;
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: rgba(237, 228, 214, 0.42);
+  font-variant-numeric: tabular-nums;
+}
+.admin-page .seccion-cab p {
+  margin: 0;
+  font-size: 0.87rem; line-height: 1.5;
+  color: rgba(237, 228, 214, 0.5);
+  max-width: 48ch;
+}
+.admin-page .seccion-cab-forma { margin-bottom: 18px; }
+.admin-page .seccion-cab-forma h3 { font-size: 23px; }
+
+.admin-page .seccion { padding-top: 2px; }
+.admin-page .seccion-bloques { display: flex; flex-direction: column; gap: 12px; }
+.admin-page .seccion-bloques > details { margin-top: 0 !important; }
+
+/* El punto en la pestaña de Pedidos cuando hay dinero esperando. Es el
+   mismo aviso que ya esta arriba, pero te sigue aunque estes en otra
+   pantalla: por eso existe la barra. */
+.barra-admin .pest { position: relative; }
+.barra-admin .pest .pinta {
+  position: absolute; top: 7px; right: 50%;
+  transform: translateX(15px);
+  width: 7px; height: 7px; border-radius: 50%;
+  background: var(--naranja, #C2570D);
+  box-shadow: 0 0 0 2px rgba(21, 17, 14, 0.9);
+}
+.barra-admin .pest.on .pinta { display: none; }
+
+/* =================================================================
+   EL FORMULARIO, POR GRUPOS
+
+   Era una pared de doce campos seguidos donde el unico rotulo era el
+   texto gris de adentro, que ademas desaparece en cuanto escribes.
+   A media captura ya no sabias en que ibas.
+
+   Ahora son cuatro grupos con su nombre: el par, el precio, tallas y
+   etiqueta, y lo demas. <fieldset> y <legend> no son adorno: son las
+   etiquetas que hacen que un lector de pantalla tambien entienda que
+   estos campos van juntos.                                        */
+.admin-page .admin-form .grupo {
+  border: none;
+  border-top: 1px solid rgba(237, 228, 214, 0.09);
+  margin: 0;
+  padding: 18px 0 6px;
+  display: flex; flex-direction: column; gap: 11px;
+  min-width: 0;
+}
+.admin-page .admin-form .grupo:first-of-type { border-top: none; padding-top: 0; }
+.admin-page .admin-form .grupo > legend {
+  padding: 0 0 3px;
+  font-family: var(--display); text-transform: uppercase;
+  font-weight: 800; font-size: 14px; letter-spacing: 0.09em;
+  color: rgba(237, 228, 214, 0.44);
+}
+/* El hint se pega al campo que explica, no flota a media distancia. */
+.admin-page .admin-form .grupo > .hint { margin-top: -5px; }
+
+/* =================================================================
+   DETALLE DE TELEFONO
+
+   Lo que se toca con el pulgar necesita 44 px. Las flechitas de
+   acomodar y los botones de editar/borrar estaban en 30 y pico: se
+   fallaba el tiro y acababas borrando el par de arriba.            */
+@media (max-width: 1040px) {
+  .admin-page .admin-item .orden button,
+  .admin-page .admin-item .del {
+    min-width: 40px; min-height: 40px;
+  }
+  .admin-page .admin-item .orden { gap: 6px; }
+
+  /* Cuatro pestañas caben porque solo la abierta enseña su nombre.
+     Aun asi se aprieta un poco el relleno para que no toque las
+     orillas en un telefono angosto. */
+  .barra-admin { gap: 2px; padding: 5px; max-width: calc(100vw - 24px); }
+  .barra-admin .pest { padding: 0 13px; }
+  .barra-admin .pest.on { padding: 0 16px; }
+
+  /* Nada empuja la pagina de lado. */
+  .admin-page, .admin-page .wrap { overflow-x: clip; }
+  .admin-page .admin-form input,
+  .admin-page .admin-form select,
+  .admin-page .admin-form textarea { max-width: 100%; }
+
+  /* Las secciones respiran lo mismo entre ellas. */
+  .admin-page .seccion,
+  .admin-page .col-lista,
+  .admin-page .pedidos { padding-top: 6px; }
+}
+
+@media (max-width: 380px) {
+  .barra-admin .pest { padding: 0 11px; }
+  .barra-admin .pest.on span { font-size: 12.5px; }
+  .admin-page .seccion-cab h3 { font-size: 25px; }
+}
+
+/* El teclado del telefono tapa el campo al que le estas escribiendo si
+   la pagina no puede rodar mas. Con esto siempre hay a donde rodar. */
+@media (max-width: 1040px) {
+  .admin-page .admin-grid.tab-nuevo { padding-bottom: 30px; }
+}
+
+/* Foco visible para quien navega con teclado, en todo el panel. */
+.admin-page button:focus-visible,
+.admin-page input:focus-visible,
+.admin-page select:focus-visible,
+.admin-page textarea:focus-visible,
+.admin-page summary:focus-visible {
+  outline: 2px solid rgba(255, 236, 206, 0.8);
+  outline-offset: 2px;
+}
+
