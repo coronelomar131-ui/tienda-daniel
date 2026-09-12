@@ -37,20 +37,24 @@ const AdminLogin = () => {
         setError('');
         setBusy(true);
         try {
+            // Lo que devuelven es el TOKEN de la sesion, o null si la clave
+            // no es correcta. La contraseña escrita no se guarda en ningun lado.
+            let token;
             if (claimed === false) {
                 if (pass !== pass2) throw new Error('Las dos claves no son iguales');
-                await adminClaim(pass);
+                token = await adminClaim(pass);
             } else if (quien?.id) {
                 // Alguien de la lista: se revisa contra SU clave.
-                const ok = await adminEntrar(quien.id, pass);
-                if (!ok) throw new Error('Esa no es la clave de ' + quien.nombre);
+                token = await adminEntrar(quien.id, pass);
+                if (!token) throw new Error('Esa no es la clave de ' + quien.nombre);
             } else {
                 // Sin id: es el dueño entrando por la salida de emergencia, y
                 // esa va contra la clave maestra, no contra la de un empleado.
-                const ok = await adminLogin(pass);
-                if (!ok) throw new Error('Clave incorrecta');
+                token = await adminLogin(pass);
+                if (!token) throw new Error('Clave incorrecta');
             }
-            guardarSesion(pass);
+            if (!token) throw new Error('No se pudo abrir la sesión');
+            guardarSesion(token);
             navigate('/admin/dashboard');
         } catch (err) {
             setError(err?.message || 'No se pudo entrar');

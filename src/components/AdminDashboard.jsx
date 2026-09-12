@@ -10,7 +10,7 @@ import {
 } from '../lib/shopApi';
 import { comprimirImagen } from '../lib/image';
 import { subirVideo, LIMITE_MB } from '../lib/videoUpload';
-import { fetchHeroVideo, adminSetHeroVideo } from '../lib/shopApi';
+import { fetchHeroVideo, adminSetHeroVideo, adminCerrarSesion } from '../lib/shopApi';
 import { adminOrdersResumen } from '../lib/pagos';
 import { leerSesion, guardarSesion, cerrarSesion } from '../lib/adminSession';
 import SneakerArt from './SneakerArt';
@@ -183,7 +183,14 @@ const AdminDashboard = () => {
 
     const set = (campo) => (e) => setForm(f => ({ ...f, [campo]: e.target.value }));
 
-    const salir = () => { cerrarSesion(); navigate('/'); };
+    // Salir tira la sesion en el SERVIDOR, no solo la borra de este navegador:
+    // si el token quedo copiado en otro lado, ahi tambien deja de servir. Si la
+    // peticion falla igual se sale, que es lo que la persona pidio.
+    const salir = () => {
+        if (pass) adminCerrarSesion(pass).catch(() => { /* se sale igual */ });
+        cerrarSesion();
+        navigate('/');
+    };
 
     const limpiar = () => {
         setForm(VACIO);
@@ -295,8 +302,11 @@ const AdminDashboard = () => {
         e.preventDefault();
         setAviso(null);
         try {
-            await adminSetPassword(claveActual, claveNueva);
-            guardarSesion(claveNueva);
+            // Al cambiar la clave el servidor tira TODAS las sesiones de esa
+            // persona (por si alguien le robo el token) y devuelve una nueva,
+            // para que a quien la cambio no lo saque su propio cambio.
+            const token = await adminSetPassword(claveActual, claveNueva);
+            if (token) guardarSesion(token);
             setClaveActual(''); setClaveNueva('');
             setAviso({ tipo: 'ok', texto: 'Clave cambiada.' });
         } catch (err) {

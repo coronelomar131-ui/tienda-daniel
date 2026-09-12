@@ -135,7 +135,11 @@ export const adminSetHeroVideo = (pass, url) => rpc('admin_set_hero_video', { pa
 
 export const adminIsClaimed   = () => rpc('admin_is_claimed', {}, LIMITE);
 export const adminClaim       = (pass) => rpc('admin_claim', { new_pass: pass });
+// Estas cuatro devuelven el TOKEN de la sesion (o null si la clave no es
+// correcta). Antes devolvian si/no y el navegador se guardaba la contraseña.
 export const adminLogin       = (pass) => rpc('admin_login', { pass });
+// Tira la sesion en el SERVIDOR, no solo la borra del navegador.
+export const adminCerrarSesion = (pass) => rpc('admin_cerrar_sesion', { pass });
 // --- Gente que puede entrar al panel ---
 export const adminCaras        = () => rpc('admin_caras', {}, LIMITE);
 export const adminEntrar       = (id, pass) => rpc('admin_entrar', { p_id: id, pass });
