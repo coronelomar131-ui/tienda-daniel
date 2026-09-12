@@ -10,7 +10,9 @@ import {
 } from '../lib/shopApi';
 import { comprimirImagen } from '../lib/image';
 import { subirVideo, LIMITE_MB } from '../lib/videoUpload';
-import { fetchHeroVideo, adminSetHeroVideo, adminCerrarSesion } from '../lib/shopApi';
+import { fetchHeroVideo, adminSetHeroVideo, adminCerrarSesion,
+         adminPasskeys, adminQuitarPasskey } from '../lib/shopApi';
+import { hayFaceId, darDeAltaFaceId } from '../lib/passkey';
 import { adminOrdersResumen } from '../lib/pagos';
 import { leerSesion, guardarSesion, cerrarSesion } from '../lib/adminSession';
 import SneakerArt from './SneakerArt';
@@ -118,6 +120,45 @@ const AdminDashboard = () => {
             .catch(() => { /* si falla, la linea enseña solo el catalogo */ });
         return () => { vivo = false; };
     }, [pass]);
+
+    // --- Face ID ---
+    const [puedeFaceId, setPuedeFaceId] = useState(false);
+    const [misFaceId, setMisFaceId] = useState([]);
+    const [dandoAlta, setDandoAlta] = useState(false);
+
+    const cargarFaceId = useCallback(() => {
+        adminPasskeys(pass).then(l => setMisFaceId(l || [])).catch(() => setMisFaceId([]));
+    }, [pass]);
+
+    useEffect(() => {
+        hayFaceId().then(setPuedeFaceId).catch(() => setPuedeFaceId(false));
+    }, []);
+    useEffect(() => { if (pass) cargarFaceId(); }, [pass, cargarFaceId]);
+
+    const altaFaceId = async () => {
+        setAviso(null);
+        setDandoAlta(true);
+        try {
+            await darDeAltaFaceId(pass, navigator.platform || 'Mi teléfono');
+            cargarFaceId();
+            setAviso({ tipo: 'ok', texto: 'Listo. La próxima vez entras con Face ID.' });
+        } catch (err) {
+            if (err?.name !== 'NotAllowedError') {
+                setAviso({ tipo: 'error', texto: err?.message || 'No se pudo dar de alta' });
+            }
+        } finally {
+            setDandoAlta(false);
+        }
+    };
+
+    const quitarFaceId = async (id) => {
+        try {
+            await adminQuitarPasskey(pass, id);
+            cargarFaceId();
+        } catch (err) {
+            setAviso({ tipo: 'error', texto: err.message });
+        }
+    };
 
     const [claveActual, setClaveActual] = useState('');
     const [claveNueva, setClaveNueva] = useState('');
@@ -588,6 +629,31 @@ const AdminDashboard = () => {
                                 </p>
                             </form>
                         </details>
+
+                        {puedeFaceId && (
+                        <details className="admin-card plegable" style={{ marginTop: '18px' }}>
+                            <summary>Entrar con Face ID ({misFaceId.length})</summary>
+                            <div className="admin-form">
+                                <p className="hint">
+                                    Da de alta este aparato y la próxima vez entras con tu cara
+                                    o tu huella, sin escribir la clave. La llave se queda guardada
+                                    en el aparato: aquí solo se guarda la parte pública, que no
+                                    sirve para entrar.
+                                </p>
+                                {misFaceId.map(k => (
+                                    <div className="gente-fila" key={k.id}>
+                                        <span>{k.nombre}</span>
+                                        <button type="button" className="link-btn link-mal"
+                                                onClick={() => quitarFaceId(k.id)}>Quitar</button>
+                                    </div>
+                                ))}
+                                <button type="button" className="btn-ghost" onClick={altaFaceId}
+                                        disabled={dandoAlta}>
+                                    {dandoAlta ? 'Esperando…' : 'Dar de alta este aparato'}
+                                </button>
+                            </div>
+                        </details>
+                        )}
 
                         <details className="admin-card plegable" style={{ marginTop: '18px' }}>
                             <summary>Cambiar mi clave</summary>

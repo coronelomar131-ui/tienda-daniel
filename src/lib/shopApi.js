@@ -148,6 +148,10 @@ export const adminCrearUsuario = (pass, nombre, foto, clave) =>
     rpc('admin_crear_usuario', { pass, p_nombre: nombre, p_foto: foto || null, p_clave: clave }, LIMITE_FOTOS);
 export const adminQuitarUsuario = (pass, id) => rpc('admin_quitar_usuario', { pass, p_id: id });
 
+// --- Entrar con Face ID / huella ---
+export const adminPasskeys       = (pass) => rpc('admin_passkeys_lista', { pass });
+export const adminQuitarPasskey  = (pass, id) => rpc('admin_passkey_quitar', { pass, p_id: id });
+
 export const adminSetPassword = (oldPass, newPass) =>
     rpc('admin_set_password', { old_pass: oldPass, new_pass: newPass });
 

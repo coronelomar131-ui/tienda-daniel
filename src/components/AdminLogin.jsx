@@ -2,6 +2,17 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { adminIsClaimed, adminClaim, adminLogin, adminCaras, adminEntrar } from '../lib/shopApi';
 import { guardarSesion } from '../lib/adminSession';
+import { hayFaceId, hayAlgunaDadaDeAlta, entrarConFaceId } from '../lib/passkey';
+
+// El simbolo de Face ID: el marco de la camara con una carita. Se dibuja aqui
+// en vez de traer una libreria de iconos completa por un solo simbolo.
+const HuellaIcono = () => (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"
+         strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+        <path d="M4 8V6a2 2 0 0 1 2-2h2M16 4h2a2 2 0 0 1 2 2v2M20 16v2a2 2 0 0 1-2 2h-2M8 20H6a2 2 0 0 1-2-2v-2" />
+        <path d="M9 10v1M15 10v1M9.5 15.5a3.5 3.5 0 0 0 5 0" />
+    </svg>
+);
 
 // Iniciales para cuando alguien no subio foto: mejor eso que un hueco gris.
 const iniciales = (nombre) => (nombre || '?')
@@ -16,7 +27,42 @@ const AdminLogin = () => {
     const [error, setError] = useState('');
     const [busy, setBusy] = useState(false);
     const [sinConexion, setSinConexion] = useState(false);
+    // El boton de Face ID solo sale si el aparato lo tiene Y si ya hay alguna
+    // huella dada de alta. Ofrecerlo sin nada registrado seria mandar a la
+    // gente a una pantalla que no puede terminar.
+    const [conFaceId, setConFaceId] = useState(false);
+    const [usandoFaceId, setUsandoFaceId] = useState(false);
     const navigate = useNavigate();
+
+    useEffect(() => {
+        let vivo = true;
+        Promise.all([hayFaceId(), hayAlgunaDadaDeAlta()])
+            .then(([puede, hay]) => { if (vivo) setConFaceId(puede && hay); })
+            .catch(() => { /* si falla, simplemente no se ofrece */ });
+        return () => { vivo = false; };
+    }, []);
+
+    const entrarConCara = async () => {
+        setError('');
+        setUsandoFaceId(true);
+        try {
+            const token = await entrarConFaceId();
+            if (!token) throw new Error('No se pudo abrir la sesión');
+            guardarSesion(token);
+            navigate('/admin/dashboard');
+        } catch (err) {
+            // El navegador manda el mismo NotAllowedError si la persona cancela
+            // o si este aparato no tiene la huella dada de alta: a proposito, para
+            // no soplarle a nadie si existe o no. Un aviso que sirva para los dos
+            // casos es mejor que dejar la pantalla muda.
+            const m = err?.name === 'NotAllowedError'
+                ? 'Se canceló, o este aparato no está dado de alta. Entra con tu clave.'
+                : (err?.message || 'No se pudo entrar');
+            setError(m);
+        } finally {
+            setUsandoFaceId(false);
+        }
+    };
 
     const revisar = () => {
         setError('');
@@ -83,6 +129,17 @@ const AdminLogin = () => {
                 )}
 
                 {error && <div className="login-error">{error}</div>}
+
+                {conFaceId && !primeraVez && (
+                    <>
+                        <button type="button" className="btn-cara" onClick={entrarConCara}
+                                disabled={usandoFaceId}>
+                            <HuellaIcono />
+                            {usandoFaceId ? 'Esperando…' : 'Entrar con Face ID'}
+                        </button>
+                        <div className="o-bien"><span>o con tu clave</span></div>
+                    </>
+                )}
 
                 {sinConexion ? (
                     <button type="button" className="btn-primary" style={{ width: '100%' }} onClick={revisar}>

@@ -2272,3 +2272,27 @@ html:has(.admin-page), body:has(.admin-page) { background: #15110E; }
   .admin-page .admin-grid.tab-catalogo .col-form > details.plegable { margin-top: 10px; }
   .admin-page .admin-grid.tab-catalogo .col-form > details.plegable:first-of-type { margin-top: 0; }
 }
+
+/* ---------- ENTRAR CON FACE ID ----------
+   Es el camino mas rapido, asi que va arriba y se ve como el boton principal.
+   La raya de "o con tu clave" deja claro que son dos caminos, no dos pasos. */
+.btn-cara {
+  display: flex; align-items: center; justify-content: center; gap: 10px;
+  width: 100%; padding: 15px; cursor: pointer;
+  border: none; border-radius: 999px;
+  background: var(--ink); color: var(--paper);
+  font-family: var(--display); font-weight: 700; font-size: 18px;
+  letter-spacing: 0.01em;
+  transition: transform .16s var(--resorte), background .2s;
+}
+.btn-cara svg { width: 22px; height: 22px; }
+.btn-cara:active:not(:disabled) { transform: scale(0.97); }
+.btn-cara:disabled { opacity: 0.6; cursor: wait; }
+
+.o-bien {
+  display: flex; align-items: center; gap: 12px;
+  margin: 16px 0 4px; color: var(--muted); font-size: 12.5px;
+}
+.o-bien::before, .o-bien::after {
+  content: ''; flex: 1; height: 1px; background: var(--line);
+}

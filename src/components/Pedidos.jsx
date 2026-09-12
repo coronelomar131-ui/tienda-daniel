@@ -45,11 +45,18 @@ const Pedidos = ({ pass }) => {
     // Datos de tu cuenta, que es a donde le van a depositar
     const [cuenta, setCuenta] = useState({ clabe: '', banco: '', titular: '' });
     const [guardandoCuenta, setGuardandoCuenta] = useState(false);
+    // Si le pasamos open={!cuenta.clabe} la ficha se CIERRA sola en cuanto
+    // escribes el primer digito de la CLABE, en plena cara. La ficha se abre
+    // sola solo la primera vez, cuando vemos que todavia no hay cuenta; de ahi
+    // en adelante la abre y la cierra quien la usa.
+    const [cuentaAbierta, setCuentaAbierta] = useState(false);
 
     useEffect(() => {
-        datosPago().then(d => d && setCuenta({
-            clabe: d.clabe || '', banco: d.banco || '', titular: d.titular || '',
-        })).catch(() => {});
+        datosPago().then(d => {
+            if (!d) return;
+            setCuenta({ clabe: d.clabe || '', banco: d.banco || '', titular: d.titular || '' });
+            if (!d.clabe) setCuentaAbierta(true);
+        }).catch(() => {});
     }, []);
 
     const guardarCuenta = async (e) => {
@@ -117,7 +124,8 @@ const Pedidos = ({ pass }) => {
 
             {/* Sin esto la tienda no puede enseñarle al cliente a donde depositar,
                 y el pedido se queda a medias. */}
-            <details className="admin-card plegable cuenta-card" open={!cuenta.clabe}>
+            <details className="admin-card plegable cuenta-card" open={cuentaAbierta}
+                     onToggle={(e) => setCuentaAbierta(e.currentTarget.open)}>
                 <summary>Tu cuenta para transferencias {cuenta.clabe ? '✓' : '— falta'}</summary>
                 <form className="admin-form" onSubmit={guardarCuenta}>
                     <p className="hint">
