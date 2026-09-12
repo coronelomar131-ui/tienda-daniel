@@ -2947,3 +2947,178 @@ html:has(.admin-page), body:has(.admin-page) { background: #15110E; }
   outline-offset: 2px;
 }
 
+
+/* =================================================================
+   LOS COLORES DEL PANEL — darle al vidrio algo que refractar
+
+   El vidrio no se notaba, y no era culpa del vidrio: era que no habia
+   NADA detras. Marron oscuro sobre marron oscuro. El desenfoque estaba
+   puesto, pero desenfocar un color plano da ese mismo color plano.
+
+   Asi que el cambio de verdad no es "colores mas bonitos": es meter
+   luz de color POR DETRAS para que los cristales tengan que hacer su
+   trabajo. Y como el campo de luz queda fijo a la pantalla, al rodar
+   la pagina los cristales se deslizan POR ENCIMA de la luz: ahi es
+   cuando de verdad se ve que son vidrio, y lo dispara tu dedo, no una
+   animacion corriendo sola.
+
+   Los colores no salen de una paleta de tablero. Salen de la calle
+   mexicana, que es de donde sale la tienda: el ROSA MEXICANO y el
+   JADE, que son complementarios y por eso se encienden uno al otro, y
+   el ambar que ya usabas para el dinero. La noche se corre un pelo
+   hacia el violeta para que el rosa se sienta en su casa.
+
+   La disciplina: el color vive SOLO en el campo de atras. Las letras
+   se quedan en hueso y el naranja sigue significando una sola cosa,
+   dinero esperando. Un panel de trabajo con colores encima todo el
+   dia cansa; con la luz detras, no.                                */
+.admin-page {
+  --noche:    #130E16;
+  --rosa:     #D81E5B;
+  --jade:     #0F7A66;
+  --ambar:    #E8863A;
+
+  --hueso:    #F0E9DE;
+  --tenue:    #A99BA6;
+  --canto:    rgba(240, 233, 222, 0.16);
+  --carta:    rgba(255, 255, 255, 0.055);
+  --bodega:   var(--noche);
+  --carton:   rgba(255, 255, 255, 0.05);
+  --carton-2: rgba(255, 255, 255, 0.075);
+
+  background: var(--noche);
+  color: var(--hueso);
+}
+html:has(.admin-page), body:has(.admin-page) { background: #130E16; }
+
+/* EL CAMPO DE LUZ. Fijo a la pantalla, no a la pagina: los cristales
+   pasan por encima al rodar. Los charcos son grandes y suaves porque
+   un degradado chico se ve como una mancha; uno grande se ve como luz. */
+.admin-page::before {
+  content: '';
+  position: fixed;
+  inset: -10%;
+  z-index: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(58% 44% at 12% 4%,  rgba(216, 30, 91, 0.30), transparent 68%),
+    radial-gradient(52% 40% at 92% 26%, rgba(232, 134, 58, 0.16), transparent 70%),
+    radial-gradient(64% 50% at 78% 92%, rgba(15, 122, 102, 0.28), transparent 72%),
+    radial-gradient(46% 34% at 30% 64%, rgba(216, 30, 91, 0.12), transparent 74%);
+  filter: blur(28px) saturate(125%);
+}
+.admin-page .wrap { position: relative; z-index: 1; }
+
+/* EL VIDRIO, DE VERDAD. Antes eran paneles marrones casi opacos
+   (0.55): con eso no se ve nada de atras, y sin atras no hay vidrio.
+   Ahora son casi transparentes y SATURAN lo que pasa por debajo, que
+   es justo lo que hace el vidrio de color. */
+.admin-page .admin-head,
+.admin-page .admin-card,
+.admin-page details.plegable,
+.admin-page .pendiente,
+.admin-page .aviso-cara,
+.admin-page details.ficha-cara,
+.carga-cabecera {
+  background:
+    linear-gradient(147deg, rgba(255, 255, 255, 0.13) 0%,
+                            rgba(255, 255, 255, 0.04) 42%,
+                            rgba(255, 255, 255, 0) 72%),
+    rgba(255, 255, 255, 0.05);
+  backdrop-filter: saturate(190%) blur(22px);
+  -webkit-backdrop-filter: saturate(190%) blur(22px);
+  border: 1px solid rgba(255, 255, 255, 0.13);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.2),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.3),
+    0 16px 40px rgba(8, 4, 12, 0.45);
+}
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .admin-page .admin-head,
+  .admin-page .admin-card,
+  .admin-page details.plegable,
+  .admin-page .pendiente,
+  .admin-page .aviso-cara,
+  .carga-cabecera { background: #241C2A; }
+}
+
+/* La barra de abajo es el cristal mas denso: es lo que mas flota. */
+.barra-admin {
+  background: rgba(255, 255, 255, 0.08);
+  backdrop-filter: saturate(200%) blur(30px);
+  -webkit-backdrop-filter: saturate(200%) blur(30px);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.28),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.11),
+    0 14px 40px rgba(8, 4, 12, 0.6);
+}
+
+/* Lo que urge sigue siendo lo unico naranja. Sobre el campo de luz el
+   canto se enciende mas, asi que no hace falta subirle el color. */
+.admin-page .pendiente.urge {
+  box-shadow:
+    inset 3px 0 0 var(--ambar),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2),
+    0 16px 40px rgba(8, 4, 12, 0.45);
+}
+
+/* Las repisas: la linea que separa se vuelve luz, no gris. */
+.admin-page .admin-item,
+.admin-page .pedido,
+.carga-renglon { border-bottom-color: rgba(255, 255, 255, 0.09); }
+.admin-page .admin-form .grupo { border-top-color: rgba(255, 255, 255, 0.1); }
+.admin-page .seccion-cab h3 { color: var(--hueso); }
+.admin-page .seccion-cab p,
+.admin-page .tablero-nota,
+.admin-page .hint { color: rgba(240, 233, 222, 0.52); }
+
+/* Los campos: vidrio tambien, para que el formulario no se sienta de
+   otro material que el resto del panel. */
+.admin-page .admin-form input,
+.admin-page .admin-form select,
+.admin-page .admin-form textarea {
+  background: rgba(255, 255, 255, 0.055);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: var(--hueso);
+}
+.admin-page .admin-form input::placeholder,
+.admin-page .admin-form textarea::placeholder { color: rgba(240, 233, 222, 0.38); }
+.admin-page .admin-form input:focus,
+.admin-page .admin-form select:focus,
+.admin-page .admin-form textarea:focus {
+  background: rgba(255, 255, 255, 0.09);
+  border-color: rgba(255, 255, 255, 0.3);
+}
+
+/* La pantalla de carga hereda el mismo campo de luz: la linterna pasa
+   sobre el rosa y el jade, no sobre un negro muerto. */
+.carga-pagina { background: var(--noche, #130E16); }
+.carga-foto { background: rgba(255, 255, 255, 0.07); }
+.carga-linea { background: rgba(255, 255, 255, 0.08); }
+.carga-linea.corta { background: rgba(255, 255, 255, 0.055); }
+.carga-boton { background: rgba(255, 255, 255, 0.09); }
+.carga-marca { color: rgba(240, 233, 222, 0.55); }
+.carga-texto { color: rgba(240, 233, 222, 0.5); }
+
+/* Los cantos de los renglones, con la regla del naranja respetada.
+   Casi todos tus pares tienen oferta, asi que el canto naranja salia en
+   casi todos: dejaba de avisar y solo gritaba. Y el naranja aqui
+   significa una cosa, dinero esperando. La oferta y lo destacado se
+   dicen con luz —que sobre el campo de color se lee perfecto— y el rojo
+   se queda para lo agotado, que si es un alto. */
+.admin-page .admin-item.canto-oferta::before    { background: rgba(255, 255, 255, 0.42); }
+.admin-page .admin-item.canto-destacado::before { background: rgba(255, 255, 255, 0.72); }
+.admin-page .admin-item.canto-agotado::before   { background: #B8453A; }
+
+/* La barra de abajo es la navegacion: si se pierde sobre un charco de
+   color, se pierde la unica forma de moverse. Lleva su propia penumbra
+   detras para despegarse de lo que sea que tenga debajo. */
+.barra-admin {
+  background:
+    linear-gradient(180deg, rgba(255,255,255,0.11), rgba(255,255,255,0.05)),
+    rgba(19, 14, 22, 0.72);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.3),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.13),
+    0 18px 44px rgba(8, 4, 12, 0.75);
+}
