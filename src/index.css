@@ -9,13 +9,14 @@
    ========================================================= */
 :root {
   /* fondo y texto */
-  --paper: #FFFFFF;
-  --paper-2: #F4F4F5;   /* respaldo de fotos y bloques suaves */
-  --paper-3: #ECECEE;
-  --ink: #0A0A0A;
-  --muted: #6E6E73;
-  --line: rgba(10, 10, 10, 0.13);
-  --line-strong: rgba(10, 10, 10, 0.30);
+  --paper: #F8F7F4;
+  --paper-2: #F1F0EC;
+  --paper-3: #E9E6E1;
+  --paper-4: #EFEAE2;
+  --ink: #121212;
+  --muted: #5F5D5A;
+  --line: rgba(18, 18, 18, 0.12);
+  --line-strong: rgba(18, 18, 18, 0.28);
 
   /* acento: azul marino */
   --navy: #1B2A52;
@@ -532,9 +533,13 @@ button { font-family: var(--body); }
 }
 .section-head h2 {
   font-family: var(--display); text-transform: uppercase; font-weight: 900;
-  font-size: clamp(38px, 7vw, 74px); line-height: 0.86; letter-spacing: -0.01em; color: var(--ink);
+  font-size: clamp(42px, 7vw, 82px); line-height: 0.82; letter-spacing: -0.04em; color: var(--ink);
+  text-wrap: balance;
 }
-.section-head span { font-size: 12px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); white-space: nowrap; }
+.section-head span {
+  font-size: 11px; font-weight: 700; letter-spacing: 0.18em; text-transform: uppercase;
+  color: var(--muted); white-space: nowrap;
+}
 
 /* ---------- TARJETAS ---------- */
 .grid {
@@ -547,27 +552,27 @@ button { font-family: var(--body); }
   position: relative;
   height: 100%;
   min-height: 520px;
-  background: rgba(255, 255, 255, 0.68);
-  border: 1px solid rgba(10, 10, 10, 0.06);
-  border-radius: 22px;
+  background: linear-gradient(180deg, rgba(255,255,255,0.76), rgba(250,248,244,0.9));
+  border: 1px solid rgba(18,18,18,0.06);
+  border-radius: 18px;
   display: flex;
   flex-direction: column;
   overflow: hidden;
   perspective: 1200px;
-  transition: transform .52s var(--resorte), box-shadow .4s var(--fluido), border-color .3s var(--fluido), background .3s var(--fluido);
-  box-shadow: 0 10px 30px rgba(10, 10, 10, 0.04);
+  transition: transform .52s var(--resorte), box-shadow .45s var(--fluido), border-color .35s var(--fluido), background .35s var(--fluido);
+  box-shadow: 0 12px 30px rgba(18,18,18,0.04), 0 2px 8px rgba(18,18,18,0.02);
 }
 .card::before {
   content: ""; position: absolute; inset: 0;
-  background: linear-gradient(135deg, rgba(255,255,255,0.7), transparent 30%, rgba(27,42,82,0.05) 100%);
+  background: linear-gradient(135deg, rgba(255,255,255,0.75), transparent 30%, rgba(27,42,82,0.04) 100%);
   opacity: 0; transition: opacity .35s var(--fluido);
   pointer-events: none;
 }
 .card:hover {
-  transform: translateY(-8px) rotateX(1.5deg);
+  transform: translateY(-10px) rotateX(1.5deg);
   border-color: rgba(27, 42, 82, 0.18);
-  background: rgba(255,255,255,0.9);
-  box-shadow: 0 18px 42px rgba(10, 10, 10, 0.1), 0 8px 18px rgba(27, 42, 82, 0.08);
+  background: linear-gradient(180deg, rgba(255,255,255,0.9), rgba(247,244,239,1));
+  box-shadow: 0 22px 45px rgba(18, 18, 18, 0.1), 0 10px 24px rgba(27, 42, 82, 0.08);
 }
 .card:hover::before { opacity: 1; }
 .card.sold-out .card-photo { opacity: 0.55; }
@@ -578,7 +583,7 @@ button { font-family: var(--body); }
   min-height: 275px;
   overflow: hidden;
   background: linear-gradient(180deg, #F7F8FB 0%, #EEF1F6 100%);
-  border-radius: 20px 20px 0 0;
+  border-radius: 18px 18px 0 0;
   display: flex; align-items: center; justify-content: center;
   transition: opacity .3s var(--fluido), box-shadow .4s var(--fluido), transform .5s var(--resorte);
 }
@@ -590,7 +595,7 @@ button { font-family: var(--body); }
 }
 .card-photo::before {
   content: ""; position: absolute; inset: 0;
-  background: linear-gradient(135deg, rgba(255,255,255,0.7), transparent 45%, rgba(27,42,82,0.04) 100%);
+  background: linear-gradient(135deg, rgba(255,255,255,0.72), transparent 42%, rgba(27,42,82,0.05) 100%);
   pointer-events: none;
 }
 .photo-holder { display: flex; width: 100%; height: 100%; align-items: center; justify-content: center; }
@@ -599,7 +604,7 @@ button { font-family: var(--body); }
   transition: transform .7s var(--resorte), filter .4s var(--fluido), scale .4s var(--fluido);
   transform-origin: center;
 }
-.card:hover .card-photo img { transform: scale(1.08); }
+.card:hover .card-photo img { transform: scale(1.09); }
 .card-photo .art {
   --rot: 0deg;
   width: 82%; max-width: 260px; color: var(--muted);
@@ -619,20 +624,27 @@ button { font-family: var(--body); }
 }
 .card-body .tag {
   display: inline-flex; width: fit-content; margin-bottom: 8px;
-  font-size: 10.5px; font-weight: 800; letter-spacing: 0.15em; text-transform: uppercase;
-  color: var(--navy); background: rgba(27, 42, 82, 0.06); padding: 5px 8px; border-radius: 999px;
+  font-size: 10px; font-weight: 800; letter-spacing: 0.14em; text-transform: uppercase;
+  color: var(--navy); background: rgba(27, 42, 82, 0.06); padding: 6px 9px; border-radius: 999px;
 }
 .card-body h3 {
   font-family: var(--display); text-transform: uppercase; font-weight: 800;
-  font-size: clamp(24px, 2vw, 30px); line-height: 0.94; margin-bottom: 8px; color: var(--ink);
+  font-size: clamp(25px, 2vw, 32px); line-height: 0.92; margin-bottom: 8px; color: var(--ink);
+  letter-spacing: -0.02em;
 }
 .card-body h3 a {
   display: inline-block; transition: color .25s var(--fluido), transform .25s var(--resorte);
 }
 .card:hover .card-body h3 a { color: var(--navy); transform: translateX(1px); }
-.card-body p.desc { font-size: 13.5px; color: var(--muted); line-height: 1.5; margin-bottom: 14px; }
-.card-foot { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; margin-top: auto; }
-.price { font-family: var(--display); font-weight: 800; font-size: 28px; line-height: 1; color: var(--ink); font-variant-numeric: tabular-nums; }
+.card-body p.desc {
+  font-size: 13.5px; color: var(--muted); line-height: 1.5; margin-bottom: 14px;
+  max-width: 26ch;
+}
+.card-foot {
+  display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap;
+  margin-top: auto; padding-top: 6px; border-top: 1px solid rgba(18,18,18,0.06);
+}
+.price { font-family: var(--display); font-weight: 800; font-size: 30px; line-height: 1; color: var(--ink); font-variant-numeric: tabular-nums; }
 .card-actions { display: flex; gap: 7px; min-width: 0; }
 
 
