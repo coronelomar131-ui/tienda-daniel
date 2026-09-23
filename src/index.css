@@ -587,8 +587,8 @@ button { font-family: var(--body); }
   display: flex; align-items: center; justify-content: center;
   transition: opacity .3s var(--fluido), box-shadow .4s var(--fluido), transform .5s var(--resorte);
 }
-.card:nth-child(3n+2) .card-photo { aspect-ratio: 1 / 1.14; }
-.card:nth-child(3n+3) .card-photo { aspect-ratio: 1 / 0.98; }
+.card:nth-child(3n+2) .card-photo { box-shadow: inset 0 0 0 1px rgba(27,42,82,0.04); }
+.card:nth-child(3n+3) .card-photo { box-shadow: inset 0 0 0 1px rgba(18,18,18,0.03); }
 .card:hover .card-photo {
   box-shadow: inset 0 1px 0 rgba(255,255,255,0.9);
   transform: scale(1.01);
@@ -604,6 +604,9 @@ button { font-family: var(--body); }
   transition: transform .7s var(--resorte), filter .4s var(--fluido), scale .4s var(--fluido);
   transform-origin: center;
 }
+.grid > .card:nth-child(3n+1) .photo-holder img { object-position: center 42%; }
+.grid > .card:nth-child(3n+2) .photo-holder img { object-position: center 35%; }
+.grid > .card:nth-child(3n+3) .photo-holder img { object-position: center 48%; }
 .card:hover .card-photo img { transform: scale(1.09); }
 .card-photo .art {
   --rot: 0deg;
