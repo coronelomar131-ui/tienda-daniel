@@ -1,4 +1,4 @@
-import React, { lazy, Suspense, useContext, useState, useEffect, useMemo } from 'react';
+import React, { lazy, Suspense, useContext, useState, useEffect, useMemo, useRef } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Navbar from './components/Navbar';
 import Hero from './components/Hero';
@@ -11,6 +11,7 @@ import HowTo from './components/HowTo';
 import Newsletter from './components/Newsletter';
 import InstagramBand from './components/InstagramBand';
 import ProductPage from './components/ProductPage';
+import PaginaNoExiste from './components/PaginaNoExiste';
 // El panel se carga aparte, solo si alguien entra a /admin. Iba dentro del
 // mismo archivo que la tienda, asi que TODOS los clientes se bajaban el
 // panel completo (subida de fotos, videos, pedidos) sin poder usarlo nunca.
@@ -38,6 +39,26 @@ function useScrollReveal(deps) {
     }, deps);
 }
 
+// Si la tienda se abre con un ancla (/#coleccion, como el link de la bio de
+// Instagram), el navegador intenta bajar ANTES de que la pagina exista y se
+// queda arriba. Se baja aqui, una sola vez, cuando el catalogo ya cargo y la
+// pagina ya tiene su altura final.
+function useBajarAlAncla(listo) {
+    const hecho = useRef(false);
+    useEffect(() => {
+        if (!listo || hecho.current || !window.location.hash) return;
+        hecho.current = true;
+        let id = window.location.hash.slice(1);
+        try { id = decodeURIComponent(id); } catch { /* se usa tal cual */ }
+        requestAnimationFrame(() => {
+            // Si mientras cargaba el cliente ya se movio por su cuenta, no se
+            // le jala la pantalla.
+            if (window.scrollY > 40) return;
+            document.getElementById(id)?.scrollIntoView({ behavior: 'instant', block: 'start' });
+        });
+    }, [listo]);
+}
+
 function StoreFront() {
     const { products, loading, loadError, demo } = useContext(ShopContext);
     const [filtro, setFiltro] = useState({ tipo: 'todos', valor: null });
@@ -53,6 +74,7 @@ function StoreFront() {
     const visible = filtrar(products, filtro);
 
     useScrollReveal([visible.length, filtro.tipo, filtro.valor, loading]);
+    useBajarAlAncla(!loading);
 
     return (
         <>
@@ -116,6 +138,7 @@ function App() {
                 <Route path="/pago/:id" element={<PagoResultado />} />
                 <Route path="/admin" element={<AdminLogin />} />
                 <Route path="/admin/dashboard" element={<AdminDashboard />} />
+                <Route path="*" element={<PaginaNoExiste />} />
             </Routes>
             </Suspense>
         </Router>
