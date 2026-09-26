@@ -1,13 +1,21 @@
+import { urlSegura } from './supabase';
+
 // Reconoce de donde viene el video para mostrarlo como toca.
 //   propio   -> archivo que subiste tu; se reproduce dentro de la pagina
 //   youtube  -> se incrusta
 //   enlace   -> TikTok e Instagram no dejan reproducirse fuera de su app,
 //               asi que para esos se muestra una tarjeta que lleva al post
+// Solo se reproduce dentro de la pagina lo que esta en nuestra propia bodega.
+// Las reglas de seguridad del sitio (la CSP) bloquean cualquier otro servidor,
+// y lo hacen EN SILENCIO: se veria un reproductor vacio sin explicacion. Lo de
+// fuera se muestra como enlace, que si funciona.
+const NUESTRO = /^https:\/\/[\w-]+\.supabase\.co\/storage\/v1\/object\/public\/videos\//i;
+
 export function leerVideo(url) {
-    const limpia = (url || '').trim();
+    const limpia = urlSegura(url);
     if (!limpia) return null;
 
-    if (/\.(mp4|webm|mov)(\?|$)/i.test(limpia) || /\/storage\/v1\/object\/public\/videos\//.test(limpia)) {
+    if (NUESTRO.test(limpia)) {
         return { tipo: 'propio', url: limpia, sitio: 'Video' };
     }
 

@@ -27,6 +27,27 @@ export const ShopProvider = ({ children }) => {
     // No es lista de deseos de cuenta, por eso no se promete que te siga.
     const [guardados, setGuardados] = useState(() => leerGuardado('protheGuardados'));
 
+    // El carrito se guarda en el navegador CON su precio, y ahi lo puede
+    // cambiar cualquiera desde las herramientas del telefono. En el pedido de
+    // verdad no importa (el precio siempre sale de la base del lado del
+    // servidor), pero el mensaje de WhatsApp se arma aqui, y te llegaria un
+    // "Total: $1" que parece legitimo. Asi que en cuanto carga el catalogo,
+    // cada linea se vuelve a precio de lista y las que ya no existen se caen.
+    useEffect(() => {
+        if (!products.length) return;
+        const alDia = (lista) => lista.flatMap(item => {
+            const real = products.find(p => String(p.id) === String(item.id));
+            if (!real) return [];
+            return (real.price === item.price && real.brand === item.brand && real.name === item.name)
+                ? [item]
+                : [{ ...item, price: real.price, brand: real.brand, name: real.name }];
+        });
+        setCart(c => { const n = alDia(c); return n.length === c.length
+            && n.every((x, i) => x === c[i]) ? c : n; });
+        setGuardados(g => { const n = alDia(g); return n.length === g.length
+            && n.every((x, i) => x === g[i]) ? g : n; });
+    }, [products]);
+
     // El catálogo vive en la base, así que lo que subes desde /admin lo ven
     // todos tus clientes al instante.
     const reload = useCallback(async () => {

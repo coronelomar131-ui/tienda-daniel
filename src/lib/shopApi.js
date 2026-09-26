@@ -1,4 +1,4 @@
-import { supabase, mensajeDeError } from './supabase';
+import { supabase, mensajeParaCliente, urlSegura, errorDe } from './supabase';
 
 // La base guarda los campos con nombres tipo ml_link; la app los usa en camelCase.
 const toApp = (row) => ({
@@ -10,7 +10,7 @@ const toApp = (row) => ({
     priceBefore: row.price_before == null ? null : Number(row.price_before),
     sizes: (row.sizes || []).map(Number),
     status: row.status || '',
-    mlLink: row.ml_link || '',
+    mlLink: urlSegura(row.ml_link),
     videoUrl: row.video_url || '',
     photoCount: row.photo_count || 0,
     sortOrder: row.sort_order || 0,
@@ -36,7 +36,7 @@ export async function fetchProducts() {
         .from('products')
         .select(CAMPOS)
         .order('sort_order', { ascending: false }));
-    if (error) throw new Error(mensajeDeError(error));
+    if (error) throw errorDe(error, mensajeParaCliente(error));
     return (data || []).map(toApp);
 }
 
@@ -46,7 +46,7 @@ export async function fetchProduct(id) {
         .select(CAMPOS)
         .eq('id', id)
         .maybeSingle());
-    if (error) throw new Error(mensajeDeError(error));
+    if (error) throw errorDe(error, mensajeParaCliente(error));
     return data ? toApp(data) : null;
 }
 
@@ -78,7 +78,7 @@ async function vaciarCola() {
             .select('id, product_id, url, data, position')
             .in('product_id', ids)
             .order('position', { ascending: true }), LIMITE_FOTOS);
-        if (error) throw new Error(mensajeDeError(error));
+        if (error) throw errorDe(error);
 
         const porPar = new Map();
         for (const f of data || []) {
@@ -118,7 +118,7 @@ export function fetchPhotos(productId) {
 
 const rpc = async (fn, args, ms = LIMITE * 3) => {
     const { data, error } = await conLimite(supabase.rpc(fn, args), ms);
-    if (error) throw new Error(mensajeDeError(error));
+    if (error) throw errorDe(error);
     return data;
 };
 
@@ -127,7 +127,7 @@ export async function fetchHeroVideo() {
         .from('site_settings')
         .select('hero_video_url')
         .maybeSingle());
-    if (error) throw new Error(mensajeDeError(error));
+    if (error) throw errorDe(error);
     return data?.hero_video_url || '';
 }
 
@@ -135,7 +135,11 @@ export const adminSetHeroVideo = (pass, url) => rpc('admin_set_hero_video', { pa
 
 export const adminIsClaimed   = () => rpc('admin_is_claimed', {}, LIMITE);
 export const adminClaim       = (pass) => rpc('admin_claim', { new_pass: pass });
+// Estas cuatro devuelven el TOKEN de la sesion (o null si la clave no es
+// correcta). Antes devolvian si/no y el navegador se guardaba la contraseña.
 export const adminLogin       = (pass) => rpc('admin_login', { pass });
+// Tira la sesion en el SERVIDOR, no solo la borra del navegador.
+export const adminCerrarSesion = (pass) => rpc('admin_cerrar_sesion', { pass });
 // --- Gente que puede entrar al panel ---
 export const adminCaras        = () => rpc('admin_caras', {}, LIMITE);
 export const adminEntrar       = (id, pass) => rpc('admin_entrar', { p_id: id, pass });
@@ -143,6 +147,10 @@ export const adminQuien        = (pass) => rpc('admin_quien', { pass });
 export const adminCrearUsuario = (pass, nombre, foto, clave) =>
     rpc('admin_crear_usuario', { pass, p_nombre: nombre, p_foto: foto || null, p_clave: clave }, LIMITE_FOTOS);
 export const adminQuitarUsuario = (pass, id) => rpc('admin_quitar_usuario', { pass, p_id: id });
+
+// --- Entrar con Face ID / huella ---
+export const adminPasskeys       = (pass) => rpc('admin_passkeys_lista', { pass });
+export const adminQuitarPasskey  = (pass, id) => rpc('admin_passkey_quitar', { pass, p_id: id });
 
 export const adminSetPassword = (oldPass, newPass) =>
     rpc('admin_set_password', { old_pass: oldPass, new_pass: newPass });
@@ -175,7 +183,7 @@ export const fetchTopVendidos = async (limite = 6) => {
     const { data, error } = await conLimite(
         supabase.rpc('top_vendidos', { p_limite: limite })
     );
-    if (error) throw new Error(mensajeDeError(error));
+    if (error) throw errorDe(error);
     return (data || []).map(toApp);
 };
 
