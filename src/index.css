@@ -3490,3 +3490,17 @@ html:has(.admin-page), body:has(.admin-page) { background: #130E16; }
 @media (prefers-reduced-motion: reduce) {
   .ig-nav, .ig-abrir, .ig-handle { transition: none; }
 }
+
+/* ---------- PAGINA QUE NO EXISTE ---------- */
+.no-existe {
+  min-height: 100dvh; display: flex; flex-direction: column; align-items: flex-start; justify-content: center;
+  gap: 18px; max-width: 560px; margin: 0 auto;
+  padding: calc(40px + env(safe-area-inset-top)) 24px calc(40px + env(safe-area-inset-bottom));
+}
+.no-existe .logo { margin-bottom: 18px; }
+.no-existe h1 {
+  font-family: var(--display); text-transform: uppercase; font-weight: 900;
+  font-size: clamp(40px, 11vw, 72px); line-height: 0.9; color: var(--ink);
+}
+.no-existe p { color: var(--muted); font-size: 16px; line-height: 1.55; max-width: 40ch; }
+.no-existe .btn-primary { margin-top: 6px; }
