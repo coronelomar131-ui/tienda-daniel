@@ -16,7 +16,7 @@ export const config = {
 
     // 2. TU ENLACE DE INSTAGRAM
     // Pon aquí el link directo a tu perfil.
-    instagramLink: "https://www.instagram.com/tu_cuenta_aqui",
+    instagramLink: "https://www.instagram.com/theprotheshop/",
 
     // 3. TU ENLACE DE TIKTOK
     tiktokLink: "https://www.tiktok.com/@tu_cuenta_aqui",
