@@ -9,6 +9,7 @@ import ProductGrid from './components/ProductGrid';
 import CartDrawer from './components/CartDrawer';
 import HowTo from './components/HowTo';
 import Newsletter from './components/Newsletter';
+import InstagramBand from './components/InstagramBand';
 import ProductPage from './components/ProductPage';
 // El panel se carga aparte, solo si alguien entra a /admin. Iba dentro del
 // mismo archivo que la tienda, asi que TODOS los clientes se bajaban el
@@ -85,6 +86,8 @@ function StoreFront() {
                 <HowTo />
 
                 <Newsletter />
+
+                <InstagramBand />
             </main>
 
             <footer className="site-footer">

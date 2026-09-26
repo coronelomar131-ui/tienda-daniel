@@ -3421,3 +3421,72 @@ html:has(.admin-page), body:has(.admin-page) { background: #130E16; }
   color: rgba(240, 233, 222, 0.5);
 }
 .carga-sinred .btn-ghost { margin-top: 5px; }
+
+/* ---------- INSTAGRAM ----------
+   Dos lugares: un botón junto al carrito (sólo en celular, donde el menú de
+   texto se esconde) y una franja azul antes del pie de página. Sin el
+   degradado de colores de Instagram: la forma de la cámara ya se reconoce y
+   así no rompe la paleta de la tienda. */
+.nav-acciones { display: flex; align-items: center; gap: 8px; }
+
+.ig-nav {
+  display: none; align-items: center; justify-content: center;
+  width: 42px; height: 42px; flex-shrink: 0;
+  color: var(--ink); border: 1.5px solid var(--line-strong); border-radius: 999px;
+  transition: color .25s var(--fluido), border-color .25s var(--fluido), transform .3s var(--resorte);
+}
+.ig-nav:hover { color: var(--navy); border-color: var(--navy); }
+.ig-nav:active { transform: scale(0.94); }
+@media (max-width: 860px) {
+  .ig-nav { display: inline-flex; }
+}
+
+.ig-band { background: var(--navy); color: var(--paper); padding: 56px 0 60px; }
+.ig-band-wrap {
+  display: flex; align-items: flex-end; justify-content: space-between;
+  gap: 28px 48px; flex-wrap: wrap;
+}
+/* El @ es la pieza grande: es lo que la gente busca en Instagram, así que va
+   en minúsculas, tal como se escribe, aunque el resto de títulos vaya en
+   mayúsculas. */
+.ig-handle {
+  display: inline-flex; align-items: center; gap: 16px; min-width: 0;
+  font-family: var(--display); font-weight: 800; text-transform: none;
+  font-size: clamp(30px, 8.6vw, 92px); line-height: 0.95; letter-spacing: 0;
+  color: var(--paper); overflow-wrap: anywhere;
+}
+.ig-handle svg { flex-shrink: 0; width: 0.62em; height: 0.62em; }
+.ig-handle { transition: opacity .25s var(--fluido); }
+.ig-handle:hover { opacity: 0.82; }
+.ig-band :focus-visible { outline-color: var(--paper); }
+
+.ig-band-copy { max-width: 34ch; display: flex; flex-direction: column; align-items: flex-start; gap: 18px; }
+.ig-band-copy p { color: rgba(248, 247, 244, 0.82); font-size: 16px; line-height: 1.55; }
+.ig-abrir {
+  display: inline-flex; align-items: center; min-height: 48px; padding: 12px 26px;
+  background: var(--paper); color: var(--navy); border-radius: 2px;
+  font-family: var(--display); text-transform: uppercase; font-weight: 800;
+  font-size: 19px; letter-spacing: 0.03em;
+  transition: background .25s var(--fluido), transform .3s var(--resorte);
+}
+.ig-abrir:hover { background: #fff; transform: translateY(-2px); }
+.ig-abrir:active { transform: scale(0.98); }
+
+@media (max-width: 680px) {
+  .ig-band { padding: 44px 0 48px; }
+  .ig-band-wrap { flex-direction: column; align-items: flex-start; }
+  .ig-abrir { width: 100%; justify-content: center; }
+  .ig-band-copy { max-width: none; width: 100%; }
+}
+/* Celulares angostos (320-380px): se aprieta la barra para que el botón de
+   Instagram y el carrito quepan sin salirse de la pastilla. */
+@media (max-width: 380px) {
+  .site-header .nav { padding-left: 16px; gap: 8px; }
+  .logo { font-size: 21px; }
+  .nav-acciones { gap: 6px; }
+  .ig-nav { width: 38px; height: 38px; }
+  .cart-toggle { padding: 9px 13px; font-size: 15px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .ig-nav, .ig-abrir, .ig-handle { transition: none; }
+}
