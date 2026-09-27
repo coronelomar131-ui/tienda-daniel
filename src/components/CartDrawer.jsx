@@ -3,11 +3,37 @@ import { ShopContext } from '../context/shop-context';
 import { waLink } from '../lib/whatsapp';
 import { fetchAnticipo, crearPedido, datosPago, crearPago, pagosTarjetaListos } from '../lib/pagos';
 import { useBloquearScroll } from '../lib/bloquearScroll';
+import { useDeslizarParaCerrar } from '../lib/deslizarParaCerrar';
 
 const WhatsAppIcon = () => (
     <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
         <path d="M12 2C6.48 2 2 6.48 2 12c0 1.85.5 3.58 1.38 5.07L2 22l5.07-1.33A9.94 9.94 0 0012 22c5.52 0 10-4.48 10-10S17.52 2 12 2z" />
     </svg>
+);
+
+// Bote: con cantidad 1, el "−" quita el par del carrito; que se vea antes de tocarlo.
+const BoteIcon = () => (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+        <path d="M4 7h16M10 11v6M14 11v6M6 7l1 12a2 2 0 002 2h6a2 2 0 002-2l1-12M9 7V4h6v3" />
+    </svg>
+);
+const VolverIcon = () => (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+        <path d="M15 5l-7 7 7 7" />
+    </svg>
+);
+
+// El "−" / "+" de un renglón. El número lleva key para que su brinquito se
+// repita cada vez que cambia: así se nota qué sí cambió.
+const Cantidad = ({ qty, onMenos, onMas }) => (
+    <div className="qty-controls">
+        <button onClick={onMenos} className={qty === 1 ? 'qty-quitar' : undefined}
+                aria-label={qty === 1 ? 'Quitar del carrito' : 'Quitar uno'}>
+            {qty === 1 ? <BoteIcon /> : '−'}
+        </button>
+        <span className="qty" key={qty}>{qty}</span>
+        <button onClick={onMas} aria-label="Agregar uno">+</button>
+    </div>
 );
 
 const CartDrawer = ({ open, onClose }) => {
@@ -36,6 +62,7 @@ const CartDrawer = ({ open, onClose }) => {
     const [yendoATarjeta, setYendoATarjeta] = useState(false);
 
     useBloquearScroll(open);
+    const { hoja, velo, agarradera, cerrar } = useDeslizarParaCerrar(onClose);
 
     useEffect(() => {
         if (!open) return;
@@ -129,11 +156,11 @@ const CartDrawer = ({ open, onClose }) => {
 
     return (
         <>
-            <div className="cart-overlay" onClick={onClose} />
-            <aside className="cart-drawer">
-                <div className="cart-head">
+            <div className="cart-overlay" ref={velo} onClick={cerrar} />
+            <aside className="cart-drawer" ref={hoja}>
+                <div className="cart-head" {...agarradera}>
                     <h3>{hecho ? `Pedido #${hecho.folio}` : pagando ? 'Tus datos' : 'Tu pedido'}</h3>
-                    <button className="cart-close" onClick={onClose} aria-label="Cerrar">×</button>
+                    <button className="cart-close" onClick={cerrar} aria-label="Cerrar">×</button>
                 </div>
 
                 <div className="cart-items">
@@ -230,11 +257,9 @@ const CartDrawer = ({ open, onClose }) => {
                                     <h4>{item.name}</h4>
                                     <span className="p">${item.price.toLocaleString('es-MX')} MXN c/u</span>
                                 </div>
-                                <div className="qty-controls">
-                                    <button onClick={() => updateQty(item.key, -1)} aria-label="Quitar uno">−</button>
-                                    <span className="qty">{item.qty}</span>
-                                    <button onClick={() => updateQty(item.key, 1)} aria-label="Agregar uno">+</button>
-                                </div>
+                                <Cantidad qty={item.qty}
+                                    onMenos={() => updateQty(item.key, -1)}
+                                    onMas={() => updateQty(item.key, 1)} />
                                 <button
                                     className="item-menu"
                                     onClick={() => { setMenu(item.key); setVistaMenu('opciones'); }}
@@ -309,7 +334,7 @@ const CartDrawer = ({ open, onClose }) => {
                                 <button className="cart-volver" type="button"
                                     onClick={() => { setPagando(false); setError(null); }}
                                     disabled={yendoATarjeta}>
-                                    Volver al carrito
+                                    <VolverIcon /> Volver al carrito
                                 </button>
                             </>
                         ) : (
@@ -340,11 +365,9 @@ const CartDrawer = ({ open, onClose }) => {
                             <div className="menu-lista">
                                 <div className="menu-fila menu-cantidad">
                                     <span>Cantidad</span>
-                                    <div className="qty-controls">
-                                        <button onClick={() => updateQty(linea.key, -1)} aria-label="Quitar uno">−</button>
-                                        <span className="qty">{linea.qty}</span>
-                                        <button onClick={() => updateQty(linea.key, 1)} aria-label="Agregar uno">+</button>
-                                    </div>
+                                    <Cantidad qty={linea.qty}
+                                        onMenos={() => updateQty(linea.key, -1)}
+                                        onMas={() => updateQty(linea.key, 1)} />
                                 </div>
 
                                 <button
