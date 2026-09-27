@@ -15,7 +15,9 @@ const ESPERA_MAXIMA = 3500;
 // cargó. Así el cristal es el "cargando" y quitarlo es el "listo". Sólo en el
 // catálogo: fuera de .card.reveal nadie le avisaría que ya entró en pantalla
 // y se quedaría cubierta.
-const ProductPhoto = ({ product, conTapa = false }) => {
+// completa: el tenis entero (contain) y lo que sobra lo llena la misma foto
+// difuminada, sin cristal. Para la portada.
+const ProductPhoto = ({ product, conTapa = false, completa = false }) => {
     const [fotos, setFotos] = useState([]);
     const [cargada, setCargada] = useState(false);
     const [rendida, setRendida] = useState(false);
@@ -49,13 +51,14 @@ const ProductPhoto = ({ product, conTapa = false }) => {
     const clases = ['photo-holder'];
     if (fotos.length > 1) clases.push('con-vuelta');
     if (conTapa) clases.push('con-tapa');
+    if (completa) clases.push('completa');
     if (conTapa && lista) clases.push('destapada');
 
     return (
         <span ref={holder} className={clases.join(' ')}>
             {fotos.length > 0 ? (
                 <>
-                    {conTapa && <img className="foto-fondo" src={fotos[0].data} alt="" aria-hidden="true" />}
+                    {(conTapa || completa) && <img className="foto-fondo" src={fotos[0].data} alt="" aria-hidden="true" />}
                     <img className="foto-1" src={fotos[0].data} alt={alt}
                          onLoad={() => setCargada(true)} onError={() => setRendida(true)} />
                     {fotos[1] && <img className="foto-2" src={fotos[1].data} alt="" aria-hidden="true" />}

@@ -123,7 +123,10 @@ const ProductPage = () => {
                         <div className="ficha-fotos">
                             <div className="ficha-principal">
                                 {fotos.length > 0
-                                    ? <img src={fotos[activa]?.data} alt={`${par.brand} ${par.name}`} />
+                                    ? <>
+                                        <img className="ficha-fondo" src={fotos[activa]?.data} alt="" aria-hidden="true" />
+                                        <img className="ficha-foto" src={fotos[activa]?.data} alt={`${par.brand} ${par.name}`} />
+                                      </>
                                     : <SneakerArt />}
                                 <div className="badges">
                                     {par.status === 'nuevo' && <span className="badge badge-new">Nuevo</span>}
