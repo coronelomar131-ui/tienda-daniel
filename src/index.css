@@ -3524,12 +3524,13 @@ html:has(.admin-page), body:has(.admin-page) { background: #130E16; }
 .pago-legal a { color: var(--navy); text-decoration: underline; text-underline-offset: 2px; }
 .site-footer .flinks-legal { text-transform: none; letter-spacing: 0.02em; font-weight: 500; }
 
-/* ---------- LA CAJA SE DESTAPA ----------
-   Cada foto del catálogo arranca tapada con la tapa de una caja Prothe (vista
-   desde arriba, con el logo). Cuando la foto ya cargó, la tapa se levanta y el
-   tenis sube a su lugar: la caja cerrada es el "cargando", abrirla es el
-   "listo". Es el único momento animado del catálogo; lo demás sólo responde
-   al dedo o al cursor.
+/* ---------- EL CRISTAL SE QUITA ----------
+   Cada foto del catálogo arranca cubierta por un cristal esmerilado en tonos
+   claros (el mismo vidrio de la barra de arriba), con el tenis borroso detrás
+   y un brillo que lo recorre mientras carga. Cuando la foto ya cargó, el
+   cristal se levanta y se aclara, y el tenis sube a su lugar: el cristal es
+   el "cargando", quitarlo es el "listo". Es el único momento animado del
+   catálogo; lo demás sólo responde al dedo o al cursor.
    Reemplaza la entrada genérica (subir + desenfoque) y el hover que
    inclinaba la tarjeta y hacía zoom a la foto. */
 
@@ -3562,23 +3563,36 @@ html:has(.admin-page), body:has(.admin-page) { background: #130E16; }
 .card-photo .badges { z-index: 3; }   /* "Nuevo", "-20%", "Agotado": se leen desde antes de abrir */
 .photo-holder.con-tapa { position: relative; transition: transform .25s var(--resorte); }
 
-.tapa {
-  position: absolute; inset: 0; z-index: 2;
-  display: flex; align-items: center; justify-content: center;
-  background: var(--navy);
-  /* el canto de la tapa: un marco un tono más claro alrededor */
-  box-shadow: inset 0 0 0 12px #22335F, inset 0 0 0 13px rgba(255, 255, 255, 0.08);
+.cristal {
+  position: absolute; inset: 0; z-index: 2; overflow: hidden;
+  /* claro y translúcido: luz arriba, un velo blanco y un toque azulado abajo */
+  background:
+    var(--vidrio-luz),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.42) 0%, rgba(238, 241, 247, 0.5) 100%);
+  -webkit-backdrop-filter: saturate(180%) brightness(1.06) blur(20px);
+  backdrop-filter: saturate(180%) brightness(1.06) blur(20px);
+  box-shadow: var(--vidrio-canto);
   transition:
-    transform .62s cubic-bezier(.65, 0, .25, 1) calc(var(--col) + 120ms),
-    opacity .2s linear calc(var(--col) + 560ms);
+    transform .7s cubic-bezier(.65, 0, .25, 1) calc(var(--col) + 120ms),
+    opacity .5s var(--fluido) calc(var(--col) + 220ms),
+    visibility 0s linear calc(var(--col) + 820ms);
 }
-.tapa-marca {
-  font-family: var(--display); font-weight: 900; text-transform: uppercase;
-  font-size: clamp(22px, 5.6vw, 30px); line-height: 1; letter-spacing: 0.02em;
-  color: var(--paper); white-space: nowrap;
+/* El brillo que cruza el cristal mientras la foto carga */
+.cristal::after {
+  content: ""; position: absolute; inset: -20% -60%;
+  background: linear-gradient(105deg, transparent 38%, rgba(255, 255, 255, 0.75) 50%, transparent 62%);
+  transform: translateX(-60%);
+  animation: brilloCristal 1.8s var(--fluido) infinite;
 }
-.tapa-marca em { font-style: normal; color: #A9B8DE; }
-.card.in .photo-holder.destapada .tapa { transform: translateY(-112%) rotate(-6deg); opacity: 0; }
+@keyframes brilloCristal { to { transform: translateX(60%); } }
+/* Si el navegador no sabe difuminar, un velo casi opaco: nunca se ve a medias */
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .cristal { background: rgba(246, 247, 250, 0.94); }
+}
+.card.in .photo-holder.destapada .cristal {
+  transform: translateY(-16%) scale(1.04); opacity: 0; visibility: hidden;
+}
+.card.in .photo-holder.destapada .cristal::after { animation: none; }
 
 /* El tenis sube a su lugar cuando se va la tapa. Usa translate y scale
    (propiedades aparte) para no chocar con el transform del hover. */
@@ -3608,7 +3622,7 @@ html:has(.admin-page), body:has(.admin-page) { background: #130E16; }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .tapa { display: none; }
+  .cristal { display: none; }
   .card.reveal, .card.reveal.in, .card.reveal.in:hover { opacity: 1; transform: none; transition: none; }
   .photo-holder.con-tapa, .photo-holder.con-tapa img, .photo-holder.con-tapa .art { translate: none; scale: none; transition: none; }
   .card:hover .card-photo .photo-holder img, .card-photo:active .photo-holder.con-tapa { transform: none; }

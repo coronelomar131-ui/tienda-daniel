@@ -2,18 +2,19 @@ import React, { useEffect, useRef, useState } from 'react';
 import { fetchPhotos } from '../lib/shopApi';
 import SneakerArt from './SneakerArt';
 
-// Si la foto tarda más que esto, la caja se destapa igual y enseña el dibujo:
-// una caja cerrada para siempre parece tienda descompuesta.
+// Si la foto tarda más que esto, el cristal se quita igual y enseña el dibujo:
+// una tarjeta cubierta para siempre parece tienda descompuesta.
 const ESPERA_MAXIMA = 3500;
 
 // La foto se pide apenas la tarjeta se asoma en pantalla, para que el catalogo
 // abra rapido aunque haya cien pares. Si el par tiene varias, la segunda
 // aparece al pasar el dedo o el cursor encima.
 //
-// conTapa: la foto arranca tapada con la tapa de una caja Prothe, que se
-// levanta cuando la foto ya cargó. Así la caja cerrada es el "cargando" y
-// abrirla es el "listo". Sólo en el catálogo: fuera de .card.reveal nadie
-// le avisaría que ya entró en pantalla y se quedaría cerrada.
+// conTapa: la foto arranca cubierta por un cristal esmerilado (el mismo
+// vidrio de la barra de arriba) que se levanta y se aclara cuando la foto ya
+// cargó. Así el cristal es el "cargando" y quitarlo es el "listo". Sólo en el
+// catálogo: fuera de .card.reveal nadie le avisaría que ya entró en pantalla
+// y se quedaría cubierta.
 const ProductPhoto = ({ product, conTapa = false }) => {
     const [fotos, setFotos] = useState([]);
     const [cargada, setCargada] = useState(false);
@@ -59,11 +60,7 @@ const ProductPhoto = ({ product, conTapa = false }) => {
                     {fotos[1] && <img className="foto-2" src={fotos[1].data} alt="" aria-hidden="true" />}
                 </>
             ) : <SneakerArt />}
-            {conTapa && (
-                <span className="tapa" aria-hidden="true">
-                    <span className="tapa-marca">Prothe <em>Shop</em></span>
-                </span>
-            )}
+            {conTapa && <span className="cristal" aria-hidden="true" />}
         </span>
     );
 };
