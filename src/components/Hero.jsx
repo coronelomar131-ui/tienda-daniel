@@ -1,15 +1,15 @@
 import React, { useContext, useEffect, useRef, useState } from 'react';
-import { Link } from 'react-router-dom';
 import SneakerArt from './SneakerArt';
-import ProductPhoto from './ProductPhoto';
+import AbanicoPares from './AbanicoPares';
 import { ShopContext } from '../context/shop-context';
 import { fetchHeroVideo } from '../lib/shopApi';
 
 // Los pares que salen en la portada: los destacados primero, sólo los que
-// tienen foto y no están agotados. Si no hay ninguno, queda el dibujo.
+// tienen foto y no están agotados; hasta 6 para ir pasándolos en el abanico.
+// Si no hay ninguno, queda el dibujo.
 function paresDePortada(products) {
     const conFoto = products.filter(p => p.photoCount > 0 && p.status !== 'agotado');
-    return [...conFoto.filter(p => p.destacado), ...conFoto.filter(p => !p.destacado)].slice(0, 3);
+    return [...conFoto.filter(p => p.destacado), ...conFoto.filter(p => !p.destacado)].slice(0, 6);
 }
 
 const Hero = () => {
@@ -67,21 +67,7 @@ const Hero = () => {
                     <a href="#comoapartar" className="btn-ghost">Cómo apartar</a>
                 </div>
             </div>
-            {!conVideo && pares.length > 0 && (
-                // Los pares de verdad, abanicados como cajas recién abiertas.
-                // Cada uno lleva a su ficha.
-                <div className={`hero-pares hero-pares-${pares.length}`}>
-                    {pares.map(par => (
-                        <Link key={par.id} to={`/tenis/${par.id}`} className="hero-par">
-                            <span className="hero-par-foto"><ProductPhoto product={par} completa /></span>
-                            <span className="hero-par-dato">
-                                <span className="hero-par-nombre">{par.name}</span>
-                                <span className="hero-par-precio">${par.price.toLocaleString('es-MX')}</span>
-                            </span>
-                        </Link>
-                    ))}
-                </div>
-            )}
+            {!conVideo && pares.length > 0 && <AbanicoPares pares={pares} />}
             {!conVideo && pares.length === 0 && (
                 <div className="hero-art">
                     <SneakerArt />
