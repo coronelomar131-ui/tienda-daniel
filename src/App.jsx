@@ -20,6 +20,7 @@ const AdminDashboard = lazy(() => import('./components/AdminDashboard'));
 const PagoResultado = lazy(() => import('./components/PagoResultado'));
 import { ShopContext } from './context/shop-context';
 import { config } from './config';
+import { linkReal } from './lib/links';
 import { waPlain } from './lib/whatsapp';
 import { filtrar, tituloFiltro } from './lib/categorias';
 
@@ -117,7 +118,9 @@ function StoreFront() {
                     <div>© 2026 Prothe Shop</div>
                     <div className="flinks">
                         <a href={config.instagramLink} target="_blank" rel="noreferrer">Instagram</a>
-                        <a href={config.tiktokLink} target="_blank" rel="noreferrer">TikTok</a>
+                        {linkReal(config.tiktokLink) && (
+                            <a href={config.tiktokLink} target="_blank" rel="noreferrer">TikTok</a>
+                        )}
                         <a href={waPlain()} target="_blank" rel="noreferrer">WhatsApp</a>
                     </div>
                 </div>

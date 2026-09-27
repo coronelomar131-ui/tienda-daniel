@@ -861,6 +861,8 @@ button { font-family: var(--body); }
 }
 .news input::placeholder { color: var(--muted); }
 .news input:focus { outline: none; border-color: var(--navy); }
+.news .news-error { flex-basis: 100%; margin: 2px 0 0; color: var(--red); font-size: 14px; font-weight: 600; }
+.news input[aria-invalid="true"] { border-color: var(--red); }
 .news .news-cta {
   background: var(--navy); color: #fff; border: 1.5px solid var(--navy); border-radius: 2px;
   font-family: var(--display); text-transform: uppercase; font-weight: 800; font-size: 19px; letter-spacing: 0.03em;

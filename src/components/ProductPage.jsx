@@ -5,6 +5,7 @@ import { fetchProduct, fetchPhotos } from '../lib/shopApi';
 import { waLink } from '../lib/whatsapp';
 import { leerVideo } from '../lib/video';
 import { config } from '../config';
+import { linkReal } from '../lib/links';
 import SneakerArt from './SneakerArt';
 import Navbar from './Navbar';
 import CartDrawer from './CartDrawer';
@@ -97,7 +98,7 @@ const ProductPage = () => {
     const pideTalla = tallas.length > 0;
     const puedeAgregar = !agotado && (!pideTalla || talla !== null);
     const video = leerVideo(par.videoUrl);
-    const mlLink = par.mlLink || config.mercadoLibreGeneralLink;
+    const mlLink = linkReal(par.mlLink) || linkReal(config.mercadoLibreGeneralLink);
 
     const texto = agotado
         ? `Hola, ¿tendrán restock de los ${par.brand} ${par.name}?`

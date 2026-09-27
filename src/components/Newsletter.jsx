@@ -4,17 +4,23 @@ import { waLink } from '../lib/whatsapp';
 const Newsletter = () => {
     const [email, setEmail] = useState('');
     const [sent, setSent] = useState(false);
+    const [error, setError] = useState('');
     const inputRef = useRef(null);
 
     // El registro llega a tu WhatsApp para que tengas la lista de interesados.
     const link = waLink(`Hola, quiero enterarme de lo que va llegando a Prothe Shop. Mi correo es: ${email}`);
 
     const handleClick = (e) => {
-        if (!email.trim()) {
+        // El boton es un link a WhatsApp, asi que el navegador no revisa el
+        // type="email" por su cuenta: sin esto llegaba "hola" como si fuera correo.
+        const limpio = email.trim();
+        if (!limpio || !/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(limpio)) {
             e.preventDefault();
+            setError(limpio ? 'Revisa tu correo: le falta la @ o el dominio (ej. tu@gmail.com).' : 'Escribe tu correo para anotarte.');
             inputRef.current?.focus();
             return;
         }
+        setError('');
         // Se cambia el mensaje hasta después de que abrió WhatsApp.
         setTimeout(() => setSent(true), 400);
     };
@@ -37,8 +43,10 @@ const Newsletter = () => {
                                 type="email"
                                 placeholder="Tu correo"
                                 value={email}
-                                onChange={(e) => setEmail(e.target.value)}
+                                onChange={(e) => { setEmail(e.target.value); if (error) setError(''); }}
                                 aria-label="Tu correo"
+                                aria-invalid={error ? 'true' : undefined}
+                                aria-describedby={error ? 'news-error' : undefined}
                             />
                             <a
                                 href={link}
@@ -49,6 +57,7 @@ const Newsletter = () => {
                             >
                                 Anotarme
                             </a>
+                            {error && <p id="news-error" className="news-error" role="alert">{error}</p>}
                         </div>
                     )}
                 </div>
