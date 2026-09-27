@@ -3774,9 +3774,11 @@ html:has(.admin-page), body:has(.admin-page) { background: #130E16; }
    cajas recién abiertas, en tarjetas de vidrio. Cada uno lleva a su ficha.
    Si no hay pares con foto, se queda el dibujo. Es lo único "atrevido" de la
    portada: el titular, el texto y los botones se quedan quietos. */
+.hero-pares-wrap { width: 100%; max-width: 520px; justify-self: center; }
 .hero-pares {
-  position: relative; width: 100%; max-width: 520px; justify-self: center;
-  aspect-ratio: 1 / 0.92;
+  position: relative; width: 100%; aspect-ratio: 1 / 0.92;
+  /* de lado es nuestro (pasar pares); para arriba y abajo sigue siendo scroll */
+  touch-action: pan-y; user-select: none; -webkit-user-select: none;
 }
 .hero-par {
   position: absolute; width: 54%;
@@ -3785,9 +3787,13 @@ html:has(.admin-page), body:has(.admin-page) { background: #130E16; }
   background: var(--vidrio-luz), var(--vidrio-denso);
   -webkit-backdrop-filter: var(--vidrio-blur); backdrop-filter: var(--vidrio-blur);
   box-shadow: var(--vidrio-canto), var(--vidrio-sombra);
-  transform: rotate(var(--giro, 0deg));
-  transition: transform .5s var(--resorte), box-shadow .4s var(--fluido);
+  left: 50%; top: 50%; width: 48%;
+  --x: 0%; --y: 0%; --giro: 0deg; --s: 1;
+  transform: translate(-50%, -50%) translate(var(--x), var(--y)) rotate(var(--giro)) scale(var(--s));
+  transition: transform .55s var(--resorte), opacity .35s var(--fluido), box-shadow .4s var(--fluido);
+  -webkit-tap-highlight-color: transparent;
 }
+.hero-par img { pointer-events: none; -webkit-user-drag: none; }
 .hero-par-foto {
   display: block; aspect-ratio: 1 / 1; border-radius: 17px; overflow: hidden;
   background: linear-gradient(180deg, #F7F8FB 0%, #EEF1F6 100%);
@@ -3800,18 +3806,41 @@ html:has(.admin-page), body:has(.admin-page) { background: #130E16; }
 }
 .hero-par-precio { font-family: var(--display); font-weight: 900; font-size: 20px; line-height: 1; flex-shrink: 0; }
 
-/* El abanico: dos atrás inclinados, uno al frente */
-.hero-pares-3 .hero-par:nth-child(1) { left: -2%; top: 12%; --giro: -10deg; z-index: 1; width: 48%; }
-.hero-pares-3 .hero-par:nth-child(2) { right: -2%; top: 3%; --giro: 9deg; z-index: 1; width: 48%; }
-.hero-pares-3 .hero-par:nth-child(3) { left: 26%; top: 20%; --giro: -1.5deg; z-index: 2; width: 50%; }
-.hero-pares-2 .hero-par:nth-child(1) { left: 2%; top: 8%; --giro: -6deg; }
-.hero-pares-2 .hero-par:nth-child(2) { right: 2%; top: 14%; --giro: 5deg; z-index: 2; }
-.hero-pares-1 .hero-par { left: 20%; top: 6%; width: 60%; --giro: -3deg; }
+/* El abanico: uno al frente y dos atrás inclinados; los demás esperan
+   escondidos detrás. Al pasar de par cada tarjeta viaja a su nuevo lugar. */
+.hero-par[data-lugar="frente"]    { --x: 2%;   --y: 4%;   --giro: -1.5deg; --s: 1.04; z-index: 3; }
+.hero-par[data-lugar="izquierda"] { --x: -58%; --y: -11%; --giro: -10deg;  --s: 0.96; z-index: 2; }
+.hero-par[data-lugar="derecha"]   { --x: 56%;  --y: -25%; --giro: 9deg;    --s: 0.96; z-index: 2; }
+.hero-par[data-lugar="oculto"]    { --y: -8%;  --s: 0.82; opacity: 0; pointer-events: none; z-index: 1; }
+.hero-pares-2 .hero-par[data-lugar="frente"]  { --x: -22%; }
+.hero-pares-2 .hero-par[data-lugar="derecha"] { --x: 34%; --y: -18%; }
+.hero-pares-1 .hero-par[data-lugar="frente"]  { --x: 0%; --s: 1.14; }
+
+/* Mientras se arrastra, la del frente sigue al dedo y se ladea un poco */
+.hero-pares.arrastrando .hero-par[data-lugar="frente"] {
+  transform: translate(-50%, -50%) translate(calc(var(--x) + var(--dx)), var(--y))
+             rotate(calc(var(--giro) + var(--dxn) * 0.05deg)) scale(var(--s));
+  transition: none;
+}
 
 @media (hover: hover) {
-  .hero-par:hover { transform: rotate(0deg) translateY(-8px); z-index: 3; box-shadow: var(--vidrio-canto), 0 22px 48px rgba(10, 10, 10, 0.18); }
+  .hero-par[data-lugar="frente"]:hover { --y: 1%; box-shadow: var(--vidrio-canto), 0 22px 48px rgba(10, 10, 10, 0.18); }
+  .hero-par[data-lugar="izquierda"]:hover, .hero-par[data-lugar="derecha"]:hover { --s: 1; }
 }
-.hero-par:active { transform: rotate(var(--giro, 0deg)) scale(0.97); }
+.hero-par[data-lugar="frente"]:active { --s: 1; }
+
+/* Los puntos: cuántos pares hay y cuál va al frente */
+.hero-puntos { display: flex; justify-content: center; gap: 2px; margin-top: 6px; }
+.hero-puntos button {
+  width: 26px; height: 26px; padding: 0; border: none; background: none; cursor: pointer;
+  display: grid; place-items: center;
+}
+.hero-puntos button::before {
+  content: ""; width: 7px; height: 7px; border-radius: 999px; background: var(--line-strong);
+  transition: width .3s var(--resorte), background .2s var(--fluido);
+}
+.hero-puntos button.activo::before { width: 22px; background: var(--navy); }
+.hero-puntos button:focus-visible { outline: 2px solid var(--navy); outline-offset: 1px; border-radius: 999px; }
 .hero-par:focus-visible { outline: 2px solid var(--navy); outline-offset: 4px; z-index: 3; }
 
 /* La foto entera (contain) y lo que sobra, con la misma foto difuminada */
@@ -3828,14 +3857,13 @@ html:has(.admin-page), body:has(.admin-page) { background: #130E16; }
 .photo-holder.completa .foto-2 { display: none; }
 
 @media (max-width: 860px) {
-  .hero-pares { order: -1; max-width: 420px; }
+  .hero-pares-wrap { order: -1; max-width: 420px; }
   .hero-par-nombre { font-size: 13px; }
   .hero-par-precio { font-size: 17px; }
   .hero-par { border-radius: 20px; padding: 6px 6px 10px; }
   .hero-par-foto { border-radius: 15px; }
   /* En pantalla chica los de atrás van tapados: sólo la foto, sin precios a medias */
-  .hero-pares-3 .hero-par:nth-child(-n+2) .hero-par-dato,
-  .hero-pares-2 .hero-par:nth-child(1) .hero-par-dato { visibility: hidden; }
+  .hero-par:not([data-lugar="frente"]) .hero-par-dato { visibility: hidden; }
 }
 
 /* Botones de la portada: pastillas, como los del carrito y la barra */
@@ -3882,5 +3910,5 @@ html:has(.admin-page), body:has(.admin-page) { background: #130E16; }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .hero-par { transition: none; }
+  .hero-par, .hero-puntos button::before { transition: none; }
 }
