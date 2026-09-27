@@ -2,7 +2,6 @@ import React, { lazy, Suspense, useContext, useState, useEffect, useMemo, useRef
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Navbar from './components/Navbar';
 import Hero from './components/Hero';
-import Marquee from './components/Marquee';
 import MasVendidos from './components/MasVendidos';
 import BrandFilter from './components/BrandFilter';
 import ProductGrid from './components/ProductGrid';
@@ -84,7 +83,6 @@ function StoreFront() {
             <Navbar onOpenCart={() => setCartOpen(true)} />
             <main>
                 <Hero />
-                <Marquee />
                 <MasVendidos />
                 {/* El filtro vive dentro del ancla para que al saltar al catálogo
                     se vea junto con los resultados y no quede tapado por el header. */}

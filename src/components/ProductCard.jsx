@@ -1,4 +1,4 @@
-import React, { useContext, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { ShopContext } from '../context/shop-context';
 import { config } from '../config';
@@ -16,6 +16,15 @@ const WhatsAppIcon = () => (
 const ProductCard = ({ product }) => {
     const { addToCart } = useContext(ShopContext);
     const [size, setSize] = useState(null);
+    // Un momento de "Agregado" en el botón: sin eso no se nota que pasó algo,
+    // porque el carrito está arriba y el dedo aquí abajo.
+    const [agregado, setAgregado] = useState(false);
+
+    useEffect(() => {
+        if (!agregado) return;
+        const t = setTimeout(() => setAgregado(false), 1400);
+        return () => clearTimeout(t);
+    }, [agregado]);
 
     const oferta = verDescuento(product);
     const soldOut = product.status === 'agotado';
@@ -33,6 +42,7 @@ const ProductCard = ({ product }) => {
         if (!canAdd) return;
         addToCart(product, size);
         setSize(null);
+        setAgregado(true);
     };
 
     return (
@@ -44,7 +54,7 @@ const ProductCard = ({ product }) => {
                     {soldOut && <span className="badge badge-out">Agotado</span>}
                     {product.videoUrl && <span className="badge badge-video">▶ Video</span>}
                 </div>
-                <ProductPhoto product={product} />
+                <ProductPhoto product={product} conTapa />
             </Link>
 
             <div className="card-body">
@@ -79,12 +89,14 @@ const ProductCard = ({ product }) => {
                     </span>
                     <div className="card-actions">
                         <button
-                            className="add-btn"
+                            className={`add-btn${agregado ? ' hecho' : ''}`}
                             onClick={handleAdd}
-                            disabled={!canAdd}
+                            disabled={!canAdd && !agregado}
                             title={needsSize && size === null && !soldOut ? 'Elige una talla primero' : undefined}
                         >
-                            {soldOut ? 'Agotado' : (needsSize && size === null ? 'Elige talla' : '+ Carrito')}
+                            <span aria-live="polite">
+                                {agregado ? 'Agregado' : soldOut ? 'Agotado' : (needsSize && size === null ? 'Elige talla' : '+ Carrito')}
+                            </span>
                         </button>
                         <a href={link} target="_blank" rel="noreferrer" className="wa-btn">
                             {soldOut ? 'Restock' : 'Apartar'} <WhatsAppIcon />
