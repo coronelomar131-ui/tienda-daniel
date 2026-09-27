@@ -861,6 +861,8 @@ button { font-family: var(--body); }
 }
 .news input::placeholder { color: var(--muted); }
 .news input:focus { outline: none; border-color: var(--navy); }
+.news .news-error { flex-basis: 100%; margin: 2px 0 0; color: var(--red); font-size: 14px; font-weight: 600; }
+.news input[aria-invalid="true"] { border-color: var(--red); }
 .news .news-cta {
   background: var(--navy); color: #fff; border: 1.5px solid var(--navy); border-radius: 2px;
   font-family: var(--display); text-transform: uppercase; font-weight: 800; font-size: 19px; letter-spacing: 0.03em;
@@ -3490,3 +3492,44 @@ html:has(.admin-page), body:has(.admin-page) { background: #130E16; }
 @media (prefers-reduced-motion: reduce) {
   .ig-nav, .ig-abrir, .ig-handle { transition: none; }
 }
+
+/* ---------- PAGINA QUE NO EXISTE ---------- */
+.no-existe {
+  min-height: 100dvh; display: flex; flex-direction: column; align-items: flex-start; justify-content: center;
+  gap: 18px; max-width: 560px; margin: 0 auto;
+  padding: calc(40px + env(safe-area-inset-top)) 24px calc(40px + env(safe-area-inset-bottom));
+}
+.no-existe .logo { margin-bottom: 18px; }
+.no-existe h1 {
+  font-family: var(--display); text-transform: uppercase; font-weight: 900;
+  font-size: clamp(40px, 11vw, 72px); line-height: 0.9; color: var(--ink);
+}
+.no-existe p { color: var(--muted); font-size: 16px; line-height: 1.55; max-width: 40ch; }
+.no-existe .btn-primary { margin-top: 6px; }
+
+/* ---------- AVISO DE PRIVACIDAD Y TÉRMINOS ---------- */
+.legal {
+  max-width: 680px; margin: 0 auto;
+  padding: calc(36px + env(safe-area-inset-top)) 24px calc(56px + env(safe-area-inset-bottom));
+  color: var(--ink); font-size: 16px; line-height: 1.65;
+}
+.legal .logo { display: inline-block; margin-bottom: 36px; }
+.legal h1 {
+  font-family: var(--display); text-transform: uppercase; font-weight: 900;
+  font-size: clamp(40px, 9vw, 64px); line-height: 0.92; text-wrap: balance;
+}
+.legal-fecha { margin-top: 16px; color: var(--muted); font-size: 14px; }
+.legal h2 {
+  font-family: var(--display); text-transform: uppercase; font-weight: 800;
+  font-size: 24px; letter-spacing: 0.02em; margin: 34px 0 8px; color: var(--navy);
+}
+.legal p { margin: 0 0 12px; }
+.legal ul { margin: 0 0 12px; padding-left: 20px; }
+.legal li { margin-bottom: 6px; }
+.legal a { color: var(--navy); text-decoration: underline; text-underline-offset: 3px; }
+.legal .logo, .legal .logo em { text-decoration: none; }
+.legal-volver { margin-top: 36px !important; font-weight: 600; }
+
+.pago-legal { margin: 4px 0 0; font-size: 13px; line-height: 1.5; color: var(--muted); }
+.pago-legal a { color: var(--navy); text-decoration: underline; text-underline-offset: 2px; }
+.site-footer .flinks-legal { text-transform: none; letter-spacing: 0.02em; font-weight: 500; }

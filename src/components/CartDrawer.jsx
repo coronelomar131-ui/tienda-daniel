@@ -215,6 +215,10 @@ const CartDrawer = ({ open, onClose }) => {
                             )}
 
                             {error && <div className="login-error">{error}</div>}
+                            <p className="pago-legal">
+                                Al apartar aceptas los <a href="/terminos">términos</a> y
+                                el <a href="/aviso-de-privacidad">aviso de privacidad</a>.
+                            </p>
                         </form>
                     ) : (
                         cart.map(item => (

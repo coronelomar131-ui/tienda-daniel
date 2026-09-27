@@ -1,0 +1,7 @@
+# El panel y las pantallas de "ya pagaste" no tienen por que salir en Google.
+User-agent: *
+Allow: /
+Disallow: /admin
+Disallow: /pago/
+
+Sitemap: https://tienda-daniel-pearl.vercel.app/sitemap.xml

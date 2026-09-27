@@ -41,6 +41,23 @@ const filtrarVisita = (evento) => {
   }
 };
 
+// LINKS CON EL # CODIFICADO.
+//
+// Instagram (y otras apps) a veces cambian el # de un link por %23: el link
+// /#coleccion llega como /%23coleccion. Para el navegador eso ya no es "baja al
+// catalogo" sino una pagina que se llama "%23coleccion", que no existe, y la
+// tienda se quedaba en blanco. Aqui se regresa a su forma normal antes de
+// pintar nada, sin recargar.
+const arreglarGatoCodificado = () => {
+  const { pathname, search } = window.location;
+  const i = pathname.toLowerCase().indexOf('%23');
+  if (i === -1) return;
+  let ancla = pathname.slice(i + 3);
+  try { ancla = decodeURIComponent(ancla); } catch { /* se queda como venia */ }
+  window.history.replaceState(null, '', (pathname.slice(0, i) || '/') + search + '#' + ancla);
+};
+arreglarGatoCodificado();
+
 createRoot(document.getElementById('root')).render(
   <StrictMode>
     <ShopProvider>

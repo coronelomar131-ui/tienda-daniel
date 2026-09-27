@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Solo la portada: las fichas de cada par (/tenis/...) salen de la base de
+     datos y cambian seguido, asi que Google las encuentra desde la portada. -->
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url>
+    <loc>https://tienda-daniel-pearl.vercel.app/</loc>
+    <changefreq>weekly</changefreq>
+  </url>
+  <url><loc>https://tienda-daniel-pearl.vercel.app/aviso-de-privacidad</loc></url>
+  <url><loc>https://tienda-daniel-pearl.vercel.app/terminos</loc></url>
+</urlset>

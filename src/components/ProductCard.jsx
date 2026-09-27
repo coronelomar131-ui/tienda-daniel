@@ -2,6 +2,7 @@ import React, { useContext, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { ShopContext } from '../context/shop-context';
 import { config } from '../config';
+import { linkReal } from '../lib/links';
 import { waLink } from '../lib/whatsapp';
 import ProductPhoto from './ProductPhoto';
 import { verDescuento, pesos } from '../lib/descuento';
@@ -26,7 +27,7 @@ const ProductCard = ({ product }) => {
         ? `Hola, ¿tendrán restock de los ${product.brand} ${product.name}?`
         : `Hola, me interesan los ${product.brand} ${product.name}${size ? ` en talla ${size}` : ''} ($${product.price} MXN). ¿Siguen disponibles?`;
     const link = waLink(waText);
-    const mlLink = product.mlLink || config.mercadoLibreGeneralLink;
+    const mlLink = linkReal(product.mlLink) || linkReal(config.mercadoLibreGeneralLink);
 
     const handleAdd = () => {
         if (!canAdd) return;
