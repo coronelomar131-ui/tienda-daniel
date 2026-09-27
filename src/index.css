@@ -240,16 +240,6 @@ button { font-family: var(--body); }
 .btn-ghost:hover { border-color: var(--navy); color: var(--navy); transform: translateY(-3px); }
 .btn-ghost:active { transform: translateY(0) scale(0.98); }
 
-/* ---------- MARQUEE ---------- */
-.marquee { overflow: hidden; padding: 10px 0; background: var(--navy); }
-.marquee-track { display: flex; width: max-content; animation: scroll 30s linear infinite; }
-.marquee-track span {
-  font-family: var(--display); text-transform: uppercase; font-weight: 800;
-  font-size: 19px; letter-spacing: 0.03em; color: #fff; padding: 0 22px; white-space: nowrap;
-}
-.marquee-track span::after { content: "/"; margin-left: 22px; opacity: 0.5; }
-@keyframes scroll { from { transform: translateX(0); } to { transform: translateX(-50%); } }
-
 /* ---------- CATÁLOGO ---------- */
 .catalog { background: var(--paper); color: var(--ink); padding-bottom: 20px; }
 
@@ -3533,3 +3523,108 @@ html:has(.admin-page), body:has(.admin-page) { background: #130E16; }
 .pago-legal { margin: 4px 0 0; font-size: 13px; line-height: 1.5; color: var(--muted); }
 .pago-legal a { color: var(--navy); text-decoration: underline; text-underline-offset: 2px; }
 .site-footer .flinks-legal { text-transform: none; letter-spacing: 0.02em; font-weight: 500; }
+
+/* ---------- EL CRISTAL SE QUITA ----------
+   Cada foto del catálogo arranca cubierta por un cristal esmerilado en tonos
+   claros (el mismo vidrio de la barra de arriba), con el tenis borroso detrás
+   y un brillo que lo recorre mientras carga. Cuando la foto ya cargó, el
+   cristal se levanta y se aclara, y el tenis sube a su lugar: el cristal es
+   el "cargando", quitarlo es el "listo". Es el único momento animado del
+   catálogo; lo demás sólo responde al dedo o al cursor.
+   Reemplaza la entrada genérica (subir + desenfoque) y el hover que
+   inclinaba la tarjeta y hacía zoom a la foto. */
+
+/* Entrada de la tarjeta: sin desenfoque (en 19 tarjetas pesa en el celular).
+   Lleva sus propias transiciones porque .reveal, que va después de .card,
+   pisaba las del hover. */
+.card.reveal {
+  opacity: 0; transform: translateY(14px); filter: none;
+  transition:
+    opacity .45s var(--entrar),
+    transform .55s var(--resorte),
+    box-shadow .45s var(--fluido),
+    border-color .35s var(--fluido),
+    background .35s var(--fluido);
+}
+.card.reveal.in { opacity: 1; transform: none; }
+.card.reveal.in:hover { transform: translateY(-4px); }
+.card.reveal:hover .card-photo { transform: none; }
+
+/* La tapa entra por columna para que una fila no se destape toda de golpe */
+.grid > .card { --col: 0ms; }
+@media (min-width: 1041px) {
+  .grid > .card:nth-child(3n+2) { --col: 90ms; }
+  .grid > .card:nth-child(3n) { --col: 180ms; }
+}
+@media (min-width: 421px) and (max-width: 1040px) {
+  .grid > .card:nth-child(2n) { --col: 90ms; }
+}
+
+.card-photo .badges { z-index: 3; }   /* "Nuevo", "-20%", "Agotado": se leen desde antes de abrir */
+.photo-holder.con-tapa { position: relative; transition: transform .25s var(--resorte); }
+
+.cristal {
+  position: absolute; inset: 0; z-index: 2; overflow: hidden;
+  /* claro y translúcido: luz arriba, un velo blanco y un toque azulado abajo */
+  background:
+    var(--vidrio-luz),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.42) 0%, rgba(238, 241, 247, 0.5) 100%);
+  -webkit-backdrop-filter: saturate(180%) brightness(1.06) blur(20px);
+  backdrop-filter: saturate(180%) brightness(1.06) blur(20px);
+  box-shadow: var(--vidrio-canto);
+  transition:
+    transform .7s cubic-bezier(.65, 0, .25, 1) calc(var(--col) + 120ms),
+    opacity .5s var(--fluido) calc(var(--col) + 220ms),
+    visibility 0s linear calc(var(--col) + 820ms);
+}
+/* El brillo que cruza el cristal mientras la foto carga */
+.cristal::after {
+  content: ""; position: absolute; inset: -20% -60%;
+  background: linear-gradient(105deg, transparent 38%, rgba(255, 255, 255, 0.75) 50%, transparent 62%);
+  transform: translateX(-60%);
+  animation: brilloCristal 1.8s var(--fluido) infinite;
+}
+@keyframes brilloCristal { to { transform: translateX(60%); } }
+/* Si el navegador no sabe difuminar, un velo casi opaco: nunca se ve a medias */
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .cristal { background: rgba(246, 247, 250, 0.94); }
+}
+.card.in .photo-holder.destapada .cristal {
+  transform: translateY(-16%) scale(1.04); opacity: 0; visibility: hidden;
+}
+.card.in .photo-holder.destapada .cristal::after { animation: none; }
+
+/* El tenis sube a su lugar cuando se va la tapa. Usa translate y scale
+   (propiedades aparte) para no chocar con el transform del hover. */
+.photo-holder.con-tapa img,
+.photo-holder.con-tapa .art {
+  translate: 0 5%; scale: 1.07;
+  transition:
+    translate .75s var(--resorte) calc(var(--col) + 320ms),
+    scale .75s var(--resorte) calc(var(--col) + 320ms),
+    transform .6s var(--resorte),
+    opacity .45s var(--fluido);
+}
+.card.in .photo-holder.destapada img,
+.card.in .photo-holder.destapada .art { translate: 0 0; scale: 1; }
+
+/* Cursor encima: el tenis se levanta un poco, como al sacarlo de la caja */
+@media (hover: hover) {
+  .card:hover .card-photo .photo-holder img { transform: translateY(-2.5%) rotate(-1.5deg) scale(1.07); }
+}
+/* Al tocar la foto, se hunde un poco: el dedo sabe que sí la tocó */
+.card-photo:active .photo-holder.con-tapa { transform: scale(0.97); }
+
+/* "Agregado" en el botón del carrito */
+.card-actions .add-btn.hecho {
+  background: var(--navy); color: #fff; border-color: var(--navy);
+  cursor: default; animation: chipPop .35s var(--rebote);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cristal { display: none; }
+  .card.reveal, .card.reveal.in, .card.reveal.in:hover { opacity: 1; transform: none; transition: none; }
+  .photo-holder.con-tapa, .photo-holder.con-tapa img, .photo-holder.con-tapa .art { translate: none; scale: none; transition: none; }
+  .card:hover .card-photo .photo-holder img, .card-photo:active .photo-holder.con-tapa { transform: none; }
+  .card-actions .add-btn.hecho { animation: none; }
+}
