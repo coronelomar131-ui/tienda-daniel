@@ -24,5 +24,16 @@ export const config = {
     // 4. ENLACE GENERAL A TU ESHOP DE MERCADO LIBRE
     // Si un producto no tiene un link específico, se usará este por defecto.
     // Déjalo vacío ("") si no vendes por Mercado Libre.
-    mercadoLibreGeneralLink: "https://listado.mercadolibre.com.mx/_CustId_TUIDAQUI"
+    mercadoLibreGeneralLink: "https://listado.mercadolibre.com.mx/_CustId_TUIDAQUI",
+
+    // 5. QUIÉN RESPONDE POR LA TIENDA
+    // Salen en el aviso de privacidad y en los términos (/aviso-de-privacidad
+    // y /terminos). La ley pide que el cliente sepa con quién está tratando y
+    // a qué correo escribir para que borren sus datos.
+    responsable: "Daniel Hernández Chavarría",
+    correoContacto: "coronelomar131@gmail.com",
+
+    // 6. CAMBIOS
+    // Días que tiene el cliente, desde que recibe el par, para pedir un cambio.
+    diasParaCambio: 7
 };

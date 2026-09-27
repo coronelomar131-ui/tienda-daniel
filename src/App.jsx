@@ -18,6 +18,8 @@ import PaginaNoExiste from './components/PaginaNoExiste';
 const AdminLogin = lazy(() => import('./components/AdminLogin'));
 const AdminDashboard = lazy(() => import('./components/AdminDashboard'));
 const PagoResultado = lazy(() => import('./components/PagoResultado'));
+const AvisoPrivacidad = lazy(() => import('./components/PaginasLegales').then(m => ({ default: m.AvisoPrivacidad })));
+const Terminos = lazy(() => import('./components/PaginasLegales').then(m => ({ default: m.Terminos })));
 import { ShopContext } from './context/shop-context';
 import { config } from './config';
 import { linkReal } from './lib/links';
@@ -116,6 +118,10 @@ function StoreFront() {
             <footer className="site-footer">
                 <div className="wrap">
                     <div>© 2026 Prothe Shop</div>
+                    <div className="flinks flinks-legal">
+                        <a href="/aviso-de-privacidad">Aviso de privacidad</a>
+                        <a href="/terminos">Términos</a>
+                    </div>
                     <div className="flinks">
                         <a href={config.instagramLink} target="_blank" rel="noreferrer">Instagram</a>
                         {linkReal(config.tiktokLink) && (
@@ -141,6 +147,8 @@ function App() {
                 <Route path="/pago/:id" element={<PagoResultado />} />
                 <Route path="/admin" element={<AdminLogin />} />
                 <Route path="/admin/dashboard" element={<AdminDashboard />} />
+                <Route path="/aviso-de-privacidad" element={<AvisoPrivacidad />} />
+                <Route path="/terminos" element={<Terminos />} />
                 <Route path="*" element={<PaginaNoExiste />} />
             </Routes>
             </Suspense>

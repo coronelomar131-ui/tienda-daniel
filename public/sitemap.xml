@@ -6,4 +6,6 @@
     <loc>https://tienda-daniel-pearl.vercel.app/</loc>
     <changefreq>weekly</changefreq>
   </url>
+  <url><loc>https://tienda-daniel-pearl.vercel.app/aviso-de-privacidad</loc></url>
+  <url><loc>https://tienda-daniel-pearl.vercel.app/terminos</loc></url>
 </urlset>
