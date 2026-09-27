@@ -3642,3 +3642,129 @@ html:has(.admin-page), body:has(.admin-page) { background: #130E16; }
 }
 .photo-holder.con-tapa .foto-1 { position: relative; z-index: 1; }
 .photo-holder.con-tapa .foto-2 { z-index: 1; }
+
+/* ---------- CARRITO: BOTONES DE VIDRIO ----------
+   La barra de arriba y el botón del carrito ya son pastillas de vidrio, pero
+   adentro del carrito había rectángulos de esquina recta: por eso se veían de
+   otra tienda. Ahora el carrito habla el mismo idioma, con jerarquía de
+   esquinas: la hoja muy redonda, campos y casilla a 14px, botones en
+   pastilla. */
+
+/* Cantidad: una sola pastilla [ − 1 + ] en vez de dos cuadritos */
+.qty-controls {
+  gap: 0; padding: 3px; border-radius: 999px;
+  background: var(--vidrio-luz), rgba(255, 255, 255, 0.62);
+  box-shadow: var(--vidrio-canto), 0 2px 8px rgba(10, 10, 10, 0.05);
+}
+.qty-controls button {
+  width: 32px; height: 32px; border: none; border-radius: 999px;
+  display: grid; place-items: center; padding: 0;
+  background: transparent; color: var(--ink); font-size: 19px; line-height: 1;
+  transition: background .18s var(--fluido), color .18s var(--fluido), transform .22s var(--resorte);
+}
+.qty-controls button:hover { background: rgba(27, 42, 82, 0.08); color: var(--navy); }
+.qty-controls button:active { transform: scale(0.86); }
+.qty-controls button svg { width: 15px; height: 15px; }
+.qty-controls .qty-quitar { color: var(--red); }
+.qty-controls .qty-quitar:hover { background: rgba(179, 38, 30, 0.09); color: var(--red); }
+.qty-controls .qty {
+  min-width: 26px; text-align: center;
+  font-family: var(--display); font-weight: 800; font-size: 19px; line-height: 1;
+  animation: qtyBrinco .32s var(--rebote);
+}
+@keyframes qtyBrinco { from { transform: scale(0.6); opacity: 0.4; } to { transform: scale(1); opacity: 1; } }
+
+/* Los tres puntos y la X: círculos de vidrio del mismo tamaño */
+.item-menu, .cart-head .cart-close {
+  width: 38px; height: 38px; border: none; border-radius: 999px;
+  display: grid; place-items: center; padding: 0; flex-shrink: 0;
+  background: var(--vidrio-luz), rgba(255, 255, 255, 0.55);
+  box-shadow: var(--vidrio-canto);
+  color: var(--ink); font-size: 22px; line-height: 1;
+  transition: background .18s var(--fluido), transform .22s var(--resorte);
+}
+.item-menu:hover, .cart-head .cart-close:hover { background: var(--vidrio-luz), rgba(255, 255, 255, 0.9); color: var(--ink); }
+.item-menu:active, .cart-head .cart-close:active { transform: scale(0.9); }
+
+/* Hacer mi pedido / pagar: pastilla azul con luz de vidrio arriba */
+.cart-foot .cart-wa {
+  min-height: 56px; padding: 0 24px; border-radius: 999px;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.18), rgba(255, 255, 255, 0) 55%), var(--navy);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.32),
+    inset 0 -12px 18px -12px rgba(0, 0, 0, 0.5),
+    0 10px 24px rgba(27, 42, 82, 0.28);
+  transition: transform .25s var(--resorte), box-shadow .25s var(--fluido), background .2s var(--fluido);
+}
+.cart-foot .cart-wa:hover:not(:disabled) {
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 0) 55%), var(--navy-soft);
+}
+.cart-foot .cart-wa:active:not(:disabled) { transform: scale(0.97); box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.25), 0 4px 12px rgba(27, 42, 82, 0.22); }
+
+/* WhatsApp y transferencia: pastilla de vidrio claro */
+.cart-foot .cart-whats,
+.cart-foot .cart-transfer {
+  min-height: 52px; margin-top: 10px; border: none; border-radius: 999px;
+  background: var(--vidrio-luz), rgba(255, 255, 255, 0.58);
+  -webkit-backdrop-filter: var(--vidrio-blur); backdrop-filter: var(--vidrio-blur);
+  box-shadow: var(--vidrio-canto), 0 4px 14px rgba(10, 10, 10, 0.06);
+  color: var(--ink);
+  transition: transform .25s var(--resorte), background .2s var(--fluido);
+}
+.cart-foot .cart-whats:hover, .cart-foot .cart-transfer:hover:not(:disabled) { background: var(--vidrio-luz), rgba(255, 255, 255, 0.85); }
+.cart-foot .cart-whats:active, .cart-foot .cart-transfer:active:not(:disabled) { transform: scale(0.97); }
+.cart-foot .cart-whats svg { width: 17px; height: 17px; color: var(--navy); }
+
+/* Volver / seguir viendo: texto normal con flecha, no una etiqueta */
+.cart-foot .cart-volver:not(.cart-transfer) {
+  display: flex; align-items: center; justify-content: center; gap: 4px;
+  min-height: 44px; margin-top: 6px;
+  text-transform: none; letter-spacing: 0; font-size: 15px; font-weight: 600; color: var(--muted);
+}
+.cart-foot .cart-volver:not(.cart-transfer):hover { color: var(--navy); }
+.cart-foot .cart-volver svg { width: 17px; height: 17px; }
+
+/* Campos: misma esquina que la casilla */
+.pago-form input[type=text], .pago-form input[type=tel], .pago-form input[type=email], .pago-form textarea {
+  border-radius: 14px; background: rgba(255, 255, 255, 0.7);
+  transition: border-color .2s var(--fluido), background .2s var(--fluido);
+}
+.pago-form input:focus, .pago-form textarea:focus { background: #fff; }
+
+/* Anticipo: interruptor a la derecha; la opción se pinta cuando está activa */
+.pago-anticipo {
+  align-items: center; border-radius: 14px; padding: 14px 16px;
+  background: rgba(255, 255, 255, 0.55);
+  transition: border-color .2s var(--fluido), background .2s var(--fluido);
+}
+.pago-anticipo span { flex: 1; }
+.pago-anticipo input[type=checkbox] {
+  order: 2; appearance: none; -webkit-appearance: none; margin: 0;
+  position: relative; width: 50px; height: 30px; border-radius: 999px; cursor: pointer; flex-shrink: 0;
+  background: rgba(18, 18, 18, 0.14);
+  box-shadow: inset 0 1px 3px rgba(10, 10, 10, 0.18);
+  transition: background .22s var(--fluido);
+}
+.pago-anticipo input[type=checkbox]::before {
+  content: ""; position: absolute; top: 3px; left: 3px; width: 24px; height: 24px; border-radius: 999px;
+  background: #fff; box-shadow: 0 2px 6px rgba(10, 10, 10, 0.25), inset 0 -1px 0 rgba(10, 10, 10, 0.06);
+  transition: transform .3s var(--resorte);
+}
+.pago-anticipo input[type=checkbox]:checked { background: var(--navy); }
+.pago-anticipo input[type=checkbox]:checked::before { transform: translateX(20px); }
+.pago-anticipo input[type=checkbox]:focus-visible { outline: 2px solid var(--navy); outline-offset: 3px; }
+.pago-anticipo:has(input:checked) { border-color: var(--navy); background: var(--navy-wash); }
+.pago-anticipo:has(input:checked) small { color: var(--navy); font-weight: 600; }
+
+/* La agarradera se puede jalar: el dedo no debe mover la página ahí */
+@media (max-width: 900px) {
+  .cart-drawer .cart-head { touch-action: none; cursor: grab; user-select: none; -webkit-user-select: none; }
+  .cart-drawer .cart-head:active { cursor: grabbing; }
+  .cart-drawer::before { width: 46px; height: 5px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .qty-controls .qty { animation: none; }
+  .qty-controls button, .item-menu, .cart-head .cart-close, .cart-foot .cart-wa,
+  .cart-foot .cart-whats, .cart-foot .cart-transfer, .pago-anticipo input[type=checkbox]::before { transition: none; }
+}
