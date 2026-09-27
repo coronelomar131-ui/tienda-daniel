@@ -3816,11 +3816,16 @@ html:has(.admin-page), body:has(.admin-page) { background: #130E16; }
 .hero-pares-2 .hero-par[data-lugar="derecha"] { --x: 34%; --y: -18%; }
 .hero-pares-1 .hero-par[data-lugar="frente"]  { --x: 0%; --s: 1.14; }
 
-/* Mientras se arrastra, la del frente sigue al dedo y se ladea un poco */
-.hero-pares.arrastrando .hero-par[data-lugar="frente"] {
-  transform: translate(-50%, -50%) translate(calc(var(--x) + var(--dx)), var(--y))
-             rotate(calc(var(--giro) + var(--dxn) * 0.05deg)) scale(var(--s));
-  transition: none;
+/* Mientras se arrastra, cada tarjeta va entre su lugar y el siguiente (lo
+   calcula AbanicoPares.jsx y lo pone en línea): sin transición, pegadas al
+   dedo. Al soltar, la transición de arriba las asienta en su lugar. */
+.hero-pares.arrastrando .hero-par { transition: none; }
+
+/* Al soltar arriba del umbral, el par sale volando hacia arriba y se abre su ficha */
+.hero-pares.abriendo .hero-par[data-lugar="frente"] {
+  transform: translate(-50%, -50%) translate(var(--x), calc(var(--y) - 55%)) scale(1.12);
+  opacity: 0;
+  transition: transform .2s cubic-bezier(.4, 0, 1, 1), opacity .2s ease-in;
 }
 
 @media (hover: hover) {
