@@ -3829,6 +3829,33 @@ html:has(.admin-page), body:has(.admin-page) { background: #130E16; }
 }
 .hero-par[data-lugar="frente"]:active { --s: 1; }
 
+/* Subir la del frente para abrirla: la tarjeta sube con el dedo, crece un
+   poco y avisa. Sólo la del frente atrapa el gesto: en el resto del abanico
+   subir el dedo sigue bajando la página. */
+.hero-par[data-lugar="frente"] { touch-action: none; }
+.hero-pares.subiendo .hero-par[data-lugar="frente"] {
+  /* sube a la mitad que el dedo: se siente con resistencia y no se sale por arriba */
+  transform: translate(-50%, -50%) translate(var(--x), calc(var(--y) + var(--dy) * 0.5))
+             rotate(calc(var(--giro) * (1 - var(--avance)))) scale(calc(var(--s) + var(--avance) * 0.05));
+  transition: none;
+  box-shadow: var(--vidrio-canto), 0 calc(14px + var(--avance) * 20px) calc(38px + var(--avance) * 20px) rgba(10, 10, 10, 0.2);
+}
+.hero-par-subir {
+  position: absolute; left: 50%; bottom: 58px; z-index: 2; transform: translateX(-50%);
+  padding: 7px 14px; border-radius: 999px; white-space: nowrap;
+  font-size: 13px; font-weight: 600; color: var(--ink);
+  background: var(--vidrio-luz), var(--vidrio-denso);
+  -webkit-backdrop-filter: var(--vidrio-blur); backdrop-filter: var(--vidrio-blur);
+  box-shadow: var(--vidrio-canto);
+  opacity: 0; pointer-events: none; transition: opacity .15s var(--fluido);
+}
+.hero-pares.subiendo .hero-par-subir { opacity: calc(0.35 + var(--avance) * 0.65); }
+.hero-pares.listo-abrir .hero-par-subir { background: var(--navy); color: #fff; opacity: 1; }
+
+/* Cómo se usa: sólo donde hay dedos */
+.hero-gestos { display: none; margin: 4px 0 0; text-align: center; font-size: 13px; color: var(--muted); }
+@media (hover: none) { .hero-gestos { display: block; } }
+
 /* Los puntos: cuántos pares hay y cuál va al frente */
 .hero-puntos { display: flex; justify-content: center; gap: 2px; margin-top: 6px; }
 .hero-puntos button {
