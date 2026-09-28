@@ -5,6 +5,7 @@ import { fetchAnticipo, crearPedido, datosPago, crearPago, pagosTarjetaListos } 
 import { useBloquearScroll } from '../lib/bloquearScroll';
 import { useDeslizarParaCerrar } from '../lib/deslizarParaCerrar';
 import WhatsAppIcon from './WhatsAppIcon';
+import Ticket from './Ticket';
 
 // Bote: con cantidad 1, el "−" quita el par del carrito; que se vea antes de tocarlo.
 const BoteIcon = () => (
@@ -160,46 +161,16 @@ const CartDrawer = ({ open, onClose }) => {
                 <div className="cart-items">
                     {hecho ? (
                         <div className="listo">
-                            <div className="listo-folio">
-                                <span>Tu folio</span>
-                                <strong>#{hecho.folio}</strong>
-                            </div>
-                            <p className="listo-texto">
-                                Ya guardamos tu pedido. Apúntale el folio: con ese número
-                                le damos seguimiento.
-                            </p>
-
-                            <div className="listo-total">
-                                <span>{hecho.esAnticipo ? `Anticipo (${pct}%)` : 'A pagar'}</span>
-                                <strong>${hecho.aPagar.toLocaleString('es-MX')} MXN</strong>
-                            </div>
-                            {hecho.esAnticipo && (
-                                <p className="hint">
-                                    Total del pedido ${hecho.total.toLocaleString('es-MX')} MXN.
-                                    El resto lo pagas al recibir.
-                                </p>
-                            )}
-
-                            {cuenta?.clabe ? (
-                                <div className="listo-cuenta">
-                                    <p className="listo-titulo">Transfiere a:</p>
-                                    {cuenta.banco && <div><span>Banco</span><strong>{cuenta.banco}</strong></div>}
-                                    {cuenta.titular && <div><span>A nombre de</span><strong>{cuenta.titular}</strong></div>}
-                                    <div><span>CLABE</span><strong className="clabe">{cuenta.clabe}</strong></div>
-                                    <button type="button" className="link-btn"
-                                        onClick={() => navigator.clipboard?.writeText(cuenta.clabe)}>
-                                        Copiar CLABE
-                                    </button>
-                                    <p className="hint">
-                                        Pon <strong>#{hecho.folio}</strong> en el concepto y mándanos
-                                        tu comprobante por WhatsApp.
-                                    </p>
-                                </div>
-                            ) : (
-                                <p className="listo-texto">
-                                    Escríbenos por WhatsApp con tu folio y te decimos cómo pagar.
-                                </p>
-                            )}
+                            <Ticket
+                                folio={hecho.folio}
+                                lineas={hecho.lineas}
+                                total={hecho.total}
+                                aPagar={hecho.aPagar}
+                                esAnticipo={hecho.esAnticipo}
+                                pct={pct}
+                                cuenta={cuenta}
+                                onCopiarClabe={() => navigator.clipboard?.writeText(cuenta.clabe)}
+                            />
                         </div>
                     ) : cart.length === 0 ? (
                         <div className="cart-empty">Tu carrito está vacío</div>

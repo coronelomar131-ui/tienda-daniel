@@ -28,6 +28,9 @@ Tipografía Big Shoulders Display + Barlow.
   como destacados desde el panel.
 - **Carrito** que junta varios pares (cada talla cuenta aparte). Desde ahí se
   cambia de talla, se guarda un par para después o se hace el pedido.
+- **Ticket de apartado.** Al hacer el pedido, la tienda imprime un ticket
+  (folio, pares, total, anticipo, a dónde transferir y código de barras) que
+  sale de una impresora térmica renglón por renglón, como en caja.
 - **Galería por par.** Varias fotos por producto; en el catálogo la segunda
   aparece al pasar el cursor, y en la ficha hay miniaturas para cambiarlas.
 - **Página propia de cada par** en `/tenis/:id`, con fotos grandes. Sirve para
