@@ -1,5 +1,5 @@
 import React, { lazy, Suspense, useContext, useState, useEffect, useMemo, useRef } from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Link, useLocation, useNavigationType, useParams } from 'react-router-dom';
 import Navbar from './components/Navbar';
 import Hero from './components/Hero';
 import MasVendidos from './components/MasVendidos';
@@ -25,7 +25,12 @@ import { linkReal } from './lib/links';
 import { waPlain } from './lib/whatsapp';
 import { filtrar, tituloFiltro } from './lib/categorias';
 
-function useScrollReveal(deps) {
+// Lo que lleva .reveal entra con animación cuando se asoma en pantalla. Se
+// vigila el documento entero: cualquier .reveal que aparezca después (los más
+// vendidos llegan por su propia petición, el catálogo cambia con el filtro) se
+// observa solo. Antes se observaba una sola vez al cargar el catálogo, y lo
+// que llegaba después se quedaba invisible.
+function useScrollReveal() {
     useEffect(() => {
         const io = new IntersectionObserver((entries) => {
             entries.forEach(e => {
@@ -35,11 +40,38 @@ function useScrollReveal(deps) {
                 }
             });
         }, { threshold: 0.12 });
-        document.querySelectorAll('.reveal').forEach(el => io.observe(el));
-        return () => io.disconnect();
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, deps);
+        const observar = (raiz) => {
+            if (raiz.nodeType !== 1) return;
+            if (raiz.classList.contains('reveal')) io.observe(raiz);
+            raiz.querySelectorAll('.reveal').forEach(el => io.observe(el));
+        };
+        observar(document.body);
+        const mo = new MutationObserver((cambios) => {
+            for (const c of cambios) c.addedNodes.forEach(observar);
+        });
+        mo.observe(document.body, { childList: true, subtree: true });
+        return () => { mo.disconnect(); io.disconnect(); };
+    }, []);
 }
+
+// Al cambiar de página (portada → ficha → portada) el navegador no mueve el
+// scroll solo: la ficha se abría a la altura donde ibas en el catálogo. Aquí
+// se sube al inicio en cada navegación nueva; al ir "atrás" no se toca, para
+// que el navegador regrese a donde estabas.
+function ScrollAlCambiarRuta() {
+    const { pathname, hash } = useLocation();
+    const tipo = useNavigationType();
+    useEffect(() => {
+        if (tipo === 'POP') return;
+        // con ancla también se sube primero: useBajarAlAncla baja luego al ancla
+        window.scrollTo({ top: 0, behavior: 'instant' });
+    }, [pathname, hash, tipo]);
+    return null;
+}
+
+// La ficha se vuelve a montar de cero al cambiar de par: así la foto elegida y
+// la talla no se quedan de un par al siguiente.
+const FichaPorId = () => { const { id } = useParams(); return <ProductPage key={id} />; };
 
 // Si la tienda se abre con un ancla (/#coleccion, como el link de la bio de
 // Instagram), el navegador intenta bajar ANTES de que la pagina exista y se
@@ -75,7 +107,7 @@ function StoreFront() {
 
     const visible = filtrar(products, filtro);
 
-    useScrollReveal([visible.length, filtro.tipo, filtro.valor, loading]);
+    useScrollReveal();
     useBajarAlAncla(!loading);
 
     return (
@@ -117,8 +149,8 @@ function StoreFront() {
                 <div className="wrap">
                     <div>© 2026 Prothe Shop</div>
                     <div className="flinks flinks-legal">
-                        <a href="/aviso-de-privacidad">Aviso de privacidad</a>
-                        <a href="/terminos">Términos</a>
+                        <Link to="/aviso-de-privacidad">Aviso de privacidad</Link>
+                        <Link to="/terminos">Términos</Link>
                     </div>
                     <div className="flinks">
                         <a href={config.instagramLink} target="_blank" rel="noreferrer">Instagram</a>
@@ -138,10 +170,11 @@ function StoreFront() {
 function App() {
     return (
         <Router>
+            <ScrollAlCambiarRuta />
             <Suspense fallback={<div className="cargando-ruta">Cargando…</div>}>
             <Routes>
                 <Route path="/" element={<StoreFront />} />
-                <Route path="/tenis/:id" element={<ProductPage />} />
+                <Route path="/tenis/:id" element={<FichaPorId />} />
                 <Route path="/pago/:id" element={<PagoResultado />} />
                 <Route path="/admin" element={<AdminLogin />} />
                 <Route path="/admin/dashboard" element={<AdminDashboard />} />

@@ -19,6 +19,8 @@ const toApp = (row) => ({
 });
 
 const LIMITE = 7000;
+// Subir fotos tarda mas, por eso el limite mas holgado.
+const LIMITE_FOTOS = 45000;
 
 const conLimite = (promesa, ms = LIMITE) => Promise.race([
     promesa,
@@ -143,7 +145,6 @@ export const adminCerrarSesion = (pass) => rpc('admin_cerrar_sesion', { pass });
 // --- Gente que puede entrar al panel ---
 export const adminCaras        = () => rpc('admin_caras', {}, LIMITE);
 export const adminEntrar       = (id, pass) => rpc('admin_entrar', { p_id: id, pass });
-export const adminQuien        = (pass) => rpc('admin_quien', { pass });
 export const adminCrearUsuario = (pass, nombre, foto, clave) =>
     rpc('admin_crear_usuario', { pass, p_nombre: nombre, p_foto: foto || null, p_clave: clave }, LIMITE_FOTOS);
 export const adminQuitarUsuario = (pass, id) => rpc('admin_quitar_usuario', { pass, p_id: id });
@@ -167,9 +168,6 @@ const campos = (p) => ({
     p_ml_link: p.mlLink || '',
     p_video_url: p.videoUrl || '',
 });
-
-// Subir fotos tarda mas, por eso el limite mas holgado.
-const LIMITE_FOTOS = 45000;
 
 export const adminAddProduct = (pass, p) =>
     rpc('admin_add_product', { pass, ...campos(p), p_photos: p.photos || [] }, LIMITE_FOTOS);

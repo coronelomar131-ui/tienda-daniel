@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { adminIsClaimed, adminClaim, adminLogin, adminCaras, adminEntrar } from '../lib/shopApi';
 import { guardarSesion } from '../lib/adminSession';
@@ -74,19 +74,27 @@ const AdminLogin = () => {
         }
     };
 
+    const consultar = useCallback(() => {
+        let vivo = true;
+        Promise.all([adminIsClaimed(), adminCaras().catch(() => [])])
+            .then(([listo, gente]) => { if (vivo) { setClaimed(listo); setCaras(gente || []); } })
+            .catch((err) => {
+                if (!vivo) return;
+                setError(err?.message || 'No hay conexión con la tienda');
+                setSinConexion(true);
+            });
+        return () => { vivo = false; };
+    }, []);
+
+    useEffect(consultar, [consultar]);
+
+    // el botón de reintentar: se limpia lo de antes y se vuelve a preguntar
     const revisar = () => {
         setError('');
         setSinConexion(false);
         setClaimed(null);
-        Promise.all([adminIsClaimed(), adminCaras().catch(() => [])])
-            .then(([listo, gente]) => { setClaimed(listo); setCaras(gente || []); })
-            .catch((err) => {
-                setError(err?.message || 'No hay conexión con la tienda');
-                setSinConexion(true);
-            });
+        consultar();
     };
-
-    useEffect(revisar, []);
 
     const entrar = async (e) => {
         e.preventDefault();

@@ -1,6 +1,6 @@
 # Funciones del servidor (Supabase Edge Functions)
 
-Estas cuatro funciones son el código que corre en el servidor, no en el
+Estas cinco funciones son el código que corre en el servidor, no en el
 navegador. Aquí es donde vive lo que no se le puede confiar al celular del
 cliente: los precios, el cobro y las llaves.
 
