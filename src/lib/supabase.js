@@ -3,7 +3,7 @@ import { createClient } from '@supabase/supabase-js';
 // Estos dos datos son publicos a proposito: la llave "publishable" solo puede
 // hacer lo que las reglas de la base permiten (leer el catalogo). Escribir
 // requiere tu clave del panel, que se verifica del lado del servidor.
-const SUPABASE_URL = 'https://buzzupacpoljliobzyip.supabase.co';
+export const SUPABASE_URL = 'https://buzzupacpoljliobzyip.supabase.co';
 const SUPABASE_KEY = 'sb_publishable_3cNkW5MfBML-0CMsh8eh-w_gTzFuNtF';
 
 // Sin este limite, una red caida deja la tienda en "Cargando..." un minuto

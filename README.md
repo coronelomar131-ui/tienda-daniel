@@ -102,6 +102,8 @@ antes de darlo. Así la bodega nunca queda abierta a que cualquiera suba cosas.
 
 ## Cómo se paga
 
+> **Para encender el cobro con tarjeta**, sigue la guía [`PAGOS.md`](PAGOS.md): todo el código ya está listo y sólo faltan el token y la clave de tu cuenta de Mercado Pago.
+
 En el carrito, "Hacer mi pedido" pide nombre, WhatsApp y dirección, y guarda
 el pedido con folio. Desde ahí se paga **con tarjeta** (Mercado Pago, sólo si
 está configurado) o **por transferencia** a la cuenta que pusiste en el panel.
@@ -129,9 +131,9 @@ Cómo está armado, y por qué:
   teléfono de clientes, así que nadie los lee desde el navegador. Solo salen
   por `admin_orders`, que exige la clave del dueño.
 
-Para encender los pagos hace falta una variable en Supabase (Edge Functions →
-Secrets): `MP_ACCESS_TOKEN` con el token de producción de Mercado Pago, y
-opcionalmente `MP_WEBHOOK_SECRET` para validar la firma de los avisos. Sin
+Para encender los pagos hacen falta dos secretos en Supabase (Edge Functions →
+Secrets): `MP_ACCESS_TOKEN` con el token de Mercado Pago, y `MP_WEBHOOK_SECRET`
+para validar la firma de los avisos. Paso a paso en [`PAGOS.md`](PAGOS.md). Sin
 `MP_ACCESS_TOKEN`, el botón de pagar responde que los pagos no están
 configurados y la tienda sigue funcionando por WhatsApp.
 

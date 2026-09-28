@@ -28,6 +28,11 @@ async function firmaValida(req: Request, idPago: string): Promise<boolean> {
   const secreto = Deno.env.get("MP_WEBHOOK_SECRET");
   if (!secreto) return true; // sin secreto configurado no se puede validar
 
+  // Mercado Pago firma con el id que viaja en la DIRECCION (?data.id=...), en
+  // minusculas si es alfanumerico. Es el mismo numero que trae el cuerpo en un
+  // pago, pero la firma se calcula sobre el de la direccion, asi que se usa ese.
+  const idFirmado = (new URL(req.url).searchParams.get("data.id") || idPago).toLowerCase();
+
   const firma = req.headers.get("x-signature") || "";
   const requestId = req.headers.get("x-request-id") || "";
 
@@ -38,7 +43,7 @@ async function firmaValida(req: Request, idPago: string): Promise<boolean> {
   const hash = partes["v1"];
   if (!ts || !hash) return false;
 
-  const plantilla = `id:${idPago};request-id:${requestId};ts:${ts};`;
+  const plantilla = `id:${idFirmado};request-id:${requestId};ts:${ts};`;
   const llave = await crypto.subtle.importKey(
     "raw", new TextEncoder().encode(secreto),
     { name: "HMAC", hash: "SHA-256" }, false, ["sign"],
@@ -47,7 +52,11 @@ async function firmaValida(req: Request, idPago: string): Promise<boolean> {
   const esperado = [...new Uint8Array(firmado)]
     .map((b) => b.toString(16).padStart(2, "0")).join("");
 
-  return esperado === hash;
+  // comparacion sin atajos: no dice en que letra fallo
+  if (esperado.length !== hash.length) return false;
+  let diferencia = 0;
+  for (let i = 0; i < esperado.length; i++) diferencia |= esperado.charCodeAt(i) ^ hash.charCodeAt(i);
+  return diferencia === 0;
 }
 
 Deno.serve(async (req: Request) => {

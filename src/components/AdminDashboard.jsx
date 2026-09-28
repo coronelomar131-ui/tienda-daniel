@@ -26,6 +26,7 @@ import { CATEGORIAS } from '../lib/categorias';
 import { comprimirAvatar } from '../lib/avatar';
 import { subirFotos } from '../lib/fotoUpload';
 import MiniFoto from './MiniFoto';
+import PagosTarjeta from './PagosTarjeta';
 
 const VACIO = { brand: '', name: '', price: '', priceBefore: '', pct: '', categoria: 'calzado', sizes: '', status: '', desc: '', mlLink: '', videoUrl: '' };
 
@@ -556,9 +557,10 @@ const AdminDashboard = () => {
                     <section className="seccion" aria-label="Ajustes de la tienda">
                         <header className="seccion-cab">
                             <h3>Tu tienda</h3>
-                            <p>Cómo entras, quién más puede entrar y qué se ve en la portada.</p>
+                            <p>Cómo cobras, cómo entras, quién más puede entrar y qué se ve en la portada.</p>
                         </header>
                         <div className="seccion-bloques">
+                        <PagosTarjeta />
                         <details className={`admin-card plegable ficha-cara ${misFaceId.length ? 'lista' : ''}`} open={misFaceId.length === 0}
                                  onToggle={(e) => {
                                      if (e.currentTarget.open) precalentarAlta(pass, nombreDelAparato());
