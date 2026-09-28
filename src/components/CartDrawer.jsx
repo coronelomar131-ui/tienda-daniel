@@ -4,12 +4,7 @@ import { waLink } from '../lib/whatsapp';
 import { fetchAnticipo, crearPedido, datosPago, crearPago, pagosTarjetaListos } from '../lib/pagos';
 import { useBloquearScroll } from '../lib/bloquearScroll';
 import { useDeslizarParaCerrar } from '../lib/deslizarParaCerrar';
-
-const WhatsAppIcon = () => (
-    <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-        <path d="M12 2C6.48 2 2 6.48 2 12c0 1.85.5 3.58 1.38 5.07L2 22l5.07-1.33A9.94 9.94 0 0012 22c5.52 0 10-4.48 10-10S17.52 2 12 2z" />
-    </svg>
-);
+import WhatsAppIcon from './WhatsAppIcon';
 
 // Bote: con cantidad 1, el "−" quita el par del carrito; que se vea antes de tocarlo.
 const BoteIcon = () => (
@@ -87,10 +82,9 @@ const CartDrawer = ({ open, onClose }) => {
     const message = `Hola, quiero apartar estos pares:\n\n${orderLines.join('\n')}\n\nTotal: $${cartTotal.toLocaleString('es-MX')} MXN`;
     const link = waLink(message);
 
-    // Se vacía el carrito hasta después de que el navegador abrió WhatsApp.
-    const handleOrder = () => {
-        setTimeout(() => { clearCart(); onClose(); }, 400);
-    };
+    // "Preguntar" no es "pedir": el carrito se queda como está. Antes se
+    // vaciaba y el cliente regresaba de WhatsApp sin sus pares.
+    const alPreguntar = () => { setTimeout(onClose, 400); };
 
     // Guardar el pedido con folio. Antes el pedido solo existia en el chat de
     // WhatsApp: si el mensaje se perdia entre otras conversaciones, se perdia
@@ -102,6 +96,8 @@ const CartDrawer = ({ open, onClose }) => {
         setDatos(d => ({ ...d, [campo]: valor }));
         if (error) setError(null);
     };
+
+    const conAnticipo = pct > 0 && pct < 100;
 
     // Los dos caminos de pago piden lo mismo, asi que la revision es una sola.
     const faltanDatos = () => {
@@ -145,14 +141,12 @@ const CartDrawer = ({ open, onClose }) => {
         setError(null);
         try {
             const r = await crearPago({ cart, ...datos, anticipo: anticipo && conAnticipo });
-            window.location.href = r.pagar_en;
+            window.location.assign(r.pagar_en);
         } catch (err) {
             setError(err.message);
             setYendoATarjeta(false);
         }
     };
-
-    const conAnticipo = pct > 0 && pct < 100;
 
     return (
         <>
@@ -242,9 +236,11 @@ const CartDrawer = ({ open, onClose }) => {
                             )}
 
                             {error && <div className="login-error">{error}</div>}
+                            {/* En pestaña aparte: si se fueran en esta, se perdería lo que
+                                lleva escrito en el formulario. */}
                             <p className="pago-legal">
-                                Al apartar aceptas los <a href="/terminos">términos</a> y
-                                el <a href="/aviso-de-privacidad">aviso de privacidad</a>.
+                                Al apartar aceptas los <a href="/terminos" target="_blank" rel="noreferrer">términos</a> y
+                                el <a href="/aviso-de-privacidad" target="_blank" rel="noreferrer">aviso de privacidad</a>.
                             </p>
                         </form>
                     ) : (
@@ -342,7 +338,7 @@ const CartDrawer = ({ open, onClose }) => {
                                 <button className="cart-wa" onClick={() => setPagando(true)}>
                                     Hacer mi pedido
                                 </button>
-                                <a href={link} target="_blank" rel="noreferrer" className="cart-whats" onClick={handleOrder}>
+                                <a href={link} target="_blank" rel="noreferrer" className="cart-whats" onClick={alPreguntar}>
                                     O preguntar por WhatsApp <WhatsAppIcon />
                                 </a>
                             </>

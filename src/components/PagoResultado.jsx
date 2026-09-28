@@ -28,10 +28,11 @@ const PagoResultado = () => {
                     clearCart();
                     return;
                 }
-                // El aviso de Mercado Pago puede tardar unos segundos en llegar.
-                if (intentos < 10) {
-                    temporizador = setTimeout(() => setIntentos(n => n + 1), 2000);
-                }
+                // El aviso de Mercado Pago suele llegar en segundos; un pago en
+                // OXXO o por transferencia puede tardar horas. Se revisa seguido
+                // al principio y luego cada medio minuto, sin dejar de revisar:
+                // la pantalla dice que se actualiza sola, y tiene que ser cierto.
+                temporizador = setTimeout(() => setIntentos(n => n + 1), intentos < 10 ? 2000 : 30000);
             } catch (err) {
                 if (vivo) setError(err.message);
             }

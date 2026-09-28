@@ -1,9 +1,15 @@
 import React, { useCallback, useEffect, useState } from 'react';
+import { useCargar } from '../lib/alMontar';
 import { RefreshCw } from 'lucide-react';
 import { adminOrders, adminOrdersResumen, adminSetAnticipo, fetchAnticipo,
          datosPago, adminSetDatosPago, adminEstadoPedido } from '../lib/pagos';
+import { pesos } from '../lib/descuento';
 
-const pesos = (n) => '$' + Number(n || 0).toLocaleString('es-MX');
+// Un cobro con tarjeta se guarda antes de mandar al cliente a Mercado Pago. Si
+// cerró esa ventana, el pedido quedó pendiente sin ningún pago detrás: no es
+// dinero que te deban, es alguien que no terminó. Se le da una hora de margen.
+const sinTerminar = (o) => o.estado === 'pendiente' && o.metodo_entrega === 'tarjeta' && !o.con_pago
+    && Date.now() - new Date(o.created_at).getTime() > 60 * 60 * 1000;
 
 const ETIQUETA = {
     pagado: { texto: 'Pagado', clase: 'ok' },
@@ -24,15 +30,15 @@ const Pedidos = ({ pass }) => {
     const [guardandoPct, setGuardandoPct] = useState(false);
 
     const cargar = useCallback(async () => {
-        setCargando(true);
-        setError(null);
         try {
             const [lista, res, anticipo] = await Promise.all([
                 adminOrders(pass), adminOrdersResumen(pass), fetchAnticipo(),
             ]);
-            setPedidos(lista);
+            // lo que no se terminó de pagar se marca al llegar, una sola vez
+            setPedidos(lista.map(o => ({ ...o, abandonado: sinTerminar(o) })));
             setResumen(res);
             setPct(anticipo);
+            setError(null);
         } catch (err) {
             setError(err.message);
         } finally {
@@ -40,7 +46,8 @@ const Pedidos = ({ pass }) => {
         }
     }, [pass]);
 
-    useEffect(() => { cargar(); }, [cargar]);
+    useCargar(cargar);
+    const actualizar = () => { setCargando(true); setError(null); cargar(); };
 
     // Datos de tu cuenta, que es a donde le van a depositar
     const [cuenta, setCuenta] = useState({ clabe: '', banco: '', titular: '' });
@@ -87,10 +94,9 @@ const Pedidos = ({ pass }) => {
     };
 
     // Lo que falta por cobrar sale de los pedidos que ya estan en pantalla.
-    const porCobrar = pedidos
-        .filter(o => o.estado === 'pendiente')
-        .reduce((suma, o) => suma + Number(o.monto_cobrado || o.total || 0), 0);
-    const sinConfirmar = pedidos.filter(o => o.estado === 'pendiente').length;
+    const pendientes = pedidos.filter(o => o.estado === 'pendiente' && !o.abandonado);
+    const porCobrar = pendientes.reduce((suma, o) => suma + Number(o.monto_cobrado || o.total || 0), 0);
+    const sinConfirmar = pendientes.length;
 
     return (
         <div className="pedidos">
@@ -125,7 +131,7 @@ const Pedidos = ({ pass }) => {
                         <option value={70}>70% para apartar</option>
                     </select>
                 </label>
-                <button className="btn-ghost" onClick={cargar} disabled={cargando}>
+                <button className="btn-ghost" onClick={actualizar} disabled={cargando}>
                     <RefreshCw size={14} style={{ verticalAlign: '-2px' }} /> Actualizar
                 </button>
             </div>
@@ -166,7 +172,7 @@ const Pedidos = ({ pass }) => {
 
             <div className="pedidos-lista">
                 {pedidos.map(p => {
-                    const et = ETIQUETA[p.estado] || ETIQUETA.pendiente;
+                    const et = p.abandonado ? { texto: 'No terminó el pago', clase: 'falla' } : (ETIQUETA[p.estado] || ETIQUETA.pendiente);
                     return (
                         <div className={`pedido ${et.clase}`} key={p.id}>
                             <div className="pedido-arriba">

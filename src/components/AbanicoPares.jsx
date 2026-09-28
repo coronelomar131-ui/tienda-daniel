@@ -291,7 +291,7 @@ const AbanicoPares = ({ pares }) => {
     return (
         <div className="hero-pares-wrap">
             <div
-                className={`hero-pares hero-pares-${Math.min(n, 3)}`}
+                className="hero-pares"
                 ref={caja}
                 onPointerDown={alBajar}
                 onPointerMove={alMover}

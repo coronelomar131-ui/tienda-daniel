@@ -19,8 +19,15 @@ Tipografía Big Shoulders Display + Barlow.
   y la talla viaja en el pedido de WhatsApp.
 - **Etiquetas NUEVO y AGOTADO.** Los agotados se atenúan y su botón cambia a
   "Restock".
-- **Carrito** que junta varios pares (cada talla cuenta aparte) y manda el pedido
-  completo con total por WhatsApp.
+- **Categorías y rebajas.** Cada par es calzado, ropa, deportes o accesorio;
+  la banda de una categoría sólo aparece si tiene pares. Con un precio
+  anterior mayor, el par sale tachado con su porcentaje y entra a "Rebajas".
+- **Portada con tus pares de verdad.** Un abanico con los destacados (o los
+  primeros con foto) que se desliza con el dedo; subir uno abre su ficha.
+- **Los que más se venden.** Los pares con ventas pagadas, o los que marques
+  como destacados desde el panel.
+- **Carrito** que junta varios pares (cada talla cuenta aparte). Desde ahí se
+  cambia de talla, se guarda un par para después o se hace el pedido.
 - **Galería por par.** Varias fotos por producto; en el catálogo la segunda
   aparece al pasar el cursor, y en la ficha hay miniaturas para cambiarlas.
 - **Página propia de cada par** en `/tenis/:id`, con fotos grandes. Sirve para
@@ -40,10 +47,15 @@ Está en `/admin`.
 
 - **La primera vez que entras, tú creas la clave.** No hay clave de fábrica y no
   está escrita en el código: se guarda como hash en la base.
-- Desde ahí subes pares (marca, modelo, precio, tallas, etiqueta, video y
-  varias fotos de un jalón), **editas** los que ya están sin borrarlos,
-  **reordenas** con flechas para decidir qué ve primero el cliente, marcas
-  **agotado con un switch** y cambias tu clave.
+- Desde ahí subes pares (marca, modelo, precio, oferta, categoría, tallas,
+  etiqueta, video y varias fotos de un jalón), **editas** los que ya están sin
+  borrarlos, **reordenas** con flechas para decidir qué ve primero el cliente,
+  marcas **agotado** y **destacado** con un switch, y cambias tu clave.
+- **Pedidos**: cada pedido llega con folio, datos del cliente y sus pares. Ahí
+  marcas "ya me pagó" y "ya lo mandé", eliges el porcentaje de anticipo y
+  pones tu CLABE para que el cliente sepa a dónde transferir.
+- **Entrar con Face ID o huella** (passkeys), y **dar de alta empleados** con
+  su propia clave y foto; la clave del dueño sigue mandando.
 - La sesión dura una semana: no te pide la clave cada vez que cierras la pestaña.
 - Tras 10 intentos fallidos, el acceso se bloquea 15 minutos.
 
@@ -85,12 +97,18 @@ tope de 30 MB por archivo). Subir no se puede directo: el panel le pide un
 permiso temporal a la función `permiso-video`, que revisa la clave del dueño
 antes de darlo. Así la bodega nunca queda abierta a que cualquiera suba cosas.
 
-## Pagos con Mercado Pago
+## Cómo se paga
 
-Dos botones en el carrito: **Pagar ahora** (Mercado Pago) y **apartar por
-WhatsApp**, porque en reventa de tenis la plática suele cerrar la venta.
-Opcionalmente el cliente puede **apartar con anticipo** (el porcentaje se
-elige desde el panel).
+En el carrito, "Hacer mi pedido" pide nombre, WhatsApp y dirección, y guarda
+el pedido con folio. Desde ahí se paga **con tarjeta** (Mercado Pago, sólo si
+está configurado) o **por transferencia** a la cuenta que pusiste en el panel.
+También se puede **preguntar por WhatsApp** sin hacer pedido, porque en
+reventa de tenis la plática suele cerrar la venta. Opcionalmente el cliente
+puede **apartar con anticipo** (el porcentaje se elige desde el panel).
+
+Cada pedido guarda nombre y teléfono, así que hay **aviso de privacidad** y
+**términos** en `/aviso-de-privacidad` y `/terminos`; el responsable, el
+correo y los días para cambios se ponen en `src/config.js`.
 
 Cómo está armado, y por qué:
 
@@ -123,7 +141,8 @@ la llave publicable del código, no puede alterar tu tienda.
 
 ## Configuración
 
-1. `src/config.js`: número de WhatsApp, Instagram, TikTok y Mercado Libre.
+1. `src/config.js`: número de WhatsApp, Instagram, TikTok, Mercado Libre y
+   los datos del responsable para las páginas legales.
 2. `src/lib/supabase.js`: URL y llave publicable del proyecto de Supabase.
 
 Si la tienda no logra conectarse con la base, muestra un catálogo de muestra

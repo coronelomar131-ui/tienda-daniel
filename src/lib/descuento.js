@@ -14,7 +14,7 @@ export function verDescuento(par) {
     return { antes, ahora, pct };
 }
 
-export const pesos = (n) => `$${Number(n).toLocaleString('es-MX')}`;
+export const pesos = (n) => `$${(Number(n) || 0).toLocaleString('es-MX')}`;
 
 // Los dos lados de la cuenta, para que el dueño pueda escribir cualquiera de
 // los dos y el otro se llene solo.

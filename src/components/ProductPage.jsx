@@ -1,4 +1,4 @@
-import React, { useCallback, useContext, useEffect, useRef, useState } from 'react';
+import React, { useCallback, useContext, useRef, useState } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { ShopContext } from '../context/shop-context';
 import { fetchProduct, fetchPhotos } from '../lib/shopApi';
@@ -10,13 +10,9 @@ import SneakerArt from './SneakerArt';
 import Navbar from './Navbar';
 import CartDrawer from './CartDrawer';
 import { useRefrescarAlVolver } from '../lib/alVolver';
+import { useCargar } from '../lib/alMontar';
 import { verDescuento, pesos } from '../lib/descuento';
-
-const WhatsAppIcon = () => (
-    <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-        <path d="M12 2C6.48 2 2 6.48 2 12c0 1.85.5 3.58 1.38 5.07L2 22l5.07-1.33A9.94 9.94 0 0012 22c5.52 0 10-4.48 10-10S17.52 2 12 2z" />
-    </svg>
-);
+import WhatsAppIcon from './WhatsAppIcon';
 
 const ProductPage = () => {
     const { id } = useParams();
@@ -60,7 +56,7 @@ const ProductPage = () => {
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [id]);
 
-    useEffect(() => { cargar(); }, [cargar]);
+    useCargar(cargar);
 
     // Al volver a la pestaña se pide de nuevo, sin pantalla de carga: si el
     // dueño acaba de editar las tallas desde el panel, aqui ya salen.
@@ -117,7 +113,9 @@ const ProductPage = () => {
 
             <main className="ficha">
                 <div className="wrap">
-                    <button className="volver" onClick={() => navigate(-1)}>← Volver</button>
+                    {/* Si llegaron directo desde un link compartido no hay a dónde
+                        volver: entonces "Volver" lleva a la portada. */}
+                    <button className="volver" onClick={() => (window.history.state?.idx > 0 ? navigate(-1) : navigate('/'))}>← Volver</button>
 
                     <div className="ficha-grid">
                         <div className="ficha-fotos">

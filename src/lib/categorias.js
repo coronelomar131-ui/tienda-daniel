@@ -7,7 +7,7 @@ export const CATEGORIAS = [
     { llave: 'accesorios', texto: 'Accesorios y equipo' },
 ];
 
-export const nombreCategoria = (llave) =>
+const nombreCategoria = (llave) =>
     CATEGORIAS.find(c => c.llave === llave)?.texto || 'Calzado';
 
 export const enRebajas = (p) => Number(p?.priceBefore) > Number(p?.price);

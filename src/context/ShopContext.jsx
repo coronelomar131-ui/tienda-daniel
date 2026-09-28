@@ -3,6 +3,7 @@ import { ShopContext } from './shop-context';
 import { fetchProducts, olvidarFotos } from '../lib/shopApi';
 import { sampleProducts } from '../data/sampleProducts';
 import { useRefrescarAlVolver } from '../lib/alVolver';
+import { useCargar } from '../lib/alMontar';
 
 // Cada línea del carrito es un par producto+talla, para que 2 tallas del mismo
 // modelo se cuenten por separado.
@@ -33,46 +34,51 @@ export const ShopProvider = ({ children }) => {
     // servidor), pero el mensaje de WhatsApp se arma aqui, y te llegaria un
     // "Total: $1" que parece legitimo. Asi que en cuanto carga el catalogo,
     // cada linea se vuelve a precio de lista y las que ya no existen se caen.
-    useEffect(() => {
-        if (!products.length) return;
-        const alDia = (lista) => lista.flatMap(item => {
-            const real = products.find(p => String(p.id) === String(item.id));
+    // Solo contra el catalogo real: contra el de muestra (sin conexion) se
+    // caerian todos los pares de verdad del carrito.
+    const alDia = (lista, catalogo) => {
+        const n = lista.flatMap(item => {
+            const real = catalogo.find(p => String(p.id) === String(item.id));
             if (!real) return [];
             return (real.price === item.price && real.brand === item.brand && real.name === item.name)
                 ? [item]
                 : [{ ...item, price: real.price, brand: real.brand, name: real.name }];
         });
-        setCart(c => { const n = alDia(c); return n.length === c.length
-            && n.every((x, i) => x === c[i]) ? c : n; });
-        setGuardados(g => { const n = alDia(g); return n.length === g.length
-            && n.every((x, i) => x === g[i]) ? g : n; });
-    }, [products]);
+        return n.length === lista.length && n.every((x, i) => x === lista[i]) ? lista : n;
+    };
 
     // El catálogo vive en la base, así que lo que subes desde /admin lo ven
     // todos tus clientes al instante.
-    const reload = useCallback(async () => {
-        setLoading(true);
+    // callado: sin poner "Cargando…" ni animar de nuevo las tarjetas. Es para
+    // las recargas de fondo; si fallan, se queda lo que ya se veía.
+    const reload = useCallback(async ({ callado = false } = {}) => {
+        if (!callado) setLoading(true);
         olvidarFotos();   // si el dueño acaba de cambiar una foto, que se vea la nueva
         try {
-            setProducts(await fetchProducts());
+            const catalogo = await fetchProducts();
+            setProducts(catalogo);
+            setCart(c => alDia(c, catalogo));
+            setGuardados(g => alDia(g, catalogo));
             setLoadError(null);
             setDemo(false);
         } catch (err) {
+            if (callado) return;
             // Sin conexión con la base mostramos el catálogo de muestra, pero
             // avisando en pantalla que no son pares reales.
             setProducts(sampleProducts);
             setDemo(true);
             setLoadError(err?.message || 'No se pudo cargar el catálogo');
         } finally {
-            setLoading(false);
+            if (!callado) setLoading(false);
         }
     }, []);
 
-    useEffect(() => { reload(); }, [reload]);
+    useCargar(reload);
 
-    // Al regresar a la pestaña se vuelve a pedir el catalogo: si el dueño
-    // acaba de subir un par desde el panel, aqui ya sale.
-    useRefrescarAlVolver(reload);
+    // Al regresar a la pestaña se vuelve a pedir el catalogo, sin parpadeo: si
+    // el dueño acaba de subir un par desde el panel, aqui ya sale.
+    const recargarCallado = useCallback(() => reload({ callado: true }), [reload]);
+    useRefrescarAlVolver(recargarCallado);
 
     // El carrito sí es de cada visitante, por eso se queda en su navegador.
     useEffect(() => {

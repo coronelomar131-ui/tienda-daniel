@@ -7,11 +7,11 @@ import {
     adminSetStatus, adminSetDestacado, adminMoveProduct, adminAddPhotos, adminDeletePhoto,
     adminCaras, adminCrearUsuario, adminQuitarUsuario,
     adminSetPassword, fetchPhotos,
+    fetchHeroVideo, adminSetHeroVideo, adminCerrarSesion,
+    adminPasskeys, adminQuitarPasskey,
 } from '../lib/shopApi';
 import { comprimirImagen } from '../lib/image';
 import { subirVideo, LIMITE_MB } from '../lib/videoUpload';
-import { fetchHeroVideo, adminSetHeroVideo, adminCerrarSesion,
-         adminPasskeys, adminQuitarPasskey } from '../lib/shopApi';
 import { hayFaceId, darDeAltaFaceId, precalentarAlta } from '../lib/passkey';
 import { CaraIcono } from './AdminLogin';
 import { adminOrdersResumen } from '../lib/pagos';
@@ -29,10 +29,26 @@ import MiniFoto from './MiniFoto';
 
 const VACIO = { brand: '', name: '', price: '', priceBefore: '', pct: '', categoria: 'calzado', sizes: '', status: '', desc: '', mlLink: '', videoUrl: '' };
 
+// "12 sep", "hace 2 h", "ahorita". Lo suficiente para reconocer un aparato
+// en una lista de dos o tres, sin poner una fecha larga que nadie lee.
+const cuando = (iso, ahora) => {
+    if (!iso) return null;
+    const d = new Date(iso);
+    if (Number.isNaN(d.getTime())) return null;
+    const min = Math.floor((ahora - d.getTime()) / 60000);
+    if (min < 2) return 'ahorita';
+    if (min < 60) return `hace ${min} min`;
+    if (min < 1440) return `hace ${Math.floor(min / 60)} h`;
+    if (min < 10080) return `hace ${Math.floor(min / 1440)} días`;
+    return d.toLocaleDateString('es-MX', { day: 'numeric', month: 'short' });
+};
+
 const AdminDashboard = () => {
     const { products, reload } = useContext(ShopContext);
     const navigate = useNavigate();
-    const pass = leerSesion();
+    // El token de la sesión. Cambia sólo al cambiar la clave (el servidor da
+    // uno nuevo), por eso vive en estado y no se lee del navegador en cada dibujo.
+    const [pass, setPass] = useState(leerSesion);
 
     const [form, setForm] = useState(VACIO);
     // Lo que se entendió del campo de tallas, para enseñárselo mientras escribe.
@@ -122,7 +138,7 @@ const AdminDashboard = () => {
     // pantalla si, y eso es una puerta abierta esperando a que algun dia se le
     // cuelgue algo delicado. Esta misma llamada ya preguntaba al servidor;
     // ahora ademas decide si se pinta o no.
-    const [sesion, setSesion] = useState('revisando');   // revisando | vale | sinred | no
+    const [sesion, setSesion] = useState(pass ? 'revisando' : 'no');   // revisando | vale | sinred | no
     const [reintento, setReintento] = useState(0);
     const revisarSesion = useCallback(() => {
         setSesion('revisando');
@@ -130,7 +146,7 @@ const AdminDashboard = () => {
     }, []);
     useEffect(() => {
         let vivo = true;
-        if (!pass) { setSesion('no'); return; }
+        if (!pass) return;
         adminOrdersResumen(pass)
             .then(r => { if (vivo) { setPorCobrar(r); setSesion('vale'); } })
             .catch((err) => {
@@ -163,28 +179,17 @@ const AdminDashboard = () => {
     // Este se pinta junto al boton que acabas de tocar.
     const [avisoCara, setAvisoCara] = useState(null);
 
+    // Las fechas relativas se calculan al llegar la lista, no en cada dibujo.
     const cargarFaceId = useCallback(() => {
-        adminPasskeys(pass).then(l => setMisFaceId(l || [])).catch(() => setMisFaceId([]));
+        adminPasskeys(pass)
+            .then(l => { const ahora = Date.now(); setMisFaceId((l || []).map(k => ({ ...k, usadoHace: cuando(k.usado, ahora), creadoHace: cuando(k.creado, ahora) }))); })
+            .catch(() => setMisFaceId([]));
     }, [pass]);
 
     useEffect(() => {
         hayFaceId().then(setPuedeFaceId).catch(() => setPuedeFaceId(false));
     }, []);
     useEffect(() => { if (pass) cargarFaceId(); }, [pass, cargarFaceId]);
-
-    // "12 sep", "hace 2 h", "ahorita". Lo suficiente para reconocer un aparato
-    // en una lista de dos o tres, sin poner una fecha larga que nadie lee.
-    const cuando = (iso) => {
-        if (!iso) return null;
-        const d = new Date(iso);
-        if (Number.isNaN(d.getTime())) return null;
-        const min = Math.floor((Date.now() - d.getTime()) / 60000);
-        if (min < 2) return 'ahorita';
-        if (min < 60) return `hace ${min} min`;
-        if (min < 1440) return `hace ${Math.floor(min / 60)} h`;
-        if (min < 10080) return `hace ${Math.floor(min / 1440)} días`;
-        return d.toLocaleDateString('es-MX', { day: 'numeric', month: 'short' });
-    };
 
     const nombreDelAparato = () =>
         (/iPhone|iPad/.test(navigator.userAgent) ? 'Mi iPhone'
@@ -232,8 +237,6 @@ const AdminDashboard = () => {
         () => products.filter(p => p.status === 'agotado').length,
         [products]
     );
-
-    useEffect(() => { if (!pass) navigate('/admin'); }, [pass, navigate]);
 
     useEffect(() => {
         fetchHeroVideo()
@@ -304,15 +307,20 @@ const AdminDashboard = () => {
         setSubiendoVideo('');
     };
 
+    // Corre una acción del panel y recarga el catálogo. Devuelve si salió bien:
+    // quien la llama decide qué hacer si falló (por ejemplo, NO borrar el
+    // formulario que se acaba de llenar).
     const correr = async (accion, exito) => {
         setOcupado(true);
         setAviso(null);
         try {
             await accion();
-            await reload();
+            await reload({ callado: true });
             if (exito) setAviso({ tipo: 'ok', texto: exito });
+            return true;
         } catch (err) {
             setAviso({ tipo: 'error', texto: err.message });
+            return false;
         } finally {
             setOcupado(false);
         }
@@ -369,8 +377,9 @@ const AdminDashboard = () => {
             videoUrl: form.videoUrl,
         };
 
+        let bien;
         if (editandoId) {
-            await correr(async () => {
+            bien = await correr(async () => {
                 await adminUpdateProduct(pass, editandoId, datos);
                 if (fotosNuevas.length) {
                     const urls = await subirFotos(pass, fotosNuevas.map(f => f.blob), setSubiendoVideo);
@@ -378,11 +387,14 @@ const AdminDashboard = () => {
                 }
             }, 'Cambios guardados.');
         } else {
-            await correr(async () => {
+            bien = await correr(async () => {
                 const urls = await subirFotos(pass, fotosNuevas.map(f => f.blob), setSubiendoVideo);
                 return adminAddProduct(pass, { ...datos, photos: urls });
             }, 'Listo, ya está en tu tienda.');
         }
+        // Si falló, el formulario se queda como estaba para volver a intentar.
+        // Antes se borraba todo y había que capturar el par de nuevo.
+        if (!bien) { window.scrollTo({ top: 0, behavior: 'smooth' }); return; }
         limpiar();
         setTab('catalogo');
     };
@@ -414,6 +426,7 @@ const AdminDashboard = () => {
             // intentos nunca entraba.
             if (!token) throw new Error('La clave actual no es correcta');
             guardarSesion(token);
+            setPass(token);
             setClaveActual(''); setClaveNueva('');
             setAviso({ tipo: 'ok', texto: 'Clave cambiada.' });
         } catch (err) {
@@ -547,7 +560,6 @@ const AdminDashboard = () => {
                         </header>
                         <div className="seccion-bloques">
                         <details className={`admin-card plegable ficha-cara ${misFaceId.length ? 'lista' : ''}`} open={misFaceId.length === 0}
-                             
                                  onToggle={(e) => {
                                      if (e.currentTarget.open) precalentarAlta(pass, nombreDelAparato());
                                  }}>
@@ -564,10 +576,10 @@ const AdminDashboard = () => {
                                         <span className="aparato-datos">
                                             <b>{k.nombre}</b>
                                             <small>
-                                                {k.usado
-                                                    ? `Se usó ${cuando(k.usado)}`
+                                                {k.usadoHace
+                                                    ? `Se usó ${k.usadoHace}`
                                                     : 'Todavía no lo usas'}
-                                                {cuando(k.creado) && ` · alta ${cuando(k.creado)}`}
+                                                {k.creadoHace && ` · alta ${k.creadoHace}`}
                                             </small>
                                         </span>
                                         <button type="button" className="link-btn link-mal"
@@ -592,9 +604,9 @@ const AdminDashboard = () => {
                             </div>
                         </details>
 
-                        <details className="admin-card plegable" >
+                        <details className="admin-card plegable">
                             <summary>Video de portada</summary>
-                            <p className="hint" >
+                            <p className="hint">
                                 Se reproduce solo, en bucle y sin sonido, atrás del título de tu
                                 tienda. Es lo que más la hace ver viva. Máximo {LIMITE_MB} MB.
                             </p>
@@ -615,7 +627,7 @@ const AdminDashboard = () => {
                             )}
                         </details>
 
-                        <details className="admin-card plegable" >
+                        <details className="admin-card plegable">
                             <summary>Quién puede entrar ({gente.length})</summary>
 
                             {gente.length > 0 && (
@@ -656,7 +668,7 @@ const AdminDashboard = () => {
                                 </p>
                             </form>
                         </details>
-                        <details className="admin-card plegable" >
+                        <details className="admin-card plegable">
                             <summary>Cambiar mi clave</summary>
                             <form onSubmit={cambiarClave} className="admin-form">
                                 <input type="password" placeholder="Clave actual" value={claveActual}

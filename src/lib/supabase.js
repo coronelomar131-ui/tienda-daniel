@@ -9,13 +9,22 @@ const SUPABASE_KEY = 'sb_publishable_3cNkW5MfBML-0CMsh8eh-w_gTzFuNtF';
 // Sin este limite, una red caida deja la tienda en "Cargando..." un minuto
 // entero antes de rendirse. Preferimos fallar rapido y mostrar el respaldo.
 const TIEMPO_LIMITE = 9000;
+// Las funciones del servidor tardan en despertar si llevan rato dormidas.
+const TIEMPO_FUNCIONES = 20000;
 
 // no-store: el catalogo cambia cuando el dueño sube o edita un par, y Safari
 // en iPhone guarda las respuestas GET sin preguntar. Sin esto, subes tallas y
 // el celular te sigue enseñando la version vieja hasta que caduque el cache.
+//
+// Subir a la bodega (fotos y videos) NO lleva limite: este mismo fetch es el
+// que usa la subida, y un video de 30 MB desde un celular tarda mucho mas de
+// 9 segundos. Con el limite puesto se cortaba a medio camino.
 const fetchConLimite = (input, init = {}) => {
+    const url = typeof input === 'string' ? input : input?.url || '';
+    if (/\/storage\/v1\//.test(url)) return fetch(input, { ...init, cache: 'no-store' });
     const ctrl = new AbortController();
-    const corte = setTimeout(() => ctrl.abort(), TIEMPO_LIMITE);
+    const ms = /\/functions\/v1\//.test(url) ? TIEMPO_FUNCIONES : TIEMPO_LIMITE;
+    const corte = setTimeout(() => ctrl.abort(), ms);
     return fetch(input, { ...init, cache: 'no-store', signal: ctrl.signal })
         .finally(() => clearTimeout(corte));
 };
@@ -47,7 +56,7 @@ export const esFallaDeRed = (err) => err?.sinRed === true;
 
 // Para el panel: aqui si conviene el mensaje crudo de la base, porque quien lo
 // lee es el dueño y le sirve para saber que paso.
-export const mensajeDeError = (err) => {
+const mensajeDeError = (err) => {
     const texto = err?.message || '';
     if (SIN_RED.test(texto)) return 'No hay conexión con la tienda';
     return texto || 'Algo salió mal';
