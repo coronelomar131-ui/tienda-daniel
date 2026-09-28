@@ -1730,39 +1730,90 @@ button { font-family: var(--body); }
 .alta-foto-boton { cursor: pointer; width: 60px; height: 60px; flex-shrink: 0; }
 .alta-foto .hint { margin: 0; }
 
-/* ---------- PEDIDO HECHO (folio y datos para transferir) ---------- */
-.listo { padding: 10px 0 6px; }
-.listo-folio {
-  display: flex; flex-direction: column; align-items: center; gap: 4px;
-  padding: 22px 16px; border-radius: 22px; margin-bottom: 16px;
-  background: var(--vidrio-luz), var(--navy-wash);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.9), inset 0 0 0 1px rgba(27, 42, 82, 0.10);
+/* ---------- PEDIDO HECHO: LA IMPRESORA DEL TICKET ----------
+   Cuando el pedido ya quedó guardado, la tienda imprime el ticket de apartado
+   como una caja de verdad: una impresora térmica (el azul de la marca) de la
+   que sale el papel renglón por renglón (lo mueve Ticket.jsx). El papel es un
+   poco más blanco que el fondo para que se lea como papel sobre papel. */
+.listo { padding: 6px 0 4px; }
+.impresora { max-width: 340px; margin: 0 auto; }
+.impresora-cabeza {
+  display: flex; align-items: center; gap: 9px;
+  padding: 11px 16px 13px; border-radius: 16px 16px 0 0;
+  background: linear-gradient(180deg, var(--navy-soft), var(--navy));
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.18);
+  color: rgba(255, 255, 255, 0.86); font-size: 12.5px; font-weight: 600;
 }
-.listo-folio span {
-  font-size: 10.5px; font-weight: 700; letter-spacing: 0.18em;
-  text-transform: uppercase; color: var(--muted);
+.impresora-luz {
+  width: 7px; height: 7px; border-radius: 50%; background: #FFB454;
+  box-shadow: 0 0 0 2px rgba(255, 180, 84, 0.25);
+  animation: impresoraLuz .9s ease-in-out infinite alternate;
 }
-.listo-folio strong {
-  font-family: var(--display); font-weight: 900; font-size: 44px; line-height: 1;
-  color: var(--navy); font-variant-numeric: tabular-nums;
+.impresora.impreso .impresora-luz { background: #6FD08C; box-shadow: 0 0 0 2px rgba(111, 208, 140, 0.25); animation: none; }
+@keyframes impresoraLuz { from { opacity: 1; } to { opacity: 0.35; } }
+/* la ranura: la sombra de donde sale el papel */
+.impresora-ranura {
+  height: 7px; margin: 0 6px; border-radius: 0 0 6px 6px;
+  background: #0E1730;
+  box-shadow: inset 0 -2px 3px rgba(0, 0, 0, 0.55);
 }
-.listo-texto { font-size: 13.5px; color: var(--muted); line-height: 1.5; margin-bottom: 16px; }
-.listo-total {
-  display: flex; justify-content: space-between; align-items: baseline;
-  padding: 12px 0; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line);
-  margin-bottom: 14px;
+.ticket-ventana { position: relative; margin: -3px 14px 0; overflow: hidden; height: auto; }
+/* el borde dentado de abajo sigue al papel mientras sale */
+.ticket-ventana::after {
+  content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 7px;
+  background:
+    linear-gradient(-45deg, var(--paper) 5px, transparent 0) 0 0 / 10px 10px,
+    linear-gradient(45deg, var(--paper) 5px, transparent 0) 5px 0 / 10px 10px;
+  background-repeat: repeat-x;
 }
-.listo-total span { font-size: 11px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); }
-.listo-total strong { font-family: var(--display); font-weight: 900; font-size: 28px; font-variant-numeric: tabular-nums; }
-
-.listo-cuenta { padding: 14px 16px; border-radius: 18px; background: var(--paper-2); }
-.listo-titulo { font-size: 11px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); margin-bottom: 10px; }
-.listo-cuenta > div { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; padding: 5px 0; }
-.listo-cuenta > div span { font-size: 12px; color: var(--muted); flex-shrink: 0; }
-.listo-cuenta > div strong { font-size: 14px; font-weight: 700; text-align: right; word-break: break-all; }
-.listo-cuenta .clabe { font-variant-numeric: tabular-nums; letter-spacing: 0.04em; }
-.listo-cuenta .link-btn { margin-top: 8px; }
-.listo-cuenta .hint { margin-top: 10px; line-height: 1.5; }
+.ticket {
+  padding: 18px 18px 22px; background: #FDFCF9; color: var(--ink);
+  font-family: ui-monospace, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
+  font-size: 12.5px; line-height: 1.5; font-variant-numeric: tabular-nums;
+  box-shadow: inset 0 10px 10px -10px rgba(10, 10, 10, 0.35), 0 10px 26px -12px rgba(10, 10, 10, 0.3);
+}
+/* cada renglón nace en blanco y se entinta cuando la cabeza pasa por él */
+.ticket [data-renglon] { opacity: 0; transition: opacity .18s ease-out; }
+.ticket .entintado { opacity: 1; }
+.ticket-marca {
+  text-align: center; font-family: var(--display); text-transform: uppercase;
+  font-weight: 900; font-size: 28px; line-height: 1; letter-spacing: 0.02em; margin-bottom: 8px;
+}
+.ticket-marca em { font-style: normal; color: var(--navy); }
+.ticket-fila { display: flex; justify-content: space-between; gap: 12px; padding: 2px 0; }
+.ticket-meta { font-size: 11px; color: var(--muted); }
+.ticket-folio { display: flex; justify-content: space-between; align-items: baseline; padding-top: 4px; }
+.ticket-folio span { font-size: 11px; color: var(--muted); }
+.ticket-folio strong { font-family: var(--display); font-weight: 900; font-size: 34px; line-height: 1; color: var(--navy); }
+.ticket-corte { border-top: 1px dashed rgba(18, 18, 18, 0.35); margin: 9px 0; }
+.ticket-par { align-items: baseline; }
+.ticket-cant { flex-shrink: 0; width: 26px; color: var(--muted); }
+.ticket-nombre { flex: 1; min-width: 0; font-family: var(--display); text-transform: uppercase; font-weight: 800; font-size: 15px; line-height: 1.15; }
+.ticket-nombre small { display: block; font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace; text-transform: none; font-weight: 400; font-size: 11px; color: var(--muted); margin-top: 1px; }
+.ticket-precio { flex-shrink: 0; }
+.ticket-total { align-items: baseline; padding-top: 6px; }
+.ticket-total strong { font-family: var(--display); font-weight: 900; font-size: 30px; line-height: 1; }
+.ticket-suave { color: var(--muted); }
+.ticket-titulo { font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); margin-bottom: 2px; }
+.ticket-clabe { align-items: center; }
+.ticket-clabe > span { white-space: nowrap; letter-spacing: 0.02em; }
+.ticket-clabe button {
+  flex-shrink: 0; padding: 3px 10px; border-radius: 999px; border: 1px solid rgba(18, 18, 18, 0.35);
+  background: none; color: var(--ink); font: inherit; font-size: 11px; cursor: pointer;
+}
+.ticket-clabe button:hover { background: var(--navy); color: #fff; border-color: var(--navy); }
+.ticket-nota { font-size: 11.5px; color: var(--muted); line-height: 1.45; margin-top: 4px; }
+.ticket-codigo { display: flex; flex-direction: column; align-items: center; gap: 4px; padding-top: 4px; }
+.ticket-barras { width: 78%; height: 42px; fill: var(--ink); }
+.ticket-codigo span { font-size: 11px; letter-spacing: 0.32em; color: var(--muted); }
+.ticket-gracias { text-align: center; font-size: 11.5px; letter-spacing: 0.06em; text-transform: uppercase; margin-top: 8px; }
+/* el corte: el papel da un brinquito cuando la cuchilla lo suelta */
+.impresora.impreso .ticket-ventana { animation: ticketCorte .32s cubic-bezier(.22, 1.2, .36, 1); }
+@keyframes ticketCorte { 0% { transform: translateY(0); } 40% { transform: translateY(5px); } 100% { transform: translateY(0); } }
+@media (prefers-reduced-motion: reduce) {
+  .impresora-luz, .impresora.impreso .ticket-ventana { animation: none; }
+  .ticket [data-renglon] { transition: none; }
+}
 
 .pago-form textarea {
   width: 100%; padding: 13px 14px; border: 1.5px solid var(--line); border-radius: 12px;
@@ -1869,7 +1920,7 @@ button { font-family: var(--body); }
 .admin-page .cara-foto { background: rgba(255,255,255,.08); box-shadow: inset 0 0 0 1px var(--canto); }
 .admin-page .cara-iniciales { color: var(--tinta); }
 .admin-page .gente-fila { background: rgba(255, 255, 255, 0.05); }
-.admin-page .listo-cuenta, .admin-page .pedidos-vacio { background: rgba(255,255,255,.05); color: var(--tenue); }
+.admin-page .pedidos-vacio { background: rgba(255,255,255,.05); color: var(--tenue); }
 
 /* ---------- BARRA FLOTANTE DE ABAJO ---------- */
 .barra-admin {
