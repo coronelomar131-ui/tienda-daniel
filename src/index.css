@@ -3784,14 +3784,23 @@ html:has(.admin-page), body:has(.admin-page) { background: #130E16; }
   position: absolute; width: 54%;
   display: flex; flex-direction: column; gap: 8px; padding: 8px 8px 12px;
   border-radius: 24px; color: var(--ink);
-  background: var(--vidrio-luz), var(--vidrio-denso);
-  -webkit-backdrop-filter: var(--vidrio-blur); backdrop-filter: var(--vidrio-blur);
+  /* el mismo vidrio, pero casi opaco y sin desenfoque: detrás sólo hay papel
+     liso, así que se ve igual y seis tarjetas moviéndose no cargan seis blurs */
+  background: var(--vidrio-luz), rgba(255, 255, 255, 0.93);
   box-shadow: var(--vidrio-canto), var(--vidrio-sombra);
   left: 50%; top: 50%; width: 48%;
   --x: 0%; --y: 0%; --giro: 0deg; --s: 1;
+  /* AbanicoPares.jsx las mueve cuadro por cuadro; esto es sólo su primer lugar */
   transform: translate(-50%, -50%) translate(var(--x), var(--y)) rotate(var(--giro)) scale(var(--s));
-  transition: transform .55s var(--resorte), opacity .35s var(--fluido), box-shadow .4s var(--fluido);
+  will-change: transform, opacity;
   -webkit-tap-highlight-color: transparent;
+}
+/* La sombra de cuando se levanta (agarrada o con el cursor encima): va aparte
+   y sólo cambia su opacidad, que es barato de animar */
+.hero-par::after {
+  content: ""; position: absolute; inset: 0; z-index: -1; border-radius: inherit; pointer-events: none;
+  box-shadow: 0 26px 52px rgba(10, 10, 10, 0.2), 0 8px 18px rgba(10, 10, 10, 0.08);
+  opacity: var(--sombra, 0); will-change: opacity;
 }
 .hero-par img { pointer-events: none; -webkit-user-drag: none; }
 .hero-par-foto {
@@ -3816,35 +3825,10 @@ html:has(.admin-page), body:has(.admin-page) { background: #130E16; }
 .hero-pares-2 .hero-par[data-lugar="derecha"] { --x: 34%; --y: -18%; }
 .hero-pares-1 .hero-par[data-lugar="frente"]  { --x: 0%; --s: 1.14; }
 
-/* Mientras se arrastra, cada tarjeta va entre su lugar y el siguiente (lo
-   calcula AbanicoPares.jsx y lo pone en línea): sin transición, pegadas al
-   dedo. Al soltar, la transición de arriba las asienta en su lugar. */
-.hero-pares.arrastrando .hero-par { transition: none; }
-
-/* Al soltar arriba del umbral, el par sale volando hacia arriba y se abre su ficha */
-.hero-pares.abriendo .hero-par[data-lugar="frente"] {
-  transform: translate(-50%, -50%) translate(var(--x), calc(var(--y) - 55%)) scale(1.12);
-  opacity: 0;
-  transition: transform .2s cubic-bezier(.4, 0, 1, 1), opacity .2s ease-in;
-}
-
-@media (hover: hover) {
-  .hero-par[data-lugar="frente"]:hover { --y: 1%; box-shadow: var(--vidrio-canto), 0 22px 48px rgba(10, 10, 10, 0.18); }
-  .hero-par[data-lugar="izquierda"]:hover, .hero-par[data-lugar="derecha"]:hover { --s: 1; }
-}
-.hero-par[data-lugar="frente"]:active { --s: 1; }
-
 /* Subir la del frente para abrirla: la tarjeta sube con el dedo, crece un
-   poco y avisa. Sólo la del frente atrapa el gesto: en el resto del abanico
-   subir el dedo sigue bajando la página. */
+   poco y avisa (lo mueve AbanicoPares.jsx). Sólo la del frente atrapa el
+   gesto: en el resto del abanico subir el dedo sigue bajando la página. */
 .hero-par[data-lugar="frente"] { touch-action: none; }
-.hero-pares.subiendo .hero-par[data-lugar="frente"] {
-  /* sube a la mitad que el dedo: se siente con resistencia y no se sale por arriba */
-  transform: translate(-50%, -50%) translate(var(--x), calc(var(--y) + var(--dy) * 0.5))
-             rotate(calc(var(--giro) * (1 - var(--avance)))) scale(calc(var(--s) + var(--avance) * 0.05));
-  transition: none;
-  box-shadow: var(--vidrio-canto), 0 calc(14px + var(--avance) * 20px) calc(38px + var(--avance) * 20px) rgba(10, 10, 10, 0.2);
-}
 .hero-par-subir {
   position: absolute; left: 50%; bottom: 58px; z-index: 2; transform: translateX(-50%);
   padding: 7px 14px; border-radius: 999px; white-space: nowrap;
@@ -3856,6 +3840,8 @@ html:has(.admin-page), body:has(.admin-page) { background: #130E16; }
 }
 .hero-pares.subiendo .hero-par-subir { opacity: calc(0.35 + var(--avance) * 0.65); }
 .hero-pares.listo-abrir .hero-par-subir { background: var(--navy); color: #fff; opacity: 1; }
+.hero-par-subir .subir-listo, .hero-pares.listo-abrir .hero-par-subir .subir-antes { display: none; }
+.hero-pares.listo-abrir .hero-par-subir .subir-listo { display: inline; }
 
 /* Cómo se usa: sólo donde hay dedos */
 .hero-gestos { display: none; margin: 4px 0 0; text-align: center; font-size: 13px; color: var(--muted); }
@@ -3894,8 +3880,9 @@ html:has(.admin-page), body:has(.admin-page) { background: #130E16; }
   .hero-par-precio { font-size: 17px; }
   .hero-par { border-radius: 20px; padding: 6px 6px 10px; }
   .hero-par-foto { border-radius: 15px; }
-  /* En pantalla chica los de atrás van tapados: sólo la foto, sin precios a medias */
-  .hero-par:not([data-lugar="frente"]) .hero-par-dato { visibility: hidden; }
+  /* En pantalla chica los de atrás van tapados: sólo la foto, sin precios a
+     medias. El nombre y el precio aparecen conforme la tarjeta llega al frente. */
+  .hero-par-dato { opacity: var(--dato, 1); }
 }
 
 /* Botones de la portada: pastillas, como los del carrito y la barra */
@@ -3942,5 +3929,5 @@ html:has(.admin-page), body:has(.admin-page) { background: #130E16; }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .hero-par, .hero-puntos button::before { transition: none; }
+  .hero-puntos button::before { transition: none; }
 }
