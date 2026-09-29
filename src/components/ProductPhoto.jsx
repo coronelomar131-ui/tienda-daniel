@@ -58,10 +58,10 @@ const ProductPhoto = ({ product, conTapa = false, completa = false }) => {
         <span ref={holder} className={clases.join(' ')}>
             {fotos.length > 0 ? (
                 <>
-                    {(conTapa || completa) && <img className="foto-fondo" src={fotos[0].data} alt="" aria-hidden="true" />}
-                    <img className="foto-1" src={fotos[0].data} alt={alt}
+                    {(conTapa || completa) && <img className="foto-fondo" src={fotos[0].data} alt="" aria-hidden="true" decoding="async" />}
+                    <img className="foto-1" src={fotos[0].data} alt={alt} decoding="async"
                          onLoad={() => setCargada(true)} onError={() => setRendida(true)} />
-                    {fotos[1] && <img className="foto-2" src={fotos[1].data} alt="" aria-hidden="true" />}
+                    {fotos[1] && <img className="foto-2" src={fotos[1].data} alt="" aria-hidden="true" decoding="async" />}
                 </>
             ) : <SneakerArt />}
             {conTapa && <span className="cristal" aria-hidden="true" />}

@@ -128,7 +128,7 @@ const ProductPage = () => {
                             <div className="ficha-principal">
                                 {fotos.length > 0
                                     ? <>
-                                        <img className="ficha-fondo" src={fotos[activa]?.data} alt="" aria-hidden="true" />
+                                        <img className="ficha-fondo" src={fotos[activa]?.data} alt="" aria-hidden="true" decoding="async" />
                                         <img className="ficha-foto" src={fotos[activa]?.data} alt={`${par.brand} ${par.name}`} />
                                       </>
                                     : <SneakerArt />}
@@ -147,7 +147,7 @@ const ProductPage = () => {
                                             onClick={() => setActiva(i)}
                                             aria-label={`Foto ${i + 1}`}
                                         >
-                                            <img src={f.data} alt="" />
+                                            <img src={f.data} alt="" loading="lazy" decoding="async" />
                                         </button>
                                     ))}
                                 </div>

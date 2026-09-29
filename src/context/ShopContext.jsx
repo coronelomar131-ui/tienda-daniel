@@ -9,9 +9,34 @@ import { useCargar } from '../lib/alMontar';
 // modelo se cuenten por separado.
 const lineKey = (id, size) => `${id}__${size ?? 'unica'}`;
 
+// La última lista de pares que sí llegó de la base. Al volver a la tienda se
+// enseña de inmediato mientras se pide la nueva por detrás (se ve al instante
+// y a los pocos cientos de milisegundos ya está al día). Sin esto cada visita
+// arrancaba con la pantalla de carga hasta que respondía la base.
+const LLAVE_CATALOGO = 'protheCatalogo1';
+const VIGENCIA_CATALOGO = 7 * 24 * 3600 * 1000;
+
+const catalogoGuardado = () => {
+    try {
+        const { t, lista } = JSON.parse(localStorage.getItem(LLAVE_CATALOGO) || 'null') || {};
+        if (!Array.isArray(lista) || !lista.length || Date.now() - t > VIGENCIA_CATALOGO) return null;
+        const sano = lista.every(x => x && x.id != null && typeof x.name === 'string' && Number.isFinite(x.price) && Array.isArray(x.sizes));
+        return sano ? lista : null;
+    } catch { return null; }
+};
+
+const guardarCatalogo = (lista) => {
+    try {
+        if (lista.length) localStorage.setItem(LLAVE_CATALOGO, JSON.stringify({ t: Date.now(), lista }));
+        else localStorage.removeItem(LLAVE_CATALOGO);
+    } catch { /* localStorage no disponible o lleno */ }
+};
+
 export const ShopProvider = ({ children }) => {
-    const [products, setProducts] = useState([]);
-    const [loading, setLoading] = useState(true);
+    // Lo que había la última vez: si existe, se pinta ya y se refresca callado.
+    const [previo] = useState(catalogoGuardado);
+    const [products, setProducts] = useState(previo || []);
+    const [loading, setLoading] = useState(!previo);
     const [loadError, setLoadError] = useState(null);
     const [demo, setDemo] = useState(false);
 
@@ -56,6 +81,7 @@ export const ShopProvider = ({ children }) => {
         olvidarFotos();   // si el dueño acaba de cambiar una foto, que se vea la nueva
         try {
             const catalogo = await fetchProducts();
+            guardarCatalogo(catalogo);
             setProducts(catalogo);
             setCart(c => alDia(c, catalogo));
             setGuardados(g => alDia(g, catalogo));
@@ -73,7 +99,9 @@ export const ShopProvider = ({ children }) => {
         }
     }, []);
 
-    useCargar(reload);
+    // Con catálogo guardado la primera carga es callada: nadie ve "Cargando…".
+    const alMontar = useCallback(() => reload({ callado: !!previo }), [reload, previo]);
+    useCargar(alMontar);
 
     // Al regresar a la pestaña se vuelve a pedir el catalogo, sin parpadeo: si
     // el dueño acaba de subir un par desde el panel, aqui ya sale.

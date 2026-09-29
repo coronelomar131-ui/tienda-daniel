@@ -124,11 +124,6 @@ button { font-family: var(--body); }
   padding-top: env(safe-area-inset-top);
   padding-left: env(safe-area-inset-left);
   padding-right: env(safe-area-inset-right);
-  animation: glassFloat 9s ease-in-out infinite alternate;
-}
-@keyframes glassFloat {
-  0% { transform: translateY(0px); }
-  100% { transform: translateY(-1px); }
 }
 /* Si el navegador no sabe difuminar, se pone opaca: nunca ilegible */
 @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
@@ -262,15 +257,15 @@ button { font-family: var(--body); }
   /* Bien difuminadas: no son un collage que se deba reconocer, son las
      manchas de color que el vidrio va a agarrar. Sin esto se ven como fotos
      sueltas tiradas atras de las capsulas. */
-  filter: blur(26px) saturate(150%);
-  /* Sin esto, animar un elemento difuminado lo hace volver a rasterizar en
-     cada cuadro. Con la capa aparte el difuminado se calcula una vez y solo
-     se desplaza. */
+  /* El difuminado NO va aquí sino en cada .riel-foto. Si la cinta que se
+     mueve llevara el filtro, el navegador tendría que difuminar toda su
+     superficie en cada cuadro (bajaba a ~37 fps); en cada foto se calcula
+     una vez y la cinta sólo se desplaza. */
   will-change: transform;
   transform: translate3d(0, 0, 0);
   animation: corren 48s linear infinite;
 }
-.riel-foto { flex: 0 0 auto; width: 150px; height: 100%; display: block; }
+.riel-foto { flex: 0 0 auto; width: 150px; height: 100%; display: block; filter: blur(26px) saturate(150%); }
 .riel-foto .photo-holder { width: 100%; height: 100%; display: block; }
 .riel-foto :is(img, svg) { width: 100%; height: 100%; object-fit: contain; }
 @keyframes corren {
@@ -302,8 +297,11 @@ button { font-family: var(--body); }
   background:
     linear-gradient(180deg, rgba(255, 255, 255, 0.34), rgba(255, 255, 255, 0.06) 55%, rgba(255, 255, 255, 0) 80%),
     rgba(255, 255, 255, 0.26);
-  backdrop-filter: saturate(210%) blur(26px);
-  -webkit-backdrop-filter: saturate(210%) blur(26px);
+  /* Solo la saturacion: el riel de atras ya viene difuminado (26px), y un
+     segundo difuminado por capsula sobre una imagen que se mueve sin parar
+     obligaba a recalcularlo en cada cuadro. Casi no se ve la diferencia. */
+  backdrop-filter: saturate(210%);
+  -webkit-backdrop-filter: saturate(210%);
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 0.85),
     inset 0 0 0 1px rgba(255, 255, 255, 0.35),
@@ -339,13 +337,6 @@ button { font-family: var(--body); }
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 0.9),
     inset 0 -1px 0 rgba(10, 10, 10, 0.06);
-}
-.banda::before {
-  animation: sheenDrift 6s ease-in-out infinite alternate;
-}
-@keyframes sheenDrift {
-  0% { transform: translateX(-2%) scale(1); }
-  100% { transform: translateX(2%) scale(1.02); }
 }
 
 /* Chispa de luz en la esquina de arriba, como cuando pega en un canto curvo */
@@ -750,17 +741,14 @@ button { font-family: var(--body); }
 .reveal {
   opacity: 0;
   transform: translateY(32px) scale(0.97);
-  filter: blur(4px);
   transition:
     opacity .7s var(--entrar),
-    transform .8s var(--resorte),
-    filter .5s var(--fluido);
+    transform .8s var(--resorte);
   transition-delay: var(--delay, 0ms);
 }
 .reveal.in {
   opacity: 1;
   transform: translateY(0) scale(1);
-  filter: blur(0);
 }
 
 /* ---------- CÓMO APARTAR ---------- */
@@ -812,17 +800,18 @@ button { font-family: var(--body); }
   animation: fadeInOverlay .35s var(--fluido);
 }
 @keyframes fadeInOverlay {
-  from { opacity: 0; backdrop-filter: blur(0); }
-  to { opacity: 1; backdrop-filter: blur(12px); }
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 .cart-drawer {
   position: fixed; top: 0; right: 0; bottom: 0; width: min(420px, 100vw);
   /* 100dvh: en el celular la barra del navegador aparece y desaparece, y con
      100vh el botón de pagar quedaba cortado abajo */
   height: 100dvh;
+  /* Sin backdrop-filter propio: la pantalla de atrás ya viene difuminada por
+     el .cart-overlay, y un segundo difuminado a pantalla completa volvía
+     lento abrir y cerrar el carrito. El fondo denso es el mismo. */
   background: var(--vidrio-luz), var(--vidrio-denso); color: var(--ink); z-index: 100;
-  backdrop-filter: var(--vidrio-blur);
-  -webkit-backdrop-filter: var(--vidrio-blur);
   border-left: 1px solid var(--vidrio-borde);
   box-shadow: -18px 0 52px rgba(10, 10, 10, 0.18), var(--vidrio-canto);
   display: flex; flex-direction: column;
