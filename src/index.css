@@ -1171,6 +1171,15 @@ button { font-family: var(--body); }
    con su contenido; sin esto, el overflow-x de las tallas nunca actua. */
 .ficha-datos { min-width: 0; }
 
+/* La foto que se toca en la portada crece hasta ser ésta (lib/transicion.js).
+   El nombre es el mismo en las dos y sólo puede estar en un elemento a la vez. */
+.ficha-principal { view-transition-name: foto-par; }
+::view-transition-group(foto-par) { animation-duration: .6s; animation-timing-function: cubic-bezier(.22, 1, .36, 1); }
+::view-transition-old(foto-par), ::view-transition-new(foto-par) { height: 100%; object-fit: cover; }
+::view-transition-old(root), ::view-transition-new(root) { animation-duration: .32s; }
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-group(*), ::view-transition-old(*), ::view-transition-new(*) { animation: none !important; }
+}
 .ficha-principal {
   position: relative; aspect-ratio: 1/1; background: var(--paper-2); border-radius: 3px;
   overflow: hidden; display: flex; align-items: center; justify-content: center;
@@ -1736,13 +1745,20 @@ button { font-family: var(--body); }
    que sale el papel renglón por renglón (lo mueve Ticket.jsx). El papel es un
    poco más blanco que el fondo para que se lea como papel sobre papel. */
 .listo { padding: 6px 0 4px; }
-.impresora { max-width: 340px; margin: 0 auto; }
+.impresora { position: relative; max-width: 340px; margin: 0 auto; }
 .impresora-cabeza {
+  position: relative; overflow: hidden;
   display: flex; align-items: center; gap: 9px;
   padding: 11px 16px 13px; border-radius: 16px 16px 0 0;
-  background: linear-gradient(180deg, var(--navy-soft), var(--navy));
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.18);
+  /* acero cepillado en el azul de la marca: luz arriba, penumbra abajo */
+  background: linear-gradient(180deg, #5468A0 0%, var(--navy-soft) 22%, var(--navy) 62%, #16223F 100%);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.38), inset 0 -1px 0 rgba(0, 0, 0, 0.35), 0 10px 20px -10px rgba(27, 42, 82, 0.6);
   color: rgba(255, 255, 255, 0.86); font-size: 12.5px; font-weight: 600;
+}
+/* el destello del metal */
+.impresora-cabeza::after {
+  content: ""; position: absolute; inset: 0; pointer-events: none;
+  background: linear-gradient(105deg, transparent 28%, rgba(255, 255, 255, 0.16) 44%, transparent 60%);
 }
 .impresora-luz {
   width: 7px; height: 7px; border-radius: 50%; background: #FFB454;
@@ -1757,6 +1773,13 @@ button { font-family: var(--body); }
   background: #0E1730;
   box-shadow: inset 0 -2px 3px rgba(0, 0, 0, 0.55);
 }
+/* el papel cuelga de la ranura y se balancea con el cursor */
+.ticket-inclina {
+  transform-origin: 50% 0;
+  transform: perspective(900px) rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg)) rotateZ(var(--rz, 0deg));
+  transition: transform .6s var(--resorte);
+}
+.ticket-inclina.siguiendo { transition: transform .14s ease-out; }
 .ticket-ventana { position: relative; margin: -3px 14px 0; overflow: hidden; height: auto; }
 /* el borde dentado de abajo sigue al papel mientras sale */
 .ticket-ventana::after {
@@ -1769,7 +1792,7 @@ button { font-family: var(--body); }
 .ticket {
   padding: 18px 18px 22px; background: #FDFCF9; color: var(--ink);
   font-family: ui-monospace, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
-  font-size: 12.5px; line-height: 1.5; font-variant-numeric: tabular-nums;
+  font-size: 12.5px; line-height: 1.5; font-variant-numeric: tabular-nums; text-align: left;
   box-shadow: inset 0 10px 10px -10px rgba(10, 10, 10, 0.35), 0 10px 26px -12px rgba(10, 10, 10, 0.3);
 }
 /* cada renglón nace en blanco y se entinta cuando la cabeza pasa por él */
@@ -1810,9 +1833,33 @@ button { font-family: var(--body); }
 /* el corte: el papel da un brinquito cuando la cuchilla lo suelta */
 .impresora.impreso .ticket-ventana { animation: ticketCorte .32s cubic-bezier(.22, 1.2, .36, 1); }
 @keyframes ticketCorte { 0% { transform: translateY(0); } 40% { transform: translateY(5px); } 100% { transform: translateY(0); } }
+/* el sello: cae sobre el papel cuando se entinta ese renglón */
+.ticket-estado { align-items: center; }
+.ticket-sello {
+  display: inline-block; padding: 1px 9px; border: 2px solid var(--navy); border-radius: 6px;
+  font-family: var(--display); font-weight: 900; font-size: 17px; line-height: 1.25; letter-spacing: 0.08em;
+  text-transform: uppercase; color: var(--navy); transform: rotate(-5deg);
+}
+.entintado .ticket-sello { animation: selloCae .38s cubic-bezier(.3, 1.6, .5, 1) both; }
+@keyframes selloCae { from { transform: rotate(-5deg) scale(2.2); opacity: 0; } to { transform: rotate(-5deg) scale(1); opacity: 1; } }
+.pago-despues { margin-top: 18px; }
+
+/* el confeti sale de la ranura, sube, y cae */
+.confeti-caja { position: absolute; left: 50%; top: 34px; width: 0; height: 0; pointer-events: none; z-index: 5; }
+.confeti {
+  position: absolute; left: 0; top: 0; width: 7px; height: var(--largo, 10px);
+  border-radius: 2px; background: var(--color, var(--navy)); opacity: 0;
+  animation: confeti 2.1s var(--retraso, 0ms) both;
+}
+@keyframes confeti {
+  0%   { transform: translate(0, 0) rotate(0deg); opacity: 1; animation-timing-function: cubic-bezier(.2, .7, .3, 1); }
+  38%  { transform: translate(calc(var(--x) * 0.75), var(--alto)) rotate(calc(var(--giro) * 0.5)); opacity: 1; animation-timing-function: cubic-bezier(.5, 0, .9, .6); }
+  100% { transform: translate(var(--x), var(--caida)) rotate(var(--giro)); opacity: 0; }
+}
 @media (prefers-reduced-motion: reduce) {
-  .impresora-luz, .impresora.impreso .ticket-ventana { animation: none; }
-  .ticket [data-renglon] { transition: none; }
+  .impresora-luz, .impresora.impreso .ticket-ventana, .entintado .ticket-sello { animation: none; }
+  .ticket [data-renglon], .ticket-inclina { transition: none; }
+  .confeti-caja { display: none; }
 }
 
 .pago-form textarea {

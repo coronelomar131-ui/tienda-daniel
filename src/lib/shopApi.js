@@ -59,6 +59,7 @@ export async function fetchProduct(id) {
 // la cinta del fondo terminaban pidiendo la MISMA foto por separado. Con 12
 // pares eran 19 peticiones y 3.4 MB, casi todo repetido.
 const cacheFotos = new Map();     // id -> promesa con sus fotos
+const fotosBajadas = new Map();   // id -> sus fotos, ya resueltas (para pintar sin esperar)
 let enCola = new Map();           // id -> [quienes esperan]
 let vaciadoProgramado = false;
 
@@ -66,7 +67,12 @@ let vaciadoProgramado = false;
 // hay que soltar lo guardado o seguiriamos enseñando las fotos viejas.
 export function olvidarFotos() {
     cacheFotos.clear();
+    fotosBajadas.clear();
 }
+
+// Las fotos de un par si ya se bajaron alguna vez; si no, null. La ficha las
+// usa para abrir con la foto ya puesta, sin un cuadro de espera de por medio.
+export const fotosYaBajadas = (id) => fotosBajadas.get(id) || null;
 
 async function vaciarCola() {
     const lote = enCola;
@@ -91,6 +97,7 @@ async function vaciarCola() {
         }
         for (const [id, esperando] of lote) {
             const fotos = porPar.get(id) || [];
+            fotosBajadas.set(id, fotos);
             esperando.forEach(e => e.listo(fotos));
         }
     } catch (err) {

@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { fetchTopVendidos } from '../lib/shopApi';
 import { useRefrescarAlVolver } from '../lib/alVolver';
 import ProductPhoto from './ProductPhoto';
+import { marcarFoto } from '../lib/transicion';
 
 // Los que mas se venden, en rejilla limpia: foto y nombre, nada mas.
 // Sin precio ni botones a proposito: aqui la funcion es que el ojo reconozca
@@ -29,7 +30,8 @@ const MasVendidos = () => {
                 </div>
                 <div className="vendidos-rejilla">
                     {pares.map(par => (
-                        <Link key={par.id} to={`/tenis/${par.id}`} className="vendido reveal">
+                        <Link key={par.id} to={`/tenis/${par.id}`} className="vendido reveal" viewTransition
+                              onClick={(e) => marcarFoto(e.currentTarget.querySelector('.vendido-foto'))}>
                             <div className="vendido-foto">
                                 <ProductPhoto product={par} />
                             </div>

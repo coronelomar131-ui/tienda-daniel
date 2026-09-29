@@ -30,7 +30,18 @@ Tipografía Big Shoulders Display + Barlow.
   cambia de talla, se guarda un par para después o se hace el pedido.
 - **Ticket de apartado.** Al hacer el pedido, la tienda imprime un ticket
   (folio, pares, total, anticipo, a dónde transferir y código de barras) que
-  sale de una impresora térmica renglón por renglón, como en caja.
+  sale de una impresora térmica renglón por renglón, como en caja. El papel
+  se balancea con el cursor encima.
+- **Comprobante de pago con confeti.** Cuando Mercado Pago confirma el pago,
+  `/pago/:id` imprime el comprobante con su sello "Pagado" y sale confeti de
+  la ranura (sólo con pago aprobado; con "menos animación" sale entero y sin
+  confeti).
+- **La foto del par crece hasta su ficha.** Al tocar un par (en el catálogo,
+  en "los que más se venden" o en el abanico), su foto se agranda hasta ser
+  la foto grande de la ficha (View Transitions). La ficha abre ya con los
+  datos del catálogo y se actualiza por detrás. Donde el navegador no lo
+  soporta, la página cambia sin más. Por eso la tienda usa el enrutador con
+  datos (`createBrowserRouter`), que es el que sabe hacer esta transición.
 - **Galería por par.** Varias fotos por producto; en el catálogo la segunda
   aparece al pasar el cursor, y en la ficha hay miniaturas para cambiarlas.
 - **Página propia de cada par** en `/tenis/:id`, con fotos grandes. Sirve para

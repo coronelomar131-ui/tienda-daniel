@@ -1,7 +1,7 @@
 import React, { useCallback, useContext, useRef, useState } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { ShopContext } from '../context/shop-context';
-import { fetchProduct, fetchPhotos } from '../lib/shopApi';
+import { fetchProduct, fetchPhotos, fotosYaBajadas } from '../lib/shopApi';
 import { waLink } from '../lib/whatsapp';
 import { leerVideo } from '../lib/video';
 import { config } from '../config';
@@ -19,11 +19,16 @@ const ProductPage = () => {
     const navigate = useNavigate();
     const { addToCart, products } = useContext(ShopContext);
 
-    const [par, setPar] = useState(null);
-    const [fotos, setFotos] = useState([]);
+    // Si el par ya está en el catálogo que la tienda tiene cargado (casi
+    // siempre: vienes de tocarlo), la ficha abre YA con su foto y sus datos y
+    // se actualiza por detrás. Así la foto que se tocó puede crecer hasta ser
+    // la de la ficha, sin pasar por un "Cargando…" de en medio.
+    const [local] = useState(() => products.find(p => String(p.id) === String(id)) || null);
+    const [par, setPar] = useState(local);
+    const [fotos, setFotos] = useState(() => fotosYaBajadas(id) || []);
     const [activa, setActiva] = useState(0);
     const [talla, setTalla] = useState(null);
-    const [cargando, setCargando] = useState(true);
+    const [cargando, setCargando] = useState(!local);
     const [error, setError] = useState(null);
     const [cartOpen, setCartOpen] = useState(false);
     const [agregado, setAgregado] = useState(false);
@@ -56,7 +61,8 @@ const ProductPage = () => {
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [id]);
 
-    useCargar(cargar);
+    const alMontar = useCallback(() => cargar({ mostrarCarga: !local }), [cargar, local]);
+    useCargar(alMontar);
 
     // Al volver a la pestaña se pide de nuevo, sin pantalla de carga: si el
     // dueño acaba de editar las tallas desde el panel, aqui ya salen.
