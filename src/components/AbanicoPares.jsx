@@ -1,6 +1,7 @@
 import React, { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import ProductPhoto from './ProductPhoto';
+import { hayTransicion, marcarFoto } from '../lib/transicion';
 
 // El abanico de la portada: siempre se ven tres pares (uno al frente y dos
 // atrás, inclinados), pero se desliza para ir pasando todos. Nada se mueve
@@ -21,6 +22,9 @@ import ProductPhoto from './ProductPhoto';
 // se baja por la página, por eso sólo la del frente lo atrapa (empezando en
 // cualquier otro lado la página baja normal) y hay que subirla bastante; si se
 // suelta antes, regresa y no abre nada.
+//
+// Al abrir, la foto del par crece hasta ser la foto grande de su ficha (ver
+// lib/transicion.js).
 
 const RIGIDEZ = 210;       // el resorte: qué tan fuerte jala hacia su lugar
 const FRICCION = 24;       // y qué tanto frena (poco menos que sin rebote: asienta con un solo vaivén chiquito)
@@ -81,6 +85,7 @@ const AbanicoPares = ({ pares }) => {
     const m = useRef({
         pos: 0, vel: 0, meta: 0, levanta: 0, alzar: 0, encima: false,
         dy: 0, vdy: 0, sube: 0, sale: false, salio: 0, salioDesde: 0, raf: 0, ultimo: 0, actual: 0,
+        congela: false,
     });
     const navigate = useNavigate();
     const n = pares.length;
@@ -119,6 +124,7 @@ const AbanicoPares = ({ pares }) => {
             el.style.pointerEvents = alfa < 0.1 ? 'none' : '';
             el.style.setProperty('--dato', entre(1 - a * 1.8, 0, 1));
             el.style.setProperty('--sombra', entre(sombra, 0, 1));
+
         }
 
         const c = caja.current;
@@ -133,6 +139,7 @@ const AbanicoPares = ({ pares }) => {
 
     const cuadro = (t) => {
         const s = m.current, gs = gesto.current;
+        if (s.congela) { s.raf = 0; return; }   // la foto ya va camino a su ficha: que nada la mueva
         const dt = s.ultimo ? Math.min(0.032, Math.max(0.001, (t - s.ultimo) / 1000)) : 1 / 60;
         s.ultimo = t;
         if (s.sale && !s.salioDesde) s.salioDesde = t;
@@ -192,6 +199,15 @@ const AbanicoPares = ({ pares }) => {
 
     useLayoutEffect(() => { pintar(); });   // cada vez que React dibuja, las tarjetas quedan en su lugar
     useEffect(() => () => { cancelAnimationFrame(m.current.raf); clearTimeout(salida.current); }, []);
+
+    // Abre la ficha del par k. Con transición, su foto crece hasta ser la de la
+    // ficha; sin ella (navegador viejo o "menos animación"), la página cambia.
+    const abrir = (k) => {
+        const ruta = `/tenis/${pares[k].id}`;
+        if (!hayTransicion()) { navigate(ruta); return; }
+        marcarFoto(tarjetas.current[k]?.querySelector('.hero-par-foto'));
+        navigate(ruta, { viewTransition: true });
+    };
 
     const alBajar = (e) => {
         if (e.pointerType === 'mouse' && e.button !== 0) return;
@@ -256,11 +272,16 @@ const AbanicoPares = ({ pares }) => {
             if (meta === desde && Math.abs(cae - gs.pos0) > AVANCE_MIN) meta = desde + Math.sign(cae - gs.pos0);
             s.meta = entre(meta, Math.floor(s.pos) - 1, Math.ceil(s.pos) + 1);
         } else if (gs.eje === 'subir' && s.dy <= -UMBRAL_SUBIR) {
-            // sale volando hacia arriba y ya abre su ficha
-            const id = pares[s.sube].id;
-            if (sinMovimiento()) { navigate(`/tenis/${id}`); return; }
+            if (hayTransicion() || sinMovimiento()) {
+                // la foto se queda donde el dedo la soltó y desde ahí crece hasta su ficha
+                s.congela = true;
+                cancelAnimationFrame(s.raf); s.raf = 0;
+                abrir(s.sube);
+                return;
+            }
+            // sin transición: sale volando hacia arriba y ya abre su ficha
             s.sale = true;
-            salida.current = setTimeout(() => navigate(`/tenis/${id}`), SALIDA_MS + 20);
+            salida.current = setTimeout(() => abrir(s.sube), SALIDA_MS + 20);
         }
         arrancar();
     };
@@ -279,7 +300,7 @@ const AbanicoPares = ({ pares }) => {
     const alTocar = (e, k) => {
         e.preventDefault();
         if (movio.current) { movio.current = false; return; }
-        if (k === m.current.actual) navigate(`/tenis/${pares[k].id}`);
+        if (k === m.current.actual) abrir(k);
         else irAlPar(k);
     };
 

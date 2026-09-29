@@ -7,6 +7,7 @@ import { waLink } from '../lib/whatsapp';
 import ProductPhoto from './ProductPhoto';
 import { verDescuento, pesos } from '../lib/descuento';
 import WhatsAppIcon from './WhatsAppIcon';
+import { marcarFoto } from '../lib/transicion';
 
 const ProductCard = ({ product }) => {
     const { addToCart } = useContext(ShopContext);
@@ -42,7 +43,8 @@ const ProductCard = ({ product }) => {
 
     return (
         <div className={`card reveal${soldOut ? ' sold-out' : ''}`}>
-            <Link to={`/tenis/${product.id}`} className="card-photo">
+            <Link to={`/tenis/${product.id}`} className="card-photo" viewTransition
+                  onClick={(e) => marcarFoto(e.currentTarget)}>
                 <div className="badges">
                     {oferta && <span className="badge badge-oferta">-{oferta.pct}%</span>}
                     {product.status === 'nuevo' && <span className="badge badge-new">Nuevo</span>}

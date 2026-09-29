@@ -4,6 +4,7 @@ import { ShopContext } from '../context/shop-context';
 import { estadoOrden } from '../lib/pagos';
 import { waPlain } from '../lib/whatsapp';
 import Navbar from './Navbar';
+import TicketPago from './TicketPago';
 
 // Pantalla a la que regresa el cliente después de pagar.
 // El estado NO se cree por haber vuelto aquí: se lee de la base, y la base
@@ -56,11 +57,10 @@ const PagoResultado = () => {
                     </>}
 
                     {!error && estado === 'pagado' && <>
-                        <div className="pago-marca ok">✓</div>
                         <h1>¡Listo, pagado!</h1>
-                        <p>
-                            Tu pedido <strong>#{orden.numero}</strong> quedó pagado.
-                            Te escribimos por WhatsApp para acordar el envío.
+                        <TicketPago numero={orden.numero} monto={orden.monto_cobrado} />
+                        <p className="pago-despues">
+                            Guarda tu folio <strong>#{orden.numero}</strong>: con él te damos seguimiento.
                         </p>
                         <a href={waPlain()} target="_blank" rel="noreferrer" className="btn-primary">
                             Escribirnos por WhatsApp

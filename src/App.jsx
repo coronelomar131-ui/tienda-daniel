@@ -1,5 +1,5 @@
 import React, { lazy, Suspense, useContext, useState, useEffect, useMemo, useRef } from 'react';
-import { BrowserRouter as Router, Routes, Route, Link, useLocation, useNavigationType, useParams } from 'react-router-dom';
+import { createBrowserRouter, RouterProvider, Outlet, Link, useLocation, useNavigationType, useParams } from 'react-router-dom';
 import Navbar from './components/Navbar';
 import Hero from './components/Hero';
 import MasVendidos from './components/MasVendidos';
@@ -167,24 +167,35 @@ function StoreFront() {
     );
 }
 
-function App() {
+// El enrutador "con datos" (createBrowserRouter) es el que sabe animar el paso
+// de una página a otra: la foto del par que se toca crece hasta ser su ficha.
+function Raiz() {
     return (
-        <Router>
+        <>
             <ScrollAlCambiarRuta />
             <Suspense fallback={<div className="cargando-ruta">Cargando…</div>}>
-            <Routes>
-                <Route path="/" element={<StoreFront />} />
-                <Route path="/tenis/:id" element={<FichaPorId />} />
-                <Route path="/pago/:id" element={<PagoResultado />} />
-                <Route path="/admin" element={<AdminLogin />} />
-                <Route path="/admin/dashboard" element={<AdminDashboard />} />
-                <Route path="/aviso-de-privacidad" element={<AvisoPrivacidad />} />
-                <Route path="/terminos" element={<Terminos />} />
-                <Route path="*" element={<PaginaNoExiste />} />
-            </Routes>
+                <Outlet />
             </Suspense>
-        </Router>
+        </>
     );
+}
+
+const router = createBrowserRouter([{
+    element: <Raiz />,
+    children: [
+        { path: '/', element: <StoreFront /> },
+        { path: '/tenis/:id', element: <FichaPorId /> },
+        { path: '/pago/:id', element: <PagoResultado /> },
+        { path: '/admin', element: <AdminLogin /> },
+        { path: '/admin/dashboard', element: <AdminDashboard /> },
+        { path: '/aviso-de-privacidad', element: <AvisoPrivacidad /> },
+        { path: '/terminos', element: <Terminos /> },
+        { path: '*', element: <PaginaNoExiste /> },
+    ],
+}]);
+
+function App() {
+    return <RouterProvider router={router} />;
 }
 
 export default App;
