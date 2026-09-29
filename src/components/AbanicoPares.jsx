@@ -51,6 +51,18 @@ const mezclar = (a, b, p) => ({
 });
 const entre = (v, min, max) => Math.min(max, Math.max(min, v));
 const modulo = (i, n) => ((i % n) + n) % n;
+
+// Escribe una variable CSS sólo si su valor (a dos decimales) es distinto al
+// que ya tiene. Se recuerda en el propio elemento para no llevar otra tabla.
+const ultimas = new WeakMap();
+const variable = (el, nombre, valor) => {
+    const v = String(Math.round(valor * 100) / 100);
+    let previas = ultimas.get(el);
+    if (!previas) { previas = {}; ultimas.set(el, previas); }
+    if (previas[nombre] === v) return;
+    previas[nombre] = v;
+    el.style.setProperty(nombre, v);
+};
 const sinMovimiento = () => !!window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
 
 // Dónde va una tarjeta que está a "o" pares del frente (negativo: a la izquierda).
@@ -122,8 +134,12 @@ const AbanicoPares = ({ pares }) => {
             el.style.opacity = alfa;
             el.style.zIndex = Math.round(50 - a * 10);
             el.style.pointerEvents = alfa < 0.1 ? 'none' : '';
-            el.style.setProperty('--dato', entre(1 - a * 1.8, 0, 1));
-            el.style.setProperty('--sombra', entre(sombra, 0, 1));
+            // Las variables se heredan a todo lo que lleva dentro la tarjeta:
+            // cambiar una obliga al navegador a recalcular el estilo de cada
+            // hijo. Se redondean y sólo se escriben si de verdad cambiaron;
+            // las tarjetas de atrás casi nunca cambian.
+            variable(el, '--dato', entre(1 - a * 1.8, 0, 1));
+            variable(el, '--sombra', entre(sombra, 0, 1));
 
         }
 
@@ -131,7 +147,7 @@ const AbanicoPares = ({ pares }) => {
         if (c) {
             c.classList.toggle('subiendo', s.dy < -1);
             c.classList.toggle('listo-abrir', s.dy <= -UMBRAL_SUBIR);
-            c.style.setProperty('--avance', Math.max(0, avance));
+            variable(c, '--avance', Math.max(0, avance));
         }
         const i = modulo(Math.round(s.pos), n);
         if (i !== s.actual) { s.actual = i; setActual(i); }
