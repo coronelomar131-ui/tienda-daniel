@@ -4,6 +4,7 @@ import { RefreshCw } from 'lucide-react';
 import { adminOrders, adminOrdersResumen, adminSetAnticipo, fetchAnticipo,
          datosPago, adminSetDatosPago, adminEstadoPedido } from '../lib/pagos';
 import { pesos } from '../lib/descuento';
+import PanelGraficas from './PanelGraficas';
 
 // Un cobro con tarjeta se guarda antes de mandar al cliente a Mercado Pago. Si
 // cerró esa ventana, el pedido quedó pendiente sin ningún pago detrás: no es
@@ -120,6 +121,11 @@ const Pedidos = ({ pass }) => {
                     Llevas {pesos(resumen.cobrado_mes)} cobrados este mes.
                 </p>
             </div>
+
+            {/* Las graficas van debajo de la cifra que manda, no encima: lo
+                primero que tiene que ver el duenio sigue siendo cuanto le
+                deben. Esto es el "como viene la cosa", no la alarma. */}
+            <PanelGraficas pedidos={pedidos} />
 
             <div className="pedidos-barra">
                 <label className="anticipo-ajuste">

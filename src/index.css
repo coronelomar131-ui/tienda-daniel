@@ -3838,3 +3838,100 @@ div.bento-promesa { cursor: default; }
   .pestanias-botones::-webkit-scrollbar { display: none; }
   .pestanias-botones button { white-space: nowrap; flex-shrink: 0; }
 }
+
+/* =========================================================
+   GRÁFICAS DEL PANEL
+   Una sola serie a la vez. Marcas delgadas, rejilla discreta,
+   y el dato es lo único que tiene permiso de gritar.
+   ========================================================= */
+.graficas { display: grid; gap: 14px; margin: 0 0 20px; color: var(--ink); }
+
+/* ---------- las tarjetas ---------- */
+.kpis { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+.kpi {
+  display: flex; flex-direction: column; gap: 5px;
+  padding: 15px 16px 13px; border-radius: 16px;
+  background: #fff; border: 1px solid var(--line);
+}
+.kpi-titulo {
+  font-size: 10.5px; font-weight: 700; letter-spacing: 0.14em;
+  text-transform: uppercase; color: var(--muted);
+}
+.kpi-valor {
+  font-family: var(--display); font-weight: 900; font-size: clamp(26px, 3.6vw, 36px);
+  line-height: 1; font-variant-numeric: tabular-nums; color: var(--ink);
+}
+.kpi-pie { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-top: 2px; }
+.kpi-delta { font-size: 12px; font-weight: 700; font-variant-numeric: tabular-nums; }
+.kpi-igual, .kpi-estreno { color: var(--muted); font-weight: 600; }
+.kpi-rayita { width: 70px; height: 24px; flex-shrink: 0; opacity: 0.75; }
+
+/* ---------- la gráfica ---------- */
+.gr-caja { background: #fff; border: 1px solid var(--line); border-radius: 18px; padding: 16px 16px 12px; }
+.gr-cabeza { display: flex; align-items: flex-start; justify-content: space-between; gap: 14px; flex-wrap: wrap; margin-bottom: 14px; }
+/* El color va explicito: estas cajas son blancas pero viven DENTRO del panel,
+   que es oscuro, y sin esto el titulo hereda el crema del panel y queda crema
+   sobre blanco. Regla de la casa: el texto lleva color de texto, siempre. */
+.gr-cabeza h3 { font-family: var(--display); text-transform: uppercase; font-weight: 800; font-size: 20px; line-height: 1; color: var(--ink); }
+.gr-sub { display: block; margin-top: 4px; font-size: 12px; color: var(--muted); }
+.gr-mandos { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.gr-interruptor { display: inline-flex; background: var(--paper-2); border-radius: 999px; padding: 3px; }
+.gr-interruptor button {
+  border: none; background: none; cursor: pointer; border-radius: 999px;
+  padding: 6px 13px; font-family: var(--body); font-size: 12px; font-weight: 700;
+  color: var(--muted); transition: background .2s, color .2s;
+}
+.gr-interruptor button.on { background: var(--navy); color: #fff; }
+.gr-tabla-btn {
+  border: 1px solid var(--line-strong); background: none; cursor: pointer;
+  border-radius: 999px; padding: 6px 13px;
+  font-family: var(--body); font-size: 12px; font-weight: 700; color: var(--muted);
+  transition: border-color .2s, color .2s;
+}
+.gr-tabla-btn:hover { border-color: var(--navy); color: var(--navy); }
+
+.gr-lienzo { position: relative; padding-left: 38px; padding-bottom: 20px; }
+.gr-lienzo svg { display: block; width: 100%; height: 240px; touch-action: none; }
+.gr-eje-y {
+  position: absolute; left: 0; top: 10px; bottom: 46px;
+  display: flex; flex-direction: column; justify-content: space-between;
+  font-size: 10.5px; color: var(--muted); font-variant-numeric: tabular-nums; text-align: right; width: 34px;
+}
+.gr-eje-x {
+  position: absolute; left: 38px; right: 0; bottom: 0;
+  display: flex; justify-content: space-between;
+  font-size: 10.5px; color: var(--muted);
+}
+.gr-globo {
+  position: absolute; top: 4px; transform: translateX(-50%);
+  background: var(--ink); color: #fff; border-radius: 12px; padding: 8px 12px;
+  display: grid; gap: 1px; pointer-events: none; white-space: nowrap; z-index: 3;
+  box-shadow: 0 10px 24px rgba(18,18,18,0.18);
+}
+.gr-globo span { font-size: 10.5px; opacity: 0.72; text-transform: capitalize; }
+.gr-globo strong { font-size: 15px; font-weight: 800; font-variant-numeric: tabular-nums; }
+.gr-globo small { font-size: 11px; opacity: 0.72; font-variant-numeric: tabular-nums; }
+
+/* ---------- la tabla (para quien no puede con la gráfica) ---------- */
+.gr-tabla { overflow-x: auto; }
+.gr-tabla table { width: 100%; border-collapse: collapse; font-size: 13px; }
+.gr-tabla th {
+  text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--line);
+  font-size: 10.5px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted);
+}
+.gr-tabla td { padding: 9px 10px; border-bottom: 1px solid var(--line); font-variant-numeric: tabular-nums; }
+.gr-tabla td:first-child { text-transform: capitalize; }
+.gr-nada { text-align: center; color: var(--muted); padding: 24px 0; }
+.sr-solo {
+  position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+  overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0;
+}
+
+@media (max-width: 760px) {
+  .kpis { grid-template-columns: 1fr; }
+  .kpi { flex-direction: row; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+  .kpi-titulo { flex: 1 0 100%; }
+  .kpi-pie { margin-top: 0; }
+  .gr-cabeza { flex-direction: column; }
+  .gr-lienzo svg { height: 200px; }
+}
