@@ -114,7 +114,7 @@ function StoreFront() {
         <>
             <Navbar onOpenCart={() => setCartOpen(true)} />
             <main>
-                <Hero />
+                <Hero onFiltrar={setFiltro} />
                 <MasVendidos />
                 {/* El filtro vive dentro del ancla para que al saltar al catálogo
                     se vea junto con los resultados y no quede tapado por el header. */}

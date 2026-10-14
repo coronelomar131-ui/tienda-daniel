@@ -1,6 +1,7 @@
 import React, { useContext, useEffect, useRef, useState } from 'react';
 import SneakerArt from './SneakerArt';
 import AbanicoPares from './AbanicoPares';
+import Bento from './Bento';
 import { ShopContext } from '../context/shop-context';
 import { fetchHeroVideo } from '../lib/shopApi';
 
@@ -12,7 +13,7 @@ function paresDePortada(products) {
     return [...conFoto.filter(p => p.destacado), ...conFoto.filter(p => !p.destacado)].slice(0, 6);
 }
 
-const Hero = () => {
+const Hero = ({ onFiltrar }) => {
     const [video, setVideo] = useState('');
     const [listo, setListo] = useState(false);
     const { products } = useContext(ShopContext);
@@ -74,6 +75,7 @@ const Hero = () => {
                 </div>
             )}
         </section>
+        <Bento onFiltrar={onFiltrar} />
       </div>
     );
 };
