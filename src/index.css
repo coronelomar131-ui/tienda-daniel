@@ -522,8 +522,14 @@ button { font-family: var(--body); }
   position: relative;
   height: 100%;
   min-height: 520px;
-  background: rgba(255,255,255,0.84);
-  border: 1px solid rgba(18,18,18,0.07);
+  /* Cada par trae su propio tono (lo pone ProductCard desde lib/tono.js). El
+     velo blanco encima lo baja de intensidad para que el color acompañe al
+     tenis en vez de pelearse con él. El respaldo es por si llega una tarjeta
+     sin tono. */
+  background:
+      linear-gradient(0deg, rgba(255,255,255,0.30), rgba(255,255,255,0.30)),
+      var(--tono, #F3F4F7);
+  border: 1px solid var(--tono-borde, rgba(18,18,18,0.07));
   border-radius: 20px;
   display: flex;
   flex-direction: column;
@@ -540,8 +546,11 @@ button { font-family: var(--body); }
 }
 .card:hover {
   transform: translateY(-8px) rotateX(1.2deg);
-  border-color: rgba(27, 42, 82, 0.12);
-  background: rgba(255,255,255,0.92);
+  border-color: rgba(27, 42, 82, 0.14);
+  /* al pasar encima se destiñe un poco: la tarjeta se "prende" */
+  background:
+      linear-gradient(0deg, rgba(255,255,255,0.14), rgba(255,255,255,0.14)),
+      var(--tono, #F3F4F7);
   box-shadow: 0 20px 40px rgba(18, 18, 18, 0.08), 0 8px 20px rgba(27, 42, 82, 0.06);
 }
 .card:hover::before { opacity: 1; }
@@ -551,7 +560,15 @@ button { font-family: var(--body); }
   aspect-ratio: 1 / 1.06;
   min-height: 275px;
   border-radius: 18px 18px 0 0;
+  /* El margen es lo que deja ver el color del par. Sin el, una foto con fondo
+     propio tapa el panel entero y el tono solo se asomaria abajo. */
+  padding: 13px 13px 0;
 }
+/* Lo de adentro va redondeado por su cuenta, porque ya no toca la orilla. */
+.card-photo .photo-holder,
+.card-photo .photo-holder img,
+.card-photo .cristal { border-radius: 13px; }
+.card-photo .photo-holder { overflow: hidden; }
 .card:hover .card-photo {
   box-shadow: inset 0 1px 0 rgba(255,255,255,0.9);
   transform: scale(1.01);
@@ -1142,7 +1159,10 @@ button { font-family: var(--body); }
 .card-photo {
   position: relative;
   overflow: hidden;
-  background: linear-gradient(180deg, #F7F8FB 0%, #EEF1F6 100%); align-items: center; justify-content: center;
+  /* El panel de la foto también va con el tono: si la foto no llena el cuadro,
+     o si el par todavía no tiene foto y sale el dibujo, lo que se ve atrás es
+     el color del par y no un gris de relleno. */
+  background: var(--tono, #F3F4F7); align-items: center; justify-content: center;
   transition: opacity .3s var(--fluido), box-shadow .4s var(--fluido), transform .5s var(--resorte); display: flex; }
 .badge-video { background: var(--ink); color: #fff; }
 

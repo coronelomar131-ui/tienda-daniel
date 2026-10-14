@@ -8,6 +8,7 @@ import ProductPhoto from './ProductPhoto';
 import { verDescuento, pesos } from '../lib/descuento';
 import WhatsAppIcon from './WhatsAppIcon';
 import { marcarFoto } from '../lib/transicion';
+import { estiloTono } from '../lib/tono';
 
 const ProductCard = ({ product }) => {
     const { addToCart } = useContext(ShopContext);
@@ -42,7 +43,7 @@ const ProductCard = ({ product }) => {
     };
 
     return (
-        <div className={`card reveal${soldOut ? ' sold-out' : ''}`}>
+        <div className={`card reveal${soldOut ? ' sold-out' : ''}`} style={estiloTono(product.id)}>
             <Link to={`/tenis/${product.id}`} className="card-photo" viewTransition
                   onClick={(e) => marcarFoto(e.currentTarget)}>
                 <div className="badges">
