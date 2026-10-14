@@ -522,14 +522,8 @@ button { font-family: var(--body); }
   position: relative;
   height: 100%;
   min-height: 520px;
-  /* Cada par trae su propio tono (lo pone ProductCard desde lib/tono.js). El
-     velo blanco encima lo baja de intensidad para que el color acompañe al
-     tenis en vez de pelearse con él. El respaldo es por si llega una tarjeta
-     sin tono. */
-  background:
-      linear-gradient(0deg, rgba(255,255,255,0.30), rgba(255,255,255,0.30)),
-      var(--tono, #F3F4F7);
-  border: 1px solid var(--tono-borde, rgba(18,18,18,0.07));
+  background: rgba(255,255,255,0.84);
+  border: 1px solid rgba(18,18,18,0.07);
   border-radius: 20px;
   display: flex;
   flex-direction: column;
@@ -546,11 +540,8 @@ button { font-family: var(--body); }
 }
 .card:hover {
   transform: translateY(-8px) rotateX(1.2deg);
-  border-color: rgba(27, 42, 82, 0.14);
-  /* al pasar encima se destiñe un poco: la tarjeta se "prende" */
-  background:
-      linear-gradient(0deg, rgba(255,255,255,0.14), rgba(255,255,255,0.14)),
-      var(--tono, #F3F4F7);
+  border-color: rgba(27, 42, 82, 0.12);
+  background: rgba(255,255,255,0.92);
   box-shadow: 0 20px 40px rgba(18, 18, 18, 0.08), 0 8px 20px rgba(27, 42, 82, 0.06);
 }
 .card:hover::before { opacity: 1; }
@@ -560,15 +551,7 @@ button { font-family: var(--body); }
   aspect-ratio: 1 / 1.06;
   min-height: 275px;
   border-radius: 18px 18px 0 0;
-  /* El margen es lo que deja ver el color del par. Sin el, una foto con fondo
-     propio tapa el panel entero y el tono solo se asomaria abajo. */
-  padding: 13px 13px 0;
 }
-/* Lo de adentro va redondeado por su cuenta, porque ya no toca la orilla. */
-.card-photo .photo-holder,
-.card-photo .photo-holder img,
-.card-photo .cristal { border-radius: 13px; }
-.card-photo .photo-holder { overflow: hidden; }
 .card:hover .card-photo {
   box-shadow: inset 0 1px 0 rgba(255,255,255,0.9);
   transform: scale(1.01);
@@ -1159,10 +1142,7 @@ button { font-family: var(--body); }
 .card-photo {
   position: relative;
   overflow: hidden;
-  /* El panel de la foto también va con el tono: si la foto no llena el cuadro,
-     o si el par todavía no tiene foto y sale el dibujo, lo que se ve atrás es
-     el color del par y no un gris de relleno. */
-  background: var(--tono, #F3F4F7); align-items: center; justify-content: center;
+  background: linear-gradient(180deg, #F7F8FB 0%, #EEF1F6 100%); align-items: center; justify-content: center;
   transition: opacity .3s var(--fluido), box-shadow .4s var(--fluido), transform .5s var(--resorte); display: flex; }
 .badge-video { background: var(--ink); color: #fff; }
 
@@ -3666,8 +3646,8 @@ html:has(.admin-page), body:has(.admin-page) { background: #130E16; }
   position: relative; display: flex; flex-direction: column; gap: 12px;
   min-height: 318px; padding: 16px;
   border-radius: 24px; overflow: hidden;
-  background: var(--tono, var(--paper-2));
-  border: 1px solid var(--tono-borde, var(--line));
+  background: var(--navy-wash);
+  border: 1px solid var(--line);
   color: var(--ink);
   transition: transform .5s var(--resorte), box-shadow .45s var(--fluido);
   box-shadow: 0 10px 28px rgba(18,18,18,0.05);
@@ -3724,8 +3704,8 @@ html:has(.admin-page), body:has(.admin-page) { background: #130E16; }
 .bento-cat, .bento-promesa {
   display: flex; flex-direction: column; align-items: flex-start; gap: 7px;
   padding: 20px; border-radius: 24px; text-align: left; cursor: pointer;
-  border: 1px solid var(--tono-borde, var(--line));
-  background: var(--tono, rgba(255,255,255,0.74));
+  border: 1px solid var(--line);
+  background: var(--paper-2);
   color: var(--ink); font-family: var(--body);
   transition: transform .45s var(--resorte), box-shadow .4s var(--fluido);
 }
@@ -3758,7 +3738,7 @@ div.bento-promesa { cursor: default; }
 
 /* =========================================================
    FICHA DEL PAR — al estilo del video
-   Migas arriba, foto sobre el color del par, selector de
+   Migas arriba, selector de
    cantidad, las tres promesas y las pestañas.
    ========================================================= */
 .ficha-migas { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; margin-bottom: 14px; }
@@ -3770,8 +3750,6 @@ div.bento-promesa { cursor: default; }
 .migas b { font-weight: 600; color: var(--ink); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 @media (max-width: 680px) { .migas b { max-width: 42vw; } }
 
-/* la foto grande hereda el color del par, igual que su tarjeta en el catálogo */
-.ficha-principal { background: var(--tono, var(--paper-2)) !important; }
 
 /* ---------- cuántos quieres ---------- */
 .cantidad-fila { display: flex; align-items: center; gap: 13px; margin-top: 18px; }

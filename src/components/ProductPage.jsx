@@ -13,7 +13,6 @@ import { useRefrescarAlVolver } from '../lib/alVolver';
 import { useCargar } from '../lib/alMontar';
 import { verDescuento, pesos } from '../lib/descuento';
 import WhatsAppIcon from './WhatsAppIcon';
-import { estiloTono } from '../lib/tono';
 import { CATEGORIAS } from '../lib/categorias';
 
 const ProductPage = () => {
@@ -149,7 +148,7 @@ const ProductPage = () => {
 
                     <div className="ficha-grid">
                         <div className="ficha-fotos">
-                            <div className="ficha-principal" style={estiloTono(par.id)}>
+                            <div className="ficha-principal">
                                 {fotos.length > 0
                                     ? <>
                                         <img className="ficha-fondo" src={fotos[activa]?.data} alt="" aria-hidden="true" decoding="async" />

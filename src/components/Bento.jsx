@@ -3,7 +3,6 @@ import { Link } from 'react-router-dom';
 import { ShopContext } from '../context/shop-context';
 import { CATEGORIAS, enRebajas } from '../lib/categorias';
 import { verDescuento, pesos } from '../lib/descuento';
-import { estiloTono } from '../lib/tono';
 import ProductPhoto from './ProductPhoto';
 import { marcarFoto } from '../lib/transicion';
 
@@ -77,7 +76,6 @@ const Bento = ({ onFiltrar }) => {
                 <Link
                     to={`/tenis/${destacado.id}`}
                     className="bento-par reveal"
-                    style={estiloTono(destacado.id)}
                     viewTransition
                     onClick={(e) => marcarFoto(e.currentTarget)}
                 >
@@ -103,7 +101,6 @@ const Bento = ({ onFiltrar }) => {
                 {categoria && (
                     <button
                         className="bento-cat reveal"
-                        style={estiloTono(categoria.llave)}
                         onClick={() => filtrarYBajar({ tipo: 'categoria', valor: categoria.llave })}
                     >
                         <span className="bento-eti">Lo que más hay</span>
