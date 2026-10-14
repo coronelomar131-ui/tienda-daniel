@@ -341,7 +341,7 @@ const ProductPage = () => {
                         ${par.price.toLocaleString('es-MX')}
                     </strong>
                 </div>
-                <button className="barra-btn" onClick={agregar} disabled={!puedeAgregar}>
+                <button className={`barra-btn${agregado ? ' hecho' : ''}`} onClick={agregar} disabled={!puedeAgregar}>
                     {agotado ? 'Agotado' : agregado ? '✓ Agregado' : (pideTalla && talla === null ? 'Elige tu talla' : 'Agregar')}
                 </button>
                 <a href={waLink(texto)} target="_blank" rel="noreferrer" className="barra-wa" aria-label="Apartar por WhatsApp">
