@@ -121,12 +121,15 @@ export const ShopProvider = ({ children }) => {
         } catch { /* localStorage no disponible */ }
     }, [guardados]);
 
-    const addToCart = (product, size) => {
+    // cuantos es opcional: quien no lo pase agrega uno, como siempre. La ficha
+    // lo usa para su selector de cantidad.
+    const addToCart = (product, size, cuantos = 1) => {
+        const n = Math.max(1, Math.floor(Number(cuantos) || 1));
         const key = lineKey(product.id, size);
         setCart(prev => {
             const existing = prev.find(item => item.key === key);
             if (existing) {
-                return prev.map(item => item.key === key ? { ...item, qty: item.qty + 1 } : item);
+                return prev.map(item => item.key === key ? { ...item, qty: item.qty + n } : item);
             }
             return [...prev, {
                 key,
@@ -135,7 +138,7 @@ export const ShopProvider = ({ children }) => {
                 name: product.name,
                 price: product.price,
                 size: size ?? null,
-                qty: 1,
+                qty: n,
             }];
         });
     };

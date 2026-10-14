@@ -13,6 +13,8 @@ import { useRefrescarAlVolver } from '../lib/alVolver';
 import { useCargar } from '../lib/alMontar';
 import { verDescuento, pesos } from '../lib/descuento';
 import WhatsAppIcon from './WhatsAppIcon';
+import { estiloTono } from '../lib/tono';
+import { CATEGORIAS } from '../lib/categorias';
 
 const ProductPage = () => {
     const { id } = useParams();
@@ -32,6 +34,8 @@ const ProductPage = () => {
     const [error, setError] = useState(null);
     const [cartOpen, setCartOpen] = useState(false);
     const [agregado, setAgregado] = useState(false);
+    const [cuantos, setCuantos] = useState(1);
+    const [pestania, setPestania] = useState('detalles');
 
     // Un token por carga: si el visitante cambia de par a media petición, la
     // respuesta vieja llega tarde y no debe pisar a la nueva.
@@ -108,10 +112,21 @@ const ProductPage = () => {
 
     const agregar = () => {
         if (!puedeAgregar) return;
-        addToCart(par, talla);
+        addToCart(par, talla, cuantos);
+        setCuantos(1);
         setAgregado(true);
         setTimeout(() => setAgregado(false), 2200);
     };
+
+    const categoria = CATEGORIAS.find(c => c.llave === (par.categoria || 'calzado'))?.texto || 'Calzado';
+
+    // Las tres promesas de la tienda. Son las mismas de "Cómo apartar", aquí
+    // en corto, donde se decide la compra.
+    const GARANTIAS = [
+        { icono: '✓', texto: 'Original, no réplica' },
+        { icono: '↗', texto: 'Envíos a todo México' },
+        { icono: '◷', texto: 'Apartas por WhatsApp' },
+    ];
 
     return (
         <>
@@ -121,11 +136,20 @@ const ProductPage = () => {
                 <div className="wrap">
                     {/* Si llegaron directo desde un link compartido no hay a dónde
                         volver: entonces "Volver" lleva a la portada. */}
-                    <button className="volver" onClick={() => (window.history.state?.idx > 0 ? navigate(-1) : navigate('/'))}>← Volver</button>
+                    <div className="ficha-migas">
+                        <button className="volver" onClick={() => (window.history.state?.idx > 0 ? navigate(-1) : navigate('/'))}>← Volver</button>
+                        <span className="migas" aria-label="Dónde estás">
+                            <Link to="/">Tienda</Link>
+                            <i aria-hidden="true">/</i>
+                            <span>{categoria}</span>
+                            <i aria-hidden="true">/</i>
+                            <b>{par.name}</b>
+                        </span>
+                    </div>
 
                     <div className="ficha-grid">
                         <div className="ficha-fotos">
-                            <div className="ficha-principal">
+                            <div className="ficha-principal" style={estiloTono(par.id)}>
                                 {fotos.length > 0
                                     ? <>
                                         <img className="ficha-fondo" src={fotos[activa]?.data} alt="" aria-hidden="true" decoding="async" />
@@ -189,6 +213,23 @@ const ProductPage = () => {
                                 </div>
                             )}
 
+                            {/* La cantidad va FUERA de .ficha-acciones a proposito: en celular
+                                esa fila se oculta (los botones se van a la barra de abajo) y el
+                                selector se habria ido con ella. Aqui sobrevive en los dos lados,
+                                y la barra de abajo agrega la cantidad que diga este contador. */}
+                            {!agotado && (
+                                <div className="cantidad-fila">
+                                    <span className="cantidad-label">Cuántos</span>
+                                    <div className="cantidad" role="group" aria-label="Cuántos quieres">
+                                        <button onClick={() => setCuantos(c => Math.max(1, c - 1))}
+                                                disabled={cuantos <= 1} aria-label="Uno menos">−</button>
+                                        <span aria-live="polite">{cuantos}</span>
+                                        <button onClick={() => setCuantos(c => Math.min(10, c + 1))}
+                                                disabled={cuantos >= 10} aria-label="Uno más">+</button>
+                                    </div>
+                                </div>
+                            )}
+
                             <div className="ficha-acciones">
                                 <button className="btn-primary" onClick={agregar} disabled={!puedeAgregar}>
                                     {agotado ? 'Agotado' : agregado ? '✓ Agregado' : (pideTalla && talla === null ? 'Elige tu talla' : 'Agregar al carrito')}
@@ -196,6 +237,57 @@ const ProductPage = () => {
                                 <a href={waLink(texto)} target="_blank" rel="noreferrer" className="btn-ghost">
                                     {agotado ? 'Pedir restock' : 'Apartar'} <WhatsAppIcon />
                                 </a>
+                            </div>
+
+                            <ul className="garantias">
+                                {GARANTIAS.map(g => (
+                                    <li key={g.texto}>
+                                        <span aria-hidden="true">{g.icono}</span>{g.texto}
+                                    </li>
+                                ))}
+                            </ul>
+
+                            <div className="pestanias">
+                                <div className="pestanias-botones" role="tablist">
+                                    {[
+                                        ['detalles', 'Detalles'],
+                                        ['tallas', 'Tallas'],
+                                        ['apartar', 'Cómo apartar'],
+                                    ].map(([llave, texto]) => (
+                                        <button
+                                            key={llave}
+                                            role="tab"
+                                            aria-selected={pestania === llave}
+                                            className={pestania === llave ? 'on' : undefined}
+                                            onClick={() => setPestania(llave)}
+                                        >{texto}</button>
+                                    ))}
+                                </div>
+                                <div className="pestanias-hoja" role="tabpanel">
+                                    {pestania === 'detalles' && (
+                                        <ul>
+                                            <li>{par.brand} · {categoria}</li>
+                                            {par.desc && <li>{par.desc}</li>}
+                                            <li>Original, con caja. No manejamos réplicas.</li>
+                                            {oferta && <li>Antes {pesos(oferta.antes)}, ahora {pesos(par.price)}.</li>}
+                                        </ul>
+                                    )}
+                                    {pestania === 'tallas' && (
+                                        <ul>
+                                            {pideTalla
+                                                ? <li>Tallas MX disponibles: {tallas.join(', ')}.</li>
+                                                : <li>Este artículo es de talla única.</li>}
+                                            <li>Si no ves la tuya, escríbenos: a veces conseguimos sobre pedido.</li>
+                                        </ul>
+                                    )}
+                                    {pestania === 'apartar' && (
+                                        <ul>
+                                            <li>Escoge tu talla y dale a Apartar.</li>
+                                            <li>Se abre WhatsApp con tu pedido y tallas ya escritos.</li>
+                                            <li>Acordamos pago y envío por el chat.</li>
+                                        </ul>
+                                    )}
+                                </div>
                             </div>
 
                             {video && (

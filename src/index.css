@@ -3755,3 +3755,86 @@ div.bento-promesa { cursor: default; }
 @media (prefers-reduced-motion: reduce) {
   .sello svg { animation: none; }
 }
+
+/* =========================================================
+   FICHA DEL PAR — al estilo del video
+   Migas arriba, foto sobre el color del par, selector de
+   cantidad, las tres promesas y las pestañas.
+   ========================================================= */
+.ficha-migas { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; margin-bottom: 14px; }
+.ficha-migas .volver { margin-bottom: 0; }
+.migas { display: flex; align-items: center; gap: 7px; font-size: 12.5px; color: var(--muted); min-width: 0; }
+.migas i { font-style: normal; opacity: 0.45; }
+.migas a { border-bottom: 1px solid transparent; transition: color .2s, border-color .2s; }
+.migas a:hover { color: var(--navy); border-color: var(--navy); }
+.migas b { font-weight: 600; color: var(--ink); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+@media (max-width: 680px) { .migas b { max-width: 42vw; } }
+
+/* la foto grande hereda el color del par, igual que su tarjeta en el catálogo */
+.ficha-principal { background: var(--tono, var(--paper-2)) !important; }
+
+/* ---------- cuántos quieres ---------- */
+.cantidad-fila { display: flex; align-items: center; gap: 13px; margin-top: 18px; }
+.cantidad-label {
+  font-size: 11px; font-weight: 700; letter-spacing: 0.16em;
+  text-transform: uppercase; color: var(--muted);
+}
+.cantidad {
+  display: inline-flex; align-items: center; gap: 2px; flex-shrink: 0;
+  border: 1.5px solid var(--line-strong); border-radius: 999px;
+  background: rgba(255,255,255,0.7); padding: 3px;
+}
+.cantidad button {
+  width: 34px; height: 34px; border: none; background: none; cursor: pointer;
+  border-radius: 50%; font-size: 17px; line-height: 1; color: var(--ink);
+  transition: background .2s, color .2s;
+}
+.cantidad button:hover:not(:disabled) { background: var(--navy); color: #fff; }
+.cantidad button:disabled { color: var(--line-strong); cursor: not-allowed; }
+.cantidad span {
+  min-width: 26px; text-align: center; font-weight: 700; font-size: 15px;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ---------- las tres promesas ---------- */
+.garantias {
+  list-style: none; display: flex; flex-wrap: wrap; gap: 7px;
+  margin: 16px 0 0; padding: 0;
+}
+.garantias li {
+  display: inline-flex; align-items: center; gap: 7px;
+  background: rgba(255,255,255,0.72); border: 1px solid var(--line);
+  border-radius: 999px; padding: 7px 13px;
+  font-size: 12.5px; color: var(--muted);
+}
+.garantias li span { color: var(--navy); font-weight: 700; }
+
+/* ---------- pestañas ---------- */
+.pestanias { margin-top: 22px; }
+.pestanias-botones { display: flex; gap: 4px; border-bottom: 1px solid var(--line); }
+.pestanias-botones button {
+  background: none; border: none; cursor: pointer; padding: 10px 14px;
+  font-family: var(--body); font-size: 12.5px; font-weight: 700;
+  letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted);
+  border-bottom: 2px solid transparent; margin-bottom: -1px;
+  transition: color .2s, border-color .2s;
+}
+.pestanias-botones button:hover { color: var(--ink); }
+.pestanias-botones button.on { color: var(--ink); border-color: var(--navy); }
+.pestanias-hoja { padding: 15px 2px 0; }
+.pestanias-hoja ul { list-style: none; padding: 0; margin: 0; display: grid; gap: 9px; }
+.pestanias-hoja li {
+  position: relative; padding-left: 17px;
+  font-size: 14px; line-height: 1.55; color: var(--muted);
+}
+.pestanias-hoja li::before {
+  content: ""; position: absolute; left: 0; top: 9px;
+  width: 5px; height: 5px; border-radius: 50%; background: var(--navy); opacity: 0.55;
+}
+
+@media (max-width: 680px) {
+  .ficha-acciones { flex-wrap: wrap; }
+  .pestanias-botones { overflow-x: auto; scrollbar-width: none; }
+  .pestanias-botones::-webkit-scrollbar { display: none; }
+  .pestanias-botones button { white-space: nowrap; flex-shrink: 0; }
+}
